@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinyu.dao.OrderDao">
+	
+	<resultMap id="BaseResultMap" type="com.xinyu.model.Order" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
+        <result column="contact" property="contact" jdbcType="VARCHAR" />
+        <result column="address" property="address" jdbcType="VARCHAR" />
+        <result column="phone" property="phone" jdbcType="VARCHAR" />
+        <result column="email" property="email" jdbcType="VARCHAR" />
+        <result column="facility" property="facility" jdbcType="VARCHAR" />
+        <result column="model" property="model" jdbcType="VARCHAR" />
+        <result column="sn" property="sn" jdbcType="VARCHAR" />
+        <result column="description" property="description" jdbcType="VARCHAR" />
+        <result column="status" property="status" jdbcType="VARCHAR" />
+        <result column="isUrgent" property="isUrgent" jdbcType="BOOLEAN" />
+        <result column="report" property="report" jdbcType="VARCHAR" />
+        <result column="image_urls" property="imageUrls" jdbcType="VARCHAR" />
+        <result column="upkeep" property="upkeep" jdbcType="FLOAT" />
+        <result column="depath_user" property="depathUser" jdbcType="VARCHAR" />
+        <result column="technician" property="technician" jdbcType="VARCHAR" />
+        <result column="confirm_user" property="confirmUser" jdbcType="VARCHAR" />
+        <result column="depath_date" property="depathDate" jdbcType="TIMESTAMP" />
+        <result column="feedback_time" property="feedbackDate" jdbcType="TIMESTAMP" />
+        <result column="ts_user_complete" property="completeDate" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createDate" jdbcType="TIMESTAMP" />
+        <association property="device" javaType="com.xinyu.model.Device">
+            <id column="id" property="id" jdbcType="INTEGER"/>
+            <result column="dname" property="name" jdbcType="VARCHAR"/>
+            <result column="did" property="id" jdbcType="INTEGER"/>
+            <result column="dagency" property="agency" jdbcType="VARCHAR"/>
+		</association>
+		<association property="unit" javaType="com.xinyu.model.Unit">
+            <id column="uid" property="id" jdbcType="INTEGER"/>
+            <result column="uname" property="name" jdbcType="VARCHAR"/>
+		</association>
+        <collection property="partList" ofType="com.xinyu.model.OrderPart">
+            <id column="opid" property="opid" jdbcType="INTEGER"/>
+            <result column="pname" property="name" jdbcType="VARCHAR"/>
+            <result column="pid" property="id" jdbcType="INTEGER"/>
+            <result column="id" property="orderId" jdbcType="INTEGER"/>
+            <result column="pcategory" property="category" jdbcType="VARCHAR"/>
+            <result column="poffer" property="offer" jdbcType="FLOAT"/>
+            <result column="pcost" property="partCost" jdbcType="FLOAT"/>
+        </collection>
+    </resultMap>
+    
+    <sql id="query_order_where">
+			<if test="order.unit != null and order.unit.id!=null">
+				and u.id = #{order.unit.id}
+			</if>
+			<if test="order.unit != null and order.unit.name!=null">
+				and u.name like '%${order.unit.name}%' 
+			</if>
+			<if test="order.orderNo!=null">
+				and order_no like '%${order.orderNo}%'
+			</if>
+			<if test="order.status!=null">
+				and status=#{order.status.name}
+			</if>
+			<if test="order.technician!=null">
+				and technician=#{order.technician}
+			</if>
+	</sql>
+	
+	<sql id="select_order">
+		select o.*,
+		d.id did,d.name dname,d.agency dagency,
+		p.name pname,p.id pid,p.category pcategory,p.cost pcost,
+		op.part_offer poffer,op.id opid,
+		u.id uid,u.name uname 
+	</sql>
+	
+	<select id="getOrderById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        <include refid="select_order"/>
+        from t_order o
+        left join t_device d on d.id = o.device_id
+        left join t_unit u on u.id = o.unit_id
+        left join t_order_part op on op.order_id = o.id
+        left join t_part p on p.id = op.part_id
+        where o.id=#{id}
+    </select>
+    
+    <select id="getOrderCriteriaQuery" resultMap="BaseResultMap">
+        <include refid="select_order"/>
+        from
+        (SELECT ot.*
+			FROM t_order ot
+			LEFT JOIN t_unit u ON u.id = ot.unit_id
+			WHERE 1=1
+			<!-- 如果满足其中的条件就调用其中的SQL语句 -->
+        	<include refid="query_order_where"/>
+			ORDER BY ot.order_no
+			limit #{page.start},#{page.end}) AS o
+        left join t_device d on d.id = o.device_id
+        left join t_unit u on u.id = o.unit_id
+        left join t_order_part op on op.order_id = o.id
+        left join t_part p on p.id = op.part_id
+        order by o.order_no
+    </select>
+    
+    <select id="getOrderCriteriaQueryByStatusList" resultMap="BaseResultMap">
+        <include refid="select_order"/>
+        from
+        (SELECT ot.*
+			FROM t_order ot
+			LEFT JOIN t_unit u ON u.id = ot.unit_id
+			WHERE status in 
+			<foreach collection="list" item="status" index="index" open="(" separator="," close=")" >#{status}</foreach>
+			<!-- 如果满足其中的条件就调用其中的SQL语句 -->
+			<if test="order.unit != null and order.unit.id!=null">
+				and u.id = #{order.unit.id}
+			</if>
+			<if test="order.technician!=null">
+				and technician=#{order.technician}
+			</if>
+        	
+			ORDER BY ot.order_no
+			limit #{pageBean.start},#{pageBean.end}) AS o
+        left join t_device d on d.id = o.device_id
+        left join t_unit u on u.id = o.unit_id
+        left join t_order_part op on op.order_id = o.id
+        left join t_part p on p.id = op.part_id
+        order by o.order_no
+    </select>
+    
+    
+    
+    <select id="getCountOrderCriteriaQuery" resultType="java.lang.Integer">
+        select count(distinct o.id) from t_order o
+        left join t_unit u on u.id = o.unit_id
+        where 1=1
+         <!-- 如果满足其中的条件就调用其中的SQL语句 -->
+        <include refid="query_order_where"/>
+    </select>
+    
+    <select id="getNewOrderNo" parameterType="String" resultType="java.lang.String">
+        select max(o.order_no) from t_order o
+         <!-- 如果满足其中的条件就调用其中的SQL语句 -->
+        where order_no like '${preOrderNo}%'
+        order by o.order_no
+    </select>
+    
+    
+    <insert id="saveOrUpdateOrder" useGeneratedKeys="true" keyProperty="id" parameterType="com.xinyu.model.Order">  
+	    <!-- 如果大于0则更新 -->    
+	    <if test="order.id!=null">    
+	        update t_order set         
+	        order_no =#{order.orderNo},
+			contact =#{order.contact},
+			address =#{order.address},
+			phone =#{order.phone},
+			email =#{order.email},
+			facility =#{order.facility},
+			model =#{order.model},
+			sn =#{order.sn},
+			description =#{order.description },
+			status =#{order.status.name},
+			report =#{order.report},
+			image_urls =#{order.imageUrls},
+			upkeep =#{order.upkeep},
+			device_id =#{order.device.id},
+			unit_id =#{order.unit.id},
+			isUrgent =#{order.isUrgent},
+			confirm_user =#{order.confirmUser}
+	        where id = #{order.id}  
+	    </if>  
+	      
+	    <!-- 如果等于0则保存 -->    
+	    <if test="order.id==null">  
+	        insert into t_order  
+	        <trim prefix="(" suffix=")" suffixOverrides="," >  
+	            <if test="order.orderNo != null ">order_no,</if>  
+	            <if test="order.contact != null ">contact,</if>  
+	            <if test="order.address != null ">address,</if>  
+	            <if test="order.phone != null ">phone,</if>  
+	            <if test="order.email != null ">email,</if>  
+	            <if test="order.facility != null ">facility,</if>  
+	            <if test="order.model != null ">model,</if>  
+	            <if test="order.sn != null ">sn,</if>  
+	            <if test="order.description  != null ">description,</if>  
+	            <if test="order.status.name != null ">status,</if>  
+	            <if test="order.report != null ">report,</if>  
+	            <if test="order.imageUrls != null ">image_urls,</if>  
+	            <if test="order.upkeep != null ">upkeep,</if>  
+	            <if test="order.completeDate != null ">ts_user_complete,</if>  
+	            <if test="order.device.id != null ">device_id,</if> 
+	            <if test="order.unit.id != null ">unit_id,</if>
+	            <if test="order.isUrgent != null ">isUrgent,</if>
+	            <if test="order.confirmUser != null ">confirm_user,</if>
+	            <if test="order.createDate != null ">create_time</if>
+	        </trim>  
+	        <trim prefix="values (" suffix=")" suffixOverrides="," >  
+	            <if test="order.orderNo != null ">#{order.orderNo},</if>  
+	            <if test="order.contact != null ">#{order.contact},</if>  
+	            <if test="order.address != null ">#{order.address},</if>  
+	            <if test="order.phone != null ">#{order.phone},</if>  
+	            <if test="order.email != null ">#{order.email},</if>  
+	            <if test="order.facility != null ">#{order.facility},</if>  
+	            <if test="order.model != null ">#{order.model},</if>  
+	            <if test="order.sn != null ">#{order.sn},</if>  
+	            <if test="order.description  != null ">#{order.description},</if>  
+	            <if test="order.status.name != null ">#{order.status.name},</if>  
+	            <if test="order.report != null ">#{order.report},</if>  
+	            <if test="order.imageUrls != null ">#{order.imageUrls},</if>  
+	            <if test="order.upkeep != null ">#{order.upkeep},</if>  
+	            <if test="order.completeDate != null ">#{order.completeDate},</if>  
+	            <if test="order.device.id != null ">#{order.device.id},</if> 
+	            <if test="order.unit.id != null ">#{order.unit.id},</if> 
+	            <if test="order.isUrgent != null ">#{order.isUrgent},</if>  
+	            <if test="order.confirmUser != null ">#{order.confirm_user},</if>
+	            <if test="order.createDate != null ">#{order.createDate}</if>
+	        </trim>
+	    </if>  
+	</insert> 
+	
+	<update id="updateOrderPart" parameterType="java.util.List">  
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            UPDATE t_order_part op
+            <set>
+                part_id =#{item.id},
+				part_offer=#{item.offer}
+            </set>
+            <where>
+                id=#{item.opid}
+            </where>
+        </foreach>
+	</update>        
+	        
+	<insert id="saveOrderPart" useGeneratedKeys="true" keyProperty="id" parameterType="java.util.List">  
+		<foreach collection="list" index="index" item="item" separator=";">
+			insert into t_order_part  
+			<trim prefix="(" suffix=")" suffixOverrides="," >  
+				<if test="item.orderNo != null ">order_no,</if>  
+				<if test="item.orderId != null ">order_id,</if>  
+				<if test="item.id != null ">part_id,</if>  
+				<if test="item.offer != null ">part_offer</if> 
+			</trim>  
+			<trim prefix="values (" suffix=")" suffixOverrides="," >  
+				<if test="item.orderNo != null ">#{item.orderNo},</if>  
+				<if test="item.orderId != null ">#{item.orderId},</if>  
+				<if test="item.id != null ">#{item.id},</if>  
+				<if test="item.offer != null ">#{item.offer}</if>  
+			</trim>
+		</foreach>
+	</insert>   
+	
+	<delete id="deleteOrderPart" parameterType="java.util.List">
+		delete from t_order_part where id in 
+		<foreach collection="list" item="opid" index="index" open="(" separator="," close=")" >#{opid}</foreach>
+	</delete>
+	
+	<delete id="deleteOrder" parameterType="java.lang.Long">
+		delete from t_order where id = #{id}
+	</delete>
+	
+	<select id="getOrderByIds" parameterType="java.util.List" resultMap="BaseResultMap">
+        select o.*,u.id uid,u.name uname 
+        from t_order o 
+        left join t_unit u on u.id = o.unit_id
+        where o.id in
+        <foreach collection="list" item="id" index="index" open="(" separator="," close=")" >#{id}</foreach>
+    </select>
+    
+    <update id="updateOrderStatus" >  
+    	UPDATE t_order o
+        <set>
+        	status =#{order.status}
+        	<if test="order.depathUser != null ">,depath_user=#{order.depathUser}</if>
+        	<if test="order.technician != null ">,technician=#{order.technician}</if>
+        	<if test="order.depathDate != null ">,depath_time=#{order.depathDate}</if>
+        	<if test="order.confirmUser != null ">,confirm_user=#{order.confirmUser}</if>
+        </set>
+        <where>
+        	id=#{order.id}
+        </where>
+	</update>
+	
+	<update id="maintenanceFeedback" >  
+    	UPDATE t_order o
+        <set>
+        	status =#{order.status},
+        	feedback_time=#{order.feedbackDate}
+        	<if test="order.imageUrls != null ">,image_urls=#{order.imageUrls}</if>
+        	<if test="order.report != null ">,report=#{order.report}</if>
+        </set>
+        <where>
+        	id=#{order.id}
+        </where>
+	</update>
+    
+    <select id="getDepathAndTechUser" resultMap="BaseResultMap">
+        select o.depath_user,o.technician,o.isUrgent,o.confirm_user,o.order_no,o.facility
+        from t_order o 
+        where o.id = #{orderId}
+    </select>
+    
+</mapper>

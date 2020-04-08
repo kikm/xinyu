@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Login Form</title>
+<link href="style/login.css" rel="stylesheet" type="text/css">
+<script src="scripts/jquery-3.4.1.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+function login() {
+    var username = $("input[name=username]").val();
+    var password = $("input[name=password]").val();
+    if (username === "" || password === "") {
+        alert("用户名或密码不能为空");
+        return;
+    }
+    document.forms[0].submit();
+    
+}
+
+
+
+</script>
+</head>
+
+<body>
+<body>
+
+	<div class="login">
+		<div class="login-screen">
+			<div class="app-title">
+				<h1>登陆</h1>
+			</div>
+
+			<div class="login-form">
+				<form action="login" method="post">
+					<div class="control-group">
+						<input type="text" class="login-field" value=""
+							placeholder="用户名" id="login-name" name="username"> <label
+							class="login-field-icon fui-user" for="login-name"></label>
+					</div>
+
+					<div class="control-group">
+						<input type="password" class="login-field" value="" name="password"
+							placeholder="密码" id="login-pass" > <label
+							class="login-field-icon fui-lock" for="login-pass"></label>
+					</div>
+					<a class="btn btn-primary btn-large btn-block" href="javascript:void(0);" onclick="login()">登陆</a>
+					<!-- <a class="login-link" href="#">Lost your password?</a> -->
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+
+
+
+</body>
+
+</html>

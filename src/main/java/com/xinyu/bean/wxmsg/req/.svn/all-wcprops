@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/req
+END
+BaseMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/req/BaseMessage.java
+END
+LinkMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/req/LinkMessage.java
+END
+ImageMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/req/ImageMessage.java
+END
+TextMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/req/TextMessage.java
+END
+VoiceMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/req/VoiceMessage.java
+END
+VideoMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/req/VideoMessage.java
+END
+LocationMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/req/LocationMessage.java
+END

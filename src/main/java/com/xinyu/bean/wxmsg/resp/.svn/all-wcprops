@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/resp
+END
+BaseMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/resp/BaseMessage.java
+END
+Music.java
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/resp/Music.java
+END
+NewsMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/resp/NewsMessage.java
+END
+Image.java
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/resp/Image.java
+END
+Article.java
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/resp/Article.java
+END
+MusicMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/resp/MusicMessage.java
+END
+Voice.java
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/resp/Voice.java
+END
+Video.java
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/resp/Video.java
+END
+ImageMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/resp/ImageMessage.java
+END
+TextMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/resp/TextMessage.java
+END
+VoiceMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/resp/VoiceMessage.java
+END
+VideoMessage.java
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/appidg1b967vlte/!svn/ver/12/src/com/lijmhj/pojo/message/resp/VideoMessage.java
+END

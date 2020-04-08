@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,viewport-fit=cover">
+    <title>新域公司</title>
+    <link rel="stylesheet" href="style/weui/weui.css"/>
+    <link rel="stylesheet" href="style/weui/example.css"/>
+    <link rel="stylesheet" href="style/weui/jquery-weui.min.css"/>
+</head>
+<body ontouchstart >
+  <input type="hidden" id="hidopenId" name="openId" th:value="${openId}">
+  <div class="weui-toptips weui-toptips_warn js_tooltips">账号密码错误</div>
+
+  <div class="container js_container" id="container">
+  </div>
+    
+
+
+<script type="text/html" id="tpl_home">
+<div class="page">
+  <div class="weui-form">
+    <div class="weui-form__text-area">
+      <h1 class="weui-form__title">
+		<img src="images/xinyulogo.jpg" alt="XinYu" height="21px" />&nbsp;新域
+	  </h1>
+      <div class="weui-form__desc">绑定账号后可进入查看新域公司业务详情</div>
+    </div>
+    <div class="weui-form__control-area">
+      <div class="weui-cells__group weui-cells__group_form">
+        <div class="weui-cells__title"></div>
+        <div class="weui-cells weui-cells_form">
+          <div class="weui-cell" id="js_cell">
+            <div class="weui-cell__hd"><label class="weui-label">账号</label></div>
+            <div class="weui-cell__bd">
+                <input id="js_input" class="weui-input" autofocus type="text" pattern="[0-9]*" placeholder="请输入账号"  maxlength="16" />
+                <button id="js_input_clear" class="weui-btn_reset weui-btn_icon weui-btn_input-clear">
+                  <i class="weui-icon-clear"></i>
+                </button>
+            </div>
+          </div>
+		  <div class="weui-cell" id="js_cell">
+            <div class="weui-cell__hd"><label class="weui-label">密码</label></div>
+            <div class="weui-cell__bd">
+                <input id="js_input2" class="weui-input" placeholder="请输入密码" autofocus type="password" />
+                <button id="js_input_clear2" class="weui-btn_reset weui-btn_icon weui-btn_input-clear">
+                  <i class="weui-icon-clear"></i>
+                </button>
+            </div>
+          </div>
+		  <div class="weui-cell">
+            <div class="weui-cell__hd"><label class="weui-label"></label></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="weui-form__opr-area">
+      <a class="weui-btn weui-btn_primary weui-btn_disabled" href="javascript:" id="showTooltips">确定</a>
+    </div>
+  </div>
+  <div id="js_toast" style="display: none;">
+      <div class="weui-mask_transparent"></div>
+      <div class="weui-toast">
+          <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+          <p class="weui-toast__content">已完成</p>
+      </div>
+  </div>
+  <!-- loading toast -->
+  <div id="loadingToast" style="display:none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-loading weui-icon_toast"></i>
+            <p class="weui-toast__content">核验中</p>
+        </div>
+  </div>
+  <div id="dialogs">
+	<!--BEGIN dialog2-->
+     <div class="js_dialog" id="iosDialog2" style="display: none;">
+     	<div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__bd">绑定成功</div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+                </div>
+            </div>
+        </div>
+     <!--END dialog2-->
+   </div>
+</div>
+
+<script type="text/javascript">
+    $(function(){
+		var openId = $('#hidopenId').val();
+		var $tooltips = $('.js_tooltips');
+      	var $toast = $('#js_toast');
+		var $loadtoast = $('#loadingToast');
+      	var $input = $('#js_input');
+	  	var $input2 = $('#js_input2');
+      	var $inputClear = $('#js_input_clear');
+	  	var $inputClear2 = $('#js_input_clear2');
+      	var $cell = $('#js_cell');
+	  	var $iosDialog2 = $('#iosDialog2');
+		var openId = $('#hidopenId').val();
+
+		$input.on('input', function(){
+        	var $value = $input.val();
+        	if ($cell.hasClass('weui-cell_warn')){
+          		$cell.removeClass('weui-cell_warn');
+        	}
+        	if ($value){
+          		$('#showTooltips').removeClass('weui-btn_disabled');
+        	}else{
+          		$('#showTooltips').addClass('weui-btn_disabled');
+       		}
+      	});
+		$('#dialogs').on('click', '.weui-dialog__btn', function(){
+            $(this).parents('.js_dialog').fadeOut(200);
+        });
+		$('#showTooltips').on('click', function(){
+        	if ($(this).hasClass('weui-btn_disabled')) return;
+
+          	var $value = $input.val();
+			var $value2 = $input2.val();
+          	if ($tooltips.css('display') != 'none') return;
+
+          	// toptips的fixed, 如果有`animation`, `position: fixed`不生效
+          	$('.page.cell').removeClass('slideIn');
+
+          	if($value.length == ''){
+            	$cell.addClass('weui-cell_warn');
+            	$tooltips.fadeIn(100);
+            	setTimeout(function () {
+              		$tooltips.fadeOut(100);
+            	}, 2000);
+          	}else{
+				$loadtoast.fadeIn(200);
+				$.ajax({
+    				url:"login",    //请求的url地址
+    				async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+    				data:{"username":$value+'-'+openId,"password":$value2},    //参数值
+    				type:"POST",   //请求方式
+    				success:function(req){
+              			$loadtoast.fadeOut(100);
+        				$iosDialog2.fadeIn(200);
+						window.pageManager.go('preview');
+    				},
+				});
+          	}
+
+		});
+
+
+      	$inputClear.on('click', function(){
+        	$input.val('');
+      	});
+	  	$inputClear2.on('click', function(){
+        	$input2.val('');
+      	});
+
+	});
+</script>
+</script>
+<script type="text/html" id="tpl_preview">
+<div class="page">
+    <div class="page__bd" style="height: 100%;">
+        <div class="weui-tab">
+            <div class="weui-tab__bd">
+        		<div id="tab1" class="infinite" style="overflow:auto;height: 100%">
+					<div class="content-padded QuotedPrice">
+        				
+      				</div>
+      				<div class="weui-loadmore">
+  						<i class="weui-loading"></i>
+  						<span class="weui-loadmore__tips">正在加载</span>
+					</div>
+        		</div>
+        		<div id="tab2" class="infinite" style="display: none;overflow:auto;height: 100%">
+            		<div class="content-padded OrderConfirmed">
+      					
+    				</div>
+					<div class="weui-loadmore">
+  							<i class="weui-loading"></i>
+  							<span class="weui-loadmore__tips">正在加载</span>
+					</div>
+        		</div>
+        		<div id="tab3" class="infinite" style="display: none;overflow:auto;height: 100%">
+					<div class="content-padded Finish">
+        				
+      				</div>
+      				<div class="weui-loadmore">
+  						<i class="weui-loading"></i>
+  						<span class="weui-loadmore__tips">正在加载</span>
+					</div>
+        		</div>
+    		</div>
+            <div class="weui-tabbar">
+                <a href="#tab1" class="weui-tabbar__item weui-bar__item_on" page="2" status="QuotedPrice">
+                    <span style="display: inline-block;position: relative;">
+                        <img src="images/weimages/icon_tabbar.png" alt="" class="weui-tabbar__icon">
+                        <!--<span class="weui-badge" style="position: absolute;top: -2px;right: -13px;">8</span>-->
+                    </span>
+                    <p class="weui-tabbar__label">已报价</p>
+                </a>
+                <a href="#tab2" class="weui-tabbar__item" page="2" status="OrderConfirmed">
+                    <img src="images/weimages/icon_tabbar.png" alt="" class="weui-tabbar__icon">
+                    <p class="weui-tabbar__label">待完修</p>
+                </a>
+                <a href="#tab3" class="weui-tabbar__item" page="2" status="Finish">
+                    <span style="display: inline-block;position: relative;">
+                        <img src="images/weimages/icon_tabbar.png" alt="" class="weui-tabbar__icon">
+                    </span>
+                    <p class="weui-tabbar__label">历史</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="previewTemplate" style="display:none">
+<br>
+<div class="weui-form-preview">
+	<div class="weui-form-preview__hd">
+        	<div class="weui-form-preview__item">
+            	<label class="weui-form-preview__label">工单总价</label>
+            	<em class="weui-form-preview__value"></em>
+            </div>
+    </div>
+    <div class="weui-form-preview__bd">
+        <div class="weui-form-preview__item">
+             <label class="weui-form-preview__label">申请人</label>
+             <span class="weui-form-preview__value"></span>
+        </div>
+        <div class="weui-form-preview__item">
+             <label class="weui-form-preview__label">联系电话</label>
+             <span class="weui-form-preview__value"></span>
+        </div>
+        <div class="weui-form-preview__item">
+             <label class="weui-form-preview__label">设备类型</label>
+             <span class="weui-form-preview__value"></span>
+        </div>
+		<div class="weui-form-preview__item">
+             <label class="weui-form-preview__label">配件数量</label>
+             <span class="weui-form-preview__value"></span>
+        </div>
+		<div class="weui-progress">
+            <div class="weui-progress__bar">
+                <div class="weui-progress__inner-bar js_progress"></div>
+            </div>
+			&nbsp&nbsp
+			<span class="weui-form-preview__value"></span>
+        </div>
+        </div>
+			<div class="weui-form-preview__ft">
+                <a class="weui-form-preview__btn weui-form-preview__btn_default confirm" data-id="1" href="javascript:">确认</a>
+            	<button type="submit" class="weui-form-preview__btn weui-form-preview__btn_primary detail" data-id="1" href="javascript:">详情</button>
+			</div>
+        </div>
+</div>
+<script type="text/javascript">
+    $(function(){
+		var page = 1
+		var loading = false;  //状态标记
+		var status = $('.weui-bar__item_on').attr('status');
+		var tempValue = $('#previewTemplate').find(".weui-form-preview__value");
+        var openId = $('#hidopenId').val();
+		$.ajax({
+    		url:"wx/getMobileData",    //请求的url地址
+    		async:false,//请求是否异步，默认为异步，这也是ajax重要特性
+    		data:{"status":status,"limit":2,"page":page,'openId':openId,'type':'customerService'},    //参数值
+    		type:"POST",   //请求方式
+    		success:function(data){
+				var t1 = 0;
+				var t2 = 0;
+				var t3 = 0;
+				for(let i=0;i<data.length;i++){
+				 	var bean = data[i];
+					if(bean.status == 'QuotedPrice'){t1+=1}
+					if(bean.status == 'OrderConfirmed'){t2+=1}
+					if(bean.status == 'Finish'){t3+=1}
+				}
+				var status = [];
+				if(t1<2){status.push('QuotedPrice');}
+				if(t2<2){status.push('OrderConfirmed');}
+				if(t3<2){status.push('Finish');}
+				for(let i = 0;i<status.length ; i++){
+					$('.'+status[i]).parent().find('.weui-loadmore').children('.weui-loading').hide();
+					$('.'+status[i]).parent().find('.weui-loadmore').children('.weui-loadmore__tips').html("没有更多数据");
+					$('.weui-bar__item_on').attr('noMoreData','true');
+				}
+				addTempleHtml(data);
+    		}
+		});	
+
+		function addTempleHtml(data){
+			for(let i=0;i<data.length;i++){
+					var bean = data[i];
+					$(tempValue).eq(0).html(bean.total);
+					$(tempValue).eq(1).html(bean.contact);
+					$(tempValue).eq(2).html(bean.phone);
+					$(tempValue).eq(3).html(bean.deviceName);
+					$(tempValue).eq(4).html(bean.partListSize);
+					$('#previewTemplate').find(".confirm").eq(0).attr('data-id',bean.id);
+					if(bean.status == 'QuotedPrice'){
+						$(tempValue).eq(5).html('60%');
+						$('#previewTemplate').find(".weui-progress__inner-bar").css("width","60%");
+						$(".QuotedPrice").append($('#previewTemplate').html());
+					}
+					if(bean.status == 'OrderConfirmed'){
+						$(tempValue).eq(5).html('80%');
+						$('#previewTemplate').find(".confirm").eq(0).remove();
+						$('#previewTemplate').find(".weui-progress__inner-bar").css("width","80%");
+						$(".OrderConfirmed").append($('#previewTemplate').html());
+						
+					}
+					if(bean.status == 'Finish'){
+						$(tempValue).eq(5).html('100%');
+						$('#previewTemplate').find(".confirm").eq(0).remove();
+						$('#previewTemplate').find(".weui-progress__inner-bar").css("width","100%");
+						$(".Finish").append($('#previewTemplate').html());
+					}
+				}
+		}
+
+		
+		//下拉更新数据
+		$('.infinite').infinite().on("infinite", function() {
+			var self = this;
+			$('.weui-loadmore').removeClass("display:none");
+            self.loading = true;
+			var status = $('.weui-bar__item_on').attr('status');
+			var page = $('.weui-bar__item_on').attr('page');
+			var getData = $('.weui-bar__item_on').attr('noMoreData');
+			var appHtml = $('#previewTemplate').html();
+			$.ajax({
+    				url:"wx/getMobileData",    //请求的url地址
+    				async:false,
+    				data:{"status":status,"limit":2,"page":page,'openId':openId,'type':'customerService'},    //参数值
+    				type:"POST",   //请求方式
+    				success:function(data){
+						if(data.length<1){
+							$('.'+status).parent().find('.weui-loadmore').children('.weui-loading').hide();
+							$('.'+status).parent().find('.weui-loadmore').children('.weui-loadmore__tips').html("没有更多数据");
+							$('.weui-bar__item_on').attr('noMoreData','true');
+						}else{
+							addTempleHtml(data);
+							$('.weui-loadmore').addClass("display:none");
+    						self.loading = false;
+							$('.weui-bar__item_on').attr('page',page+1);
+						}
+    				}
+					
+			});	
+					
+			
+		});
+	
+		$('.weui-tabbar__item').on('click', function () {
+      		$(this).addClass('weui-bar__item_on').siblings().removeClass('weui-bar__item_on');
+      		var tabId = $(this).attr('href');
+     		$('.weui-tab__bd').find(tabId).show().siblings().hide();
+			$('.weui-tab__bd').find(tabId).infinite();
+    	});
+	
+		$('.weui-tabbar__item').on('click', function () {
+            $(this).addClass('weui-bar__item_on').siblings('.weui-bar__item_on').removeClass('weui-bar__item_on');
+        });
+
+		$('.weui-form-preview__btn.weui-form-preview__btn_primary.detail').on('click', function(){
+            var order = $(this).data('id');
+			window.pageManager.go('article');
+        });
+		$('.weui-form-preview__btn.weui-form-preview__btn_default.confirm').on('click', function(){
+            var orderId = $(this).data('id');
+			var openId = $("#hidopenId").val();
+			var $clickConfirm = $(this)
+			if(orderId == null||orderId=='')return;
+			$.ajax({
+    				url:"wx/cusConfirm",    //请求的url地址
+    				async:false,
+    				data:{"orderId":orderId,"openId":openId},    //参数值
+    				type:"POST",   //请求方式
+    				success:function(data){
+						$tooltips.text(data.msg);
+						if(data.code == 0){
+							$($clickConfirm).data('id','');
+							$tooltips.removeClass('weui-toptips_warn');
+							$tooltips.addClass('weui-toptips_success');
+						}else{
+							$tooltips.removeClass('weui-toptips_success');
+							$tooltips.addClass('weui-toptips_warn');
+						}
+						$tooltips.css('display','block');
+						setTimeout(function () {
+  							$tooltips.css('display','none');
+ 						}, 2000);
+    				}
+					
+			});	
+        });
+		
+		
+    });
+	
+	
+</script>
+</script>
+<script type="text/html" id="tpl_article">
+<div class="page">
+    <div class="page__hd">
+        <h1 class="page__title">Article</h1>
+        <p class="page__desc">文章</p>
+    </div>
+    <div class="page__bd">
+        <article class="weui-article">
+            <h1>大标题</h1>
+            <section>
+                <h2 class="title">章标题</h2>
+                <section>
+                    <h3>1.1 节标题</h3>
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+                        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+                        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+                        consequat.
+                    </p>
+                    <p>
+                        <img src="images/weimages/pic_article.png" alt="">
+                        <img src="images/weimages/pic_article.png" alt="">
+                    </p>
+                </section>
+                <section>
+                    <h3>1.2 节标题</h3>
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+                        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+                        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+                        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                    </p>
+                </section>
+            </section>
+        </article>
+    </div>
+    <div class="page__ft">
+        <a href="javascript:home()"><img src="images/weimages/icon_footer_link.png" /></a>
+    </div>
+</div>
+</script>    
+
+<script type="text/html" id="tpl_form_textarea">
+<div class="page">
+  <div class="weui-form">
+    <div class="weui-form__text-area">
+      <h2 class="weui-form__title">文本域</h2>
+      <div class="weui-form__desc">输入更多内容的输入区域样式展示</div>
+    </div>
+    <div class="weui-form__control-area">
+      <div class="weui-cells__group weui-cells__group_form">
+        <div class="weui-cells__title">问题描述</div>
+        <div class="weui-cells weui-cells_form">
+            <div class="weui-cell">
+                <div class="weui-cell__bd">
+                    <textarea class="weui-textarea" placeholder="请描述你所发生的问题" rows="3"></textarea>
+                    <div class="weui-textarea-counter"><span>0</span>/200</div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+    <div class="weui-form__opr-area">
+      <a class="weui-btn weui-btn_primary" href="javascript:" id="showTooltips">确定</a>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+    $(function(){
+	
+		$('#showTooltips').on('click', function(){
+            var order = $(this).data('id');
+			window.pageManager.go('preview');
+        });
+		
+    });
+</script>
+</script>
+    
+    
+    
+    <script src="scripts/weui/zepto.min.js"></script>
+    <script src="scripts/weui/jquery-weui.min.js"></script>
+    <script src="scripts/weui/example.js"></script>
+</body>
+</html>

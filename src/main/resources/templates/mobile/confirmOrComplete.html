@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,viewport-fit=cover">
+    <title>新域公司</title>
+    <link rel="stylesheet" href="../style/weui/weui.css"/>
+    <link rel="stylesheet" href="../style/weui/example.css"/>
+    <link rel="stylesheet" href="../style/weui/jquery-weui.min.css"/>
+</head>
+<body ontouchstart>
+  <input type="hidden" id="hidopenId" name="openId" th:value="${openId}">
+  <input type="hidden" id="hidorderId" name="Id" th:value="${orderId}">
+  <input type="hidden" name="opreType" th:value="${type}">
+  <input type="hidden" name="orderNo" th:value="${orderBean.orderNo}">
+  <input type="hidden" name="statusName" th:value="${orderBean.statusName}">
+  <input type="hidden" name="deviceName" th:value="${orderBean.deviceName}">
+  <input type="hidden" name="partListSize" th:value="${orderBean.partListSize}">
+  <input type="hidden" name="total" th:value="${orderBean.total}">
+  <input type="hidden" name="upkeep" th:value="${orderBean.upkeep}">
+  <input type="hidden" name="phone" th:value="${orderBean.phone}">
+  <div class="weui-toptips weui-toptips_warn js_tooltips" style="display: none; opacity: 1;"></div>
+
+  <div class="container js_container" id="container">
+  </div>
+    
+
+
+<script type="text/html" id="tpl_home">
+<div class="page">
+    <div class="page__hd">
+        <h1 class="page__title">确认</h1>
+        <p class="page__desc" style="font-size: 28px">报价确认</p>
+    </div>
+    <div class="page__bd">
+        <div class="weui-cells__title"></div>
+        <div class="weui-cells">
+            <div class="weui-cell weui-cell_access">
+                <div class="weui-cell__bd">工单号</div>
+                <div style="font-size: 0">
+                    <span class="orderNo" style="vertical-align:middle; font-size: 17px;">详细信息</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="weui-cells__title"></div>
+        <div class="weui-cells">
+            <div class="weui-cell weui-cell_access">
+                <div class="weui-cell__bd">
+                    <span style="vertical-align: middle">设备名称</span>
+                </div>
+                <div class="deviceName">1</div>
+            </div>
+            <div class="weui-cell weui-cell_access">
+                <div class="weui-cell__bd">
+                    <span style="vertical-align: middle">配件数量</span>
+                </div>
+                <div class="partListSize" >详细信息</div>
+            </div>
+            <div class="weui-cell weui-cell_access">
+                <div class="weui-cell__bd">
+                    <span style="vertical-align: middle">维修费</span>
+                </div>
+                <div class="upkeep" ></div>
+            </div>
+			<div class="weui-cell weui-cell_access">
+                <div class="weui-cell__bd">
+                    <span style="vertical-align: middle">总价</span>
+                </div>
+                <div class="total"></div>
+            </div>
+			<div class="weui-cell weui-cell_access">
+                <div class="weui-cell__bd">
+                    <span style="vertical-align: middle">服务热线</span>
+                </div>
+                <div class="phone"></div>
+            </div>
+        </div>
+		<div class="weui-form__tips-area">
+      		<p class="weui-form__tips">
+      		</p>
+    	</div>
+		<div class="weui-form__opr-area">
+      		<a class="weui-btn weui-btn_primary" href="javascript:" id="showTooltips">确定</a>
+    	</div>
+    </div>
+    
+</div>
+<script type="text/javascript">
+    $(function(){
+		var openId = $('#hidopenId').val();
+		var $tooltips = $('.js_tooltips');
+		var orderId = $('#hidorderId').val();
+		var type = $("input[name='opreType']").val();
+		$('.orderNo').text($("input[name='orderNo']").val());
+		$('.deviceName').text($("input[name='deviceName']").val());
+		$('.partListSize').text($("input[name='partListSize']").val());
+		$('.upkeep').text($("input[name='upkeep']").val());
+		$('.phone').text($("input[name='phone']").val());
+		$('.total').text($("input[name='total']").val());
+		var url = type=='confirm'?"cusConfirm":"complete";
+		$('.page__desc').text(type=='confirm'?'报价确认':'完工确认');
+
+		$('#showTooltips').on('click', function(){
+        	if ($(this).hasClass('weui-btn_disabled')) return;
+			$(this).addClass('weui-btn_disabled');
+			var button = $(this);
+          	if ($tooltips.css('display') != 'none') return;
+			$.ajax({
+    			url:url,    //请求的url地址
+    			async:false,
+    			data:{"orderId":orderId,"openId":openId},    //参数值
+    			type:"POST",   //请求方式
+    			success:function(data){
+					$tooltips.text(data.msg);
+					if(data.code == 0){
+						$tooltips.removeClass('weui-toptips_warn');
+						$tooltips.addClass('weui-toptips_success');
+					}else{
+						$tooltips.removeClass('weui-toptips_success');
+						$tooltips.addClass('weui-toptips_warn');
+						$(button).removeClass('weui-btn_disabled');
+					}
+					$tooltips.css('display','block');
+					setTimeout(function () {
+  						$tooltips.css('display','none');
+ 					}, 2000);
+    			},
+			});
+          	
+
+		});
+
+
+	});
+</script>
+</script>
+    
+    <script src="../scripts/weui/zepto.min.js"></script>
+    <script src="../scripts/weui/jquery-weui.min.js"></script>
+    <script src="../scripts/weui/weui.min.js"></script>
+    <script src="../scripts/weui/example.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinyu.dao.MenuDao">
+	
+	<resultMap id="BaseResultMap" type="com.xinyu.model.Menu" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="url" property="url" jdbcType="VARCHAR" />
+        <result column="menu_level" property="menuLevel" jdbcType="INTEGER" />
+        <result column="pid" property="pid" jdbcType="INTEGER" />
+        <result column="enabled" property="enabled" jdbcType="BIT" />
+        <result column="order_num" property="orderNum" jdbcType="INTEGER" />
+        <result column="menu_type" property="menuType" jdbcType="VARCHAR" />
+        <result column="menu_type_info" property="menuTypeInfo" jdbcType="VARCHAR" />
+        <collection property="roles" ofType="com.xinyu.model.Role">
+            <result column="rname" property="name" jdbcType="VARCHAR"/>
+            <result column="rid" property="id" jdbcType="INTEGER"/>
+        </collection>
+    </resultMap>
+    
+    <select id="getAllMenu" parameterType="String" resultMap="BaseResultMap">
+        SELECT m.*,r.name as rname,r.id as rid FROM t_menu m
+		LEFT JOIN t_role_menu rm ON rm.menu_id = m.id
+		LEFT JOIN t_role r ON r.id = rm.role_id 
+        order by m.url
+    </select>
+    
+    <select id="getAllMenuAndRole" parameterType="String" resultType="java.util.HashMap">
+        select m.url,rm.role_id 
+        from t_menu m 
+        left join t_role_menu rm on m.id=rm.menu_id 
+        order by m.url
+    </select>
+    
+    <select id="getMenuListByUser" parameterType="String" resultMap="BaseResultMap">
+        select m.* 
+        from t_menu m 
+        left join t_role_menu rm on m.id=rm.menu_id 
+        left join t_role_user ru on ru.role_id=rm.role_id
+        WHERE m.menu_level > 0 
+        <if test="userId!=null">
+	        and ru.user_id= #{userId}  
+        </if>
+        order BY m.order_num
+    </select>
+
+  
+
+    
+</mapper>

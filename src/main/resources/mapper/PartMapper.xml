@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinyu.dao.PartDao">
+
+	<resultMap id="BaseResultMap" type="com.xinyu.model.Part" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="brand" property="brand" jdbcType="VARCHAR" />
+        <result column="url" property="url" jdbcType="VARCHAR" />
+        <result column="category" property="category" jdbcType="VARCHAR" />
+        <result column="cost" property="partCost" jdbcType="FLOAT" />
+    </resultMap>
+
+	<select id="getPartByDevice" parameterType="Integer" resultMap="BaseResultMap">
+        select p.*
+        from t_part p
+        where p.device_id= #{deviceId}
+    </select>
+    
+    <update id="updatePart" parameterType="java.util.List">  
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            UPDATE t_part p
+            <set>
+                name =#{item.name},
+				brand=#{item.brand},
+				cost=#{item.partCost}
+            </set>
+            <where>
+                id=#{item.id}
+            </where>
+        </foreach>
+	</update>        
+	        
+	<insert id="savePart" useGeneratedKeys="true" keyProperty="id" parameterType="java.util.List">  
+		<foreach collection="list" index="index" item="item" separator=";">
+			insert into t_part  
+			<trim prefix="(" suffix=")" suffixOverrides="," >  
+				<if test="item.name != null ">name,</if>
+				<if test="item.deviceId != null ">device_id,</if>  
+				<if test="item.brand != null ">brand,</if>  
+				<if test="item.partCost != null ">cost</if>  
+			</trim>  
+			<trim prefix="values (" suffix=")" suffixOverrides="," >  
+				<if test="item.name != null ">#{item.name},</if> 
+				<if test="item.deviceId != null ">#{item.deviceId},</if> 
+				<if test="item.brand != null ">#{item.brand},</if>  
+				<if test="item.partCost != null ">#{item.partCost}</if>  
+			</trim>
+		</foreach>
+	</insert>   
+	
+	<delete id="deletePart" parameterType="java.util.List">
+		delete from t_part where id in 
+		<foreach collection="list" item="id" index="index" open="(" separator="," close=")" >#{id}</foreach>
+	</delete>
+    
+
+
+
+
+
+
+
+
+
+</mapper>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link href="../style/layui/layui.css" rel="stylesheet" type="text/css">
+<script src="../scripts/layui/layui.all.js" type="text/javascript"></script>
+<script src="../scripts/jquery-3.4.1.min.js" type="text/javascript"></script>
+<style>
+	.layui-form-label.required:after{
+        content:"*";
+        color:red;
+        position: absolute;
+    }
+</style>
+</head>
+<body>
+<div id="list">
+	<div class="demoTable" style="padding-left:20px">
+  		<div class="layui-inline">
+  		<input class="layui-input" placeholder="名称" name="deviceName" id="parm1" autocomplete="off">
+  		</div>
+  		<button class="layui-btn" id="tableSearch" data-type="reload">搜索</button>
+	</div>
+	<table  id="deviceList" lay-filter="device"></table>
+	<script type="text/html" id="toolbar">
+  		<div class="layui-btn-container">
+    		<button class="layui-btn layui-btn-sm" lay-event="newDevice">新增</button>
+  		</div>
+	</script>
+ 
+	<script type="text/html" id="bar">
+  		<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+  		<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+	</script>
+</div>
+<div id="newOrEdit"  class="layui-hide">
+ <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+  <legend>新增/编辑设备</legend>
+</fieldset>	
+ 
+<form class="layui-form" id="deviceForm" lay-filter="deviceForm" method="POST">
+  <div class="layui-form-item">
+    <div class="layui-inline">
+      <label class="layui-form-label required">名称</label>
+      <div class="layui-input-inline">
+      	<input type="text" style="display:none;" id="deviceId" name="id" autocomplete="off" class="layui-input">
+      	<input type="text" style="display:none;" name="deletePart" id="deletePart" >
+        <input type="text" name="name" lay-verify="request" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+  </div>
+ 
+ <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+  <legend>配件</legend>
+</fieldset>
+  
+ <div id="partList">
+  <div class="layui-form-item">
+  	<input type="text" style="display:none" class="layui-input" name="partList[0].id">
+    <div class="layui-inline">
+      <label class="layui-form-label required">配件名称</label>
+      <div class="layui-input-inline">
+      	<input type="text" lay-verify="request" name="partList[0].name" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-inline">
+      <label class="layui-form-label">品牌</label>
+      <div class="layui-input-inline" >
+        <input type="text" name="partList[0].brand" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-inline">
+      <label class="layui-form-label">采购价</label>
+      <div class="layui-input-inline" >
+        <input type="text" name="partList[0].partCost" placeholder="￥" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-inline">
+    	<button type="button" onclick="addPart();" class="layui-btn layui-btn-xs"><i class="layui-icon"></i></button>
+    </div>
+  </div>
+ </div>
+  
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+	  <button type="button" class="layui-btn layui-btn-normal" id="LAY-component-form-setval">赋值</button>
+      <button id="deviceCommit" class="layui-btn" lay-submit="" lay-filter="device">立即提交</button>
+      <button type="reset" id="formReset" class="layui-btn layui-btn-primary">重置</button>
+      <button type="button" onclick="backcall()" class="layui-btn layui-btn-primary">返回</button>
+    </div>
+  </div>
+  
+</form>
+<div id="partTemplate" style="display:none">
+<div class="layui-form-item partTemplate">
+    <div class="layui-inline">
+		  <input type="text" dataType="id" style="display:none" name="partList[0].id" >
+	      <label class="layui-form-label required">配件名称</label>
+	      <div class="layui-input-inline">
+	      	<input type="text"  dataType="name" lay-verify="request" name="partList[0].name" class="layui-input">
+	      </div>
+    </div>
+    <div class="layui-inline">
+      <label class="layui-form-label">品牌</label>
+      <div class="layui-input-inline" >
+        <input type="text" dataType="brand" name="partList[0].brand" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-inline">
+      <label class="layui-form-label">采购价</label>
+      <div class="layui-input-inline" >
+        <input type="text" dataType="partCost" name="partList[0].partCost" placeholder="￥" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-inline">
+    	<button type="button" onclick="delPart(this)" class="layui-btn layui-btn-xs"><i class="layui-icon"></i></button>
+    </div>
+  </div>
+
+</div>	
+</div>
+
+<script>
+	 var files;
+	layui.use('table', function(){
+	  var table = layui.table;
+	  
+	  table.render({
+	    elem: '#deviceList',
+	    url:'deviceTableData',
+	    toolbar: '#toolbar', //开启头部工具栏，并为其绑定左侧模板
+	    defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+	    	title: '提示'
+	    	,layEvent: 'LAYTABLE_TIPS'
+	    	,icon: 'layui-icon-tips'
+	    }],
+	    page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+	      layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+	      //,curr: 5 //设定初始在第 5 页
+	      groups: 1, //只显示 1 个连续页码
+	      first: false, //不显示首页
+	      last: false //不显示尾页
+	      
+	    },
+	    id: 'tableReload',
+	  	where: {},
+	    cols: [
+	    	[
+	       {type: 'checkbox', fixed: 'left'}
+	      ,{field:'id', width:'8%', title: 'ID', sort: true}
+	      ,{field:'name', width:'15%', title: '名称'}
+	      ,{field:'partListName', width:'58%', title: '关联配件', sort: true}
+	      ,{fixed: 'right', title:'操作', toolbar: '#bar', width:'15%'}
+	    	]
+	    ]
+	    
+	  });
+	  
+	  table.on('toolbar(device)', function(obj){
+		var checkStatus = table.checkStatus(obj.config.id);
+		    switch(obj.event){
+		      case 'newDevice':
+		    	  exchange();
+		      break;
+		      //自定义头工具栏右侧图标 - 提示
+		      case 'LAYTABLE_TIPS':
+		        layer.alert('这是工具栏右侧自定义的一个图标按钮');
+		      break;
+		    };
+		  });
+		  
+		  //监听行工具事件
+		  table.on('tool(device)', function(obj){
+		    var data = obj.data;
+		    //console.log(obj)
+		    if(obj.event === 'del'){
+		      layer.confirm('确认删除？', function(index){
+		        $.post('deleteDevice',{"id":data.id},function(result){
+		        	obj.del();
+		     		layer.msg(result.msg);
+		     	});
+		        layer.close(index);
+		        
+		      });
+		    } else if(obj.event === 'edit'){
+		    	$.ajax({
+	                type : "get",
+	                url : "getDeviceInfo",
+	                async : false,
+	                data : {"id":data.id},  // 你的formid
+	                success : function(device) {
+	                	var form = layui.form;
+	                	for(let i=0;i<device.partList.length;i++){
+	                		if(i != 0){
+	                			addPart();
+	                		}
+	                	}
+	                	form.val('deviceForm', {//filter
+	                		"name": device.name
+	    				});
+	                	$("#deviceId").val(device.id);
+	                	for(let i=0;i<device.partList.length;i++){
+	                		$("#partList input[name='partList["+i+"].id']").val(device.partList[i].id);
+	                		$("#partList input[name='partList["+i+"].name']").val(device.partList[i].name);
+	                		$("#partList input[name='partList["+i+"].brand']").val(device.partList[i].brand);
+	                		$("#partList input[name='partList["+i+"].partCost']").val(device.partList[i].partCost);
+
+	                	} 
+	                	exchange();
+	                }
+	             })
+		    	
+		    	
+		    }
+		  });
+		  
+		  var $ = layui.$, active = {
+			reload: function(){
+				var param1 = $('#parm1').val();
+				//执行重载
+				table.reload('tableReload', {
+					page: {
+						curr: 1 //重新从第 1 页开始
+					}
+					,where: {
+						deviceName: param1
+					}
+				}, 'data');
+			}
+		  };
+				  
+		$('.demoTable .layui-btn').on('click', function(){
+			var type = $(this).data('type');
+			active[type] ? active[type].call(this) : '';
+		});
+	});
+	
+	layui.use(['form'], function(){
+		  var form = layui.form
+		  ,layer = layui.layer
+		  ,layedit = layui.layedit
+		  ,upload = layui.upload
+		  ,laydate = layui.laydate;
+		  
+		  //日期
+		  laydate.render({
+		    elem: '#date'
+		  });
+		  laydate.render({
+		    elem: '#date1'
+		  });
+		  form.render();
+		  
+		  //自定义验证规则
+		  form.verify({
+		    title: function(value){
+		      if(value.length < 5){
+		        return '标题至少得5个字符啊';
+		      }
+		    }
+		    ,pass: [
+		      /^[\S]{6,12}$/
+		      ,'密码必须6到12位，且不能出现空格'
+		    ]
+		    ,content: function(value){
+		      layedit.sync(editIndex);
+		    }
+		  });
+		  
+		  //监听提交
+		  form.on('submit(device)', function(data){
+			var fd = new FormData();
+		    var formData = new FormData($( "#deviceForm" )[0]); 
+		    
+	        $.ajax({
+                cache : true,
+                type : "post",
+                url : "saveOrUpdateDevice",
+                async : false,
+                data : formData,  // 你的formid
+                contentType: false,   //jax 中 contentType 设置为 false 是为了避免 JQuery 对其操作，从而失去分界符，而使服务器不能正常解析文件
+                processData: false,   //当设置为true的时候,jquery ajax 提交的时候不会序列化 data，而是直接使用data
+                error : function(request) {
+                    layer.alert('操作失败');
+                },
+                success : function(data) {
+                	if (data.code == 0) {
+                      	$("#formReset").click();
+                      	$("#tableSearch").click();
+                      	var form = layui.form;
+                      	$("div#partList .partTemplate").each(function(){
+                      		$(this).remove();
+                      	});
+                      	$("#partList select").each(function(){
+            				$(this).val("");
+            			});
+                      	form.render("select");
+                      	layer.msg('提交成功');
+                      	exchange();
+                      } else {
+                          layer.alert(data.msg);
+                      }
+                	}
+             })
+		     return false;
+		  });
+		  
+		  form.on('select(device)', function(data){
+			  var form=layui.form;
+			  $("select[class='partListId']").each(function(){
+	  	    		$(this).html("<option value=''>直接选择或搜索选择</option>");
+	  	      });
+			  $.ajaxSettings.async = false;//编辑的时候需要关闭异步才能赋值
+			  $.post('getPartDataByDevice',{"deviceId":data.value},function(result){
+	     		var partHtml = "";
+	     		for (var i = 0; i < result.data.length; i++) { 
+	  	    		partHtml += "<option value='"+result.data[i].id+"'>"+result.data[i].name+"</option>"
+	  	    	 }
+	  	    	 $("select[class='partListId']").each(function(){
+	  	    		$(this).append(partHtml);
+	  	    	 });
+				form.render("select");
+	     	 });
+			  $.ajaxSettings.async = true;
+		  }); 
+		 
+		  //表单赋值
+		  layui.$('#LAY-component-form-setval').on('click', function(){
+		    form.val('deviceForm', {//filter
+		      "contact": "陆河心" // "name": "value"
+		      ,"address": "南油二区南单一栋207"
+		    });
+		  });
+		  
+		  //表单取值
+		  layui.$('#LAY-component-form-getval').on('click', function(){
+		    var data = form.val('example');
+		    alert(JSON.stringify(data));
+		  });
+		  
+		});
+		
+		function addPart() {
+			var partList = $("#partList");
+			var index = 0;
+			$("#partList .layui-form-item").each(function(){
+				index = index+1;
+			});
+			$("#partTemplate [dataType]").each(function(){
+				var pro = $(this).attr('dataType');
+				$(this).attr('name','partList['+index+'].'+pro);
+			});
+			
+			partList.append($("#partTemplate").html());
+		}
+		
+		function delPart(del) {
+			var id = "";
+			if($("#deletePart").val()==null||$("#deletePart").val()==""){
+				id=$(del).parent().parent().find("input:eq(0)").val();
+			}else {
+				id=$("#deletePart").val()+","+$(del).parent().parent().find("input:eq(0)").val();
+			}
+			$("#deletePart").val(id);
+			$(del).parent().parent().remove();
+			$("#partList .partTemplate").each(function(index){
+				index = index+1;
+				$(this).find("[dataType]").each(function(){
+					var subname = $(this).attr('dataType');
+					$(this).attr('name','partList['+index+'].'+subname);
+				})
+				
+			});
+		}
+		
+		function backcall() {
+			layer.confirm('确认放弃页面所有数据？', {icon: 3, title:'提示'}, function(index){
+				$("#formReset").click();
+              	for (let x in files) {
+  		          delete files[x];
+  		      	}
+              	$("div#partList .partTemplate").each(function(){
+              		$(this).remove();
+              	});
+				layer.close(index);
+				exchange();
+			});
+		}
+		
+		function exchange(){
+			if($('#list').hasClass('layui-hide')){
+				$('#list').removeClass('layui-hide');
+				$('#newOrEdit').addClass('layui-hide');
+			}else{
+				$('#list').addClass('layui-hide');
+				$('#newOrEdit').removeClass('layui-hide');
+			}
+		}
+		
+		
+		
+	
+</script>
+</body>
+</html>

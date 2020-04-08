@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinyu.dao.UserDao">
+
+	<resultMap id="BaseResultMap" type="com.xinyu.model.User" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="user_name" property="name" jdbcType="VARCHAR" />
+        <result column="password" property="password" jdbcType="VARCHAR" />
+        <result column="phone" property="telephone" jdbcType="VARCHAR" />
+        <result column="wx_userID" property="userID" jdbcType="VARCHAR" />
+        <result column="wx_openID" property="openID" jdbcType="VARCHAR" />
+        <result column="wx_userName" property="userName" jdbcType="VARCHAR" />
+        <result column="wx_status" property="status" jdbcType="VARCHAR" />
+        <result column="wx_country" property="country" jdbcType="VARCHAR" />
+        <result column="wx_nickName" property="nickName" jdbcType="VARCHAR" />
+        <result column="wx_province" property="province" jdbcType="VARCHAR" />
+        <result column="wx_city" property="city" jdbcType="VARCHAR" />
+        <result column="wx_headImgUrl" property="headImgUrl" jdbcType="VARCHAR" />
+        <result column="wx_language" property="language" jdbcType="VARCHAR" />
+        <result column="wx_sex" property="sex" jdbcType="VARCHAR" />
+        <result column="uname" property="unitName" jdbcType="VARCHAR" />
+        <association property="unit" javaType="com.xinyu.model.Unit">
+            <id column="unid" property="id" jdbcType="INTEGER"/>
+            <result column="uname" property="name" jdbcType="VARCHAR"/>
+		</association>
+        <collection property="roles" ofType="com.xinyu.model.Role">
+            <result column="rname" property="name"/>
+            <result column="rid" property="id"/>
+        </collection>
+    </resultMap>
+
+	<select id="findByUserName" parameterType="String" resultMap="BaseResultMap">
+        select u.*
+        ,r.name as rname,r.id as rid
+        ,un.name as uname,un.id as unid
+        from t_user u
+        LEFT JOIN t_role_user sru on u.id= sru.user_id
+        LEFT JOIN t_role r on sru.role_id=r.id
+        LEFT JOIN t_unit un on u.unit_id = un.id
+        where u.user_name= #{username}
+    </select>
+    
+    <select id="findByUserId" parameterType="String" resultMap="BaseResultMap">
+        select u.*
+        ,r.name as rname,r.id as rid
+        ,un.name as uname,un.id as unid
+        from t_user u
+        LEFT JOIN t_role_user sru on u.id= sru.user_id
+        LEFT JOIN t_role r on sru.role_id=r.id
+        LEFT JOIN t_unit un on u.unit_id = un.id
+        where u.id= #{userId}
+    </select>
+    
+    <update id="updateStatusByOpenID" >
+        update t_user set         
+			status =#{status},
+        where u.openId= #{openId}
+    </update>
+    
+    <select id="findByOpenId" parameterType="String" resultMap="BaseResultMap">
+        select u.*
+        ,r.name as rname,r.id as rid
+        ,un.name as uname,un.id as unid
+        from t_user u
+        LEFT JOIN t_role_user sru on u.id= sru.user_id
+        LEFT JOIN t_role r on sru.role_id=r.id
+        LEFT JOIN t_unit un on u.unit_id = un.id
+        where u.wx_openID= #{openId}
+    </select>
+
+	<update id="bankUserOpenId" parameterType="String">
+		update t_user set wx_openID = #{openId} where id=#{userId}
+	
+	</update>
+	
+	<update id="unbankOpenID" parameterType="String">
+		update t_user set wx_openID = null where wx_openID=#{openId}
+	
+	</update>
+
+
+
+	<select id="getUserListByRole" parameterType="String" resultMap="BaseResultMap">
+        select u.id,u.user_name
+        ,r.name as rname,r.id as rid
+        from t_user u
+        LEFT JOIN t_role_user sru on u.id= sru.user_id
+        LEFT JOIN t_role r on sru.role_id=r.id
+        where r.name= #{rolename}
+    </select>
+
+	<select id="getUserListByUnit" parameterType="Long" resultMap="BaseResultMap">
+        select u.*
+        from t_user u
+        where u.unit_id= #{unitId} and u.wx_openID is not null
+    </select>
+    
+    <select id="getUserList" resultMap="BaseResultMap">
+    	select t.*,tu.id unid,tu.name uname
+    	from (
+        	select u.*
+        	from t_user u
+        	<if test="user !=null and user.name != null">
+        		where u.user_name like '%${user.name}%'
+        	</if>
+        	ORDER BY u.id
+			limit #{page.start},#{page.end}
+		) AS t
+        left join t_unit tu on tu.id = t.unit_id
+    </select>
+    
+    <select id="getUserListCount" resultType="java.lang.Integer">
+        select count(distinct u.id)
+        from t_user u
+        <if test="user !=null and user.name != null">
+        	where u.user_name like '%${user.name}%'
+        </if>
+    </select>
+    
+    <select id="checkUserIdExit" resultType="java.lang.Integer">
+        select count(distinct u.id)
+        from t_user u
+        where u.id = #{userId}
+    </select>
+    
+    <insert id="saveUserRole">
+    	<foreach collection="list" index="index" item="item" separator=";">
+			insert into t_role_user  
+			<trim prefix="(" suffix=")" suffixOverrides="," >  
+				<if test="userId != null ">user_id,</if>
+				<if test="item != null ">role_id</if>  
+			</trim>  
+			<trim prefix="values (" suffix=")" suffixOverrides="," >  
+				<if test="userId != null ">#{userId},</if> 
+				<if test="item != null ">#{item}</if> 
+			</trim>
+		</foreach>
+    </insert>
+    
+    <insert id="saveOrUpdateUser" useGeneratedKeys="true" keyProperty="id" parameterType="com.xinyu.model.User">  
+	        insert into t_user ( id, user_name, unit_id, password, phone ) values 
+	        (#{user.id},#{user.name},#{user.unit.id},#{user.password},#{user.telephone})
+	        ON DUPLICATE KEY UPDATE
+	        user_name =VALUES(user_name)
+	        ,unit_id =VALUES(unit_id)
+	        ,password =VALUES(password)
+	        ,phone =VALUES(phone)
+	</insert> 
+	
+	<delete id="deleteUserRole">
+		delete from t_role_user where user_id = #{userId} 
+	</delete>
+	
+	<delete id="deleteUser">
+		delete from t_user where id = #{userId} 
+	</delete>
+	
+	<insert id="saveUnit" useGeneratedKeys="true" keyProperty="id" parameterType="com.xinyu.model.Unit">
+    	insert into t_unit (name) values(#{un.name})
+	</insert>
+	
+	<select id="checkUnitByName" resultType="java.lang.Integer">
+        select count(u.id)
+        from t_unit u
+        where u.name = #{unitName}
+    </select>
+	
+
+
+
+</mapper>
