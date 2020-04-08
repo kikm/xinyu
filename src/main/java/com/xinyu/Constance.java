@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class Constance {
 
-	public static final String USER_ID="userId";
+	public static final String USER_ID="userId"; 
 	public static final String USER_NAME="username";
 	public static final String LOGIN_PAGE="/login.jsp";
 	public static final String REDIRECT_INDEX_PAGE="redirect:index";
