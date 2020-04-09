@@ -11,7 +11,7 @@ public class Order implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private Long id;
 	private String orderNo;
-	private Boolean isUrgent;
+	private Boolean isUrgent = false;
 	private Unit unit;
 	private String contact;
 	private String address;

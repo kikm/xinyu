@@ -218,7 +218,7 @@ public class OrderService implements IOrderService {
                     String imageUrl = FileUpDownLoadUtils.uploadFile(bytes,file.getOriginalFilename());
                     imageurls += imageUrl+";";
                 } catch (Exception e) {
-                	
+                	e.printStackTrace();
                     return Layui.data("保存图片错误",1, 0, null);  
                 }    
             }
@@ -326,7 +326,7 @@ public class OrderService implements IOrderService {
 		User depathuser = userDao.findByUserId(depathUserId);
 		List<Order> orderList = orderDao.getOrderByIds(idList);
 		Map<String,String> data = new HashMap<String,String>();
-		Layui result = Layui.data("", 0, 0, null);
+		String msg = "";
 		for(Order order : orderList) {
 			if(order.getStatus() != OrderStatus.preOrder) {
 				continue;
@@ -348,10 +348,12 @@ public class OrderService implements IOrderService {
 			orderTemp.setTechnician(technicianId);
 			if(isSend) {
 				orderDao.updateOrderStatus(orderTemp);
-				result.put(order.getOrderNo(), "派送成功");
+				msg += orderTemp.getOrderNo()+":"+"派送成功";
+			}else {
+				msg += orderTemp.getOrderNo()+":"+"派送失败";
 			}
 		}
-		return result;
+		return Layui.data(msg, 0, 0, null);
 	}
 
 	@Override

@@ -349,7 +349,7 @@
 		    	  	return;
 		    	  }
 		    	  for(let i = 0;i<checkStatus.data.length;i++){
-		    		  ids = checkStatus.data[i].id+",";
+		    		  ids += checkStatus.data[i].id+",";
 		    	  }
 		    	  var userId = "";
 		    	  layer.open({
@@ -365,11 +365,15 @@
 					    },
 						yes:function(index, layero){
 							if(userId != ""&&userId != null){
-								$.ajaxSettings.async = false;//编辑的时候需要关闭异步才能赋值
-								$.post('depathOrders',{'ids':ids,'technicianId':userId},function(result){
-					     		  	layer.msg(result);
-					     	  	});
-								$.ajaxSettings.async = true;
+								$.ajax({
+					                type : "post",
+					                url : "depathOrders",
+					                async : false,
+					                data : {'ids':ids,'technicianId':userId},  // 你的formid
+					                success : function(data) {
+					                	layer.msg(data.msg);
+					                }
+					            });
 							}
 							$("#tableSearch").click();
 							layer.close(index);	        
@@ -388,7 +392,7 @@
 		                success : function(data) {
 		                	$("div#printIframe").html(data);
 		                }
-		            })
+		            });
 		    	  $("div#printIframe").printArea();
 		    	  $("div#printIframe").html('');
 		      break;
@@ -457,12 +461,15 @@
 	                	var imageUrl = order.imageUrls==null?"":order.imageUrls.split(";")
 	                	for(let index=0;index < imageUrl.length;index++){
 	                		var filename = imageUrl[index].substr(imageUrl[index].indexOf('\\')+1,imageUrl[index].indexOf('-')-1);
+	                		var dfilename = imageUrl[index].substr(imageUrl[index].indexOf('\\')+1,imageUrl[index].length);
+	                		filename +=imageUrl[index].substr(imageUrl[index].lastIndexOf('.'),imageUrl[index].length);
 	                		var tr = $(['<tr id="upload-edit-'+ index +'">'
 	  	          	      	  ,'<td style="display:none">'+imageUrl[index]+'</td>'
 	  	          	          ,'<td>'+ filename +'</td>'
 	  	          	          ,'<td>等待上传</td>'
 	  	          	          ,'<td>'
 	  	          	            ,'<button class="layui-btn layui-btn-xs layui-btn-danger" onclick="editDelteFile(this)">删除</button>'
+	  	          	            ,'<a href="download?path='+dfilename+'" class="layui-btn layui-btn-xs layui-btn-danger" target="_blank">下载</button>'
 	  	          	          ,'</td>'
 	  	          	          ,'</tr>'].join(''));
 	  	                  
@@ -724,6 +731,20 @@
 			var tr = $(button).parent().parent().remove();
 		    $("#deleteFile").val($("#deleteFile").val()==null?tr.children("td").eq(0).text():$("#deleteFile").val()+";"+tr.children("td").eq(0).text());
 		}
+		
+		function download(button){
+			var tr = $(button).parent().parent();
+			var filename = tr.children("td").eq(0).text();
+			console.log(tr.children("td").eq(0).text());
+			// 构造隐藏的form表单
+			var $form = $("#downloadForm");
+			// 添加提交参数
+			$form.find("input[name='path']").attr("value",filename);
+			// 提交表单
+			$form.submit();
+			return false;
+		}
+		
 		
 		
 	

@@ -1,12 +1,18 @@
 package com.xinyu.util;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.FileSystemResource;
@@ -78,7 +84,42 @@ public class FileUpDownLoadUtils {
         }
         return byteArr;
     }
-
+    
+    /**
+	 * 一般文件上传都会改名
+	 * 
+	 * @param file	要下载的文件
+	 * @param response
+	 */
+	public static void download(String path, HttpServletResponse response) {
+		try {
+			File file = new File(usrDir +"\\"+ path);
+			if (!file.exists()) {
+				response.setContentType("text/html;charset=utf-8");
+				response.getWriter().print("找不到指定的文件");
+			} else {
+				// 以流的形式下载文件。
+				InputStream fis = new BufferedInputStream(new FileInputStream(file));
+				byte[] buffer = new byte[fis.available()];
+				fis.read(buffer);
+				fis.close();
+				// 清空response
+				response.reset();
+				// 设置response的Header
+				response.addHeader("Content-Disposition", "attachment;filename="
+						+ new String(path.getBytes("GBK"), "ISO-8859-1"));
+				response.addHeader("Content-Length", "" + file.length());
+				OutputStream toClient = new BufferedOutputStream(response
+						.getOutputStream());
+				response.setContentType("application/octet-stream");
+				toClient.write(buffer);
+				toClient.flush();
+				toClient.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
     /**
      * 将输入流中的数据写入字节数组
      * 
