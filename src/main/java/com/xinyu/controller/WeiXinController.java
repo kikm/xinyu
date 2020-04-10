@@ -132,15 +132,15 @@ public class WeiXinController {
 		Order order = new Order();
 		List<OrderBean> total = null;
 		User loginUser = userService.getUserByOpenId(openId);
+		boolean iscs = false;
+		for(Role r : loginUser.getRoles()) {
+			if(r.getName().equals("customerService")) iscs = true;//账号有客服角色，展示所有
+		}
+		if(!iscs) {order.setUnit(loginUser.getUnit());}
 		List<OrderStatus> list = new ArrayList<OrderStatus>();
 		list.add(OrderStatus.OrderConfirmed);
 		if(pageBean.getPage() == 1) {
-			if(type == "customerService") {
-				boolean iscs = false;
-				for(Role r : loginUser.getRoles()) {
-					if(r.getName().equals("customerService")) iscs = true;//账号有客服角色，展示所有
-				}
-				if(!iscs) {order.setUnit(loginUser.getUnit());}
+			if(type == "customer") {
 				list.add(OrderStatus.QuotedPrice);
 				list.add(OrderStatus.Finish);
 				total = orderService.getOrderListByStatusList(pageBean, order, list);

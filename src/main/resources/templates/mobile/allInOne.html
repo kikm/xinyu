@@ -265,7 +265,7 @@
 		$.ajax({
     		url:"wx/getMobileData",    //请求的url地址
     		async:false,//请求是否异步，默认为异步，这也是ajax重要特性
-    		data:{"status":status,"limit":2,"page":page,'openId':openId,'type':'customerService'},    //参数值
+    		data:{"status":status,"limit":2,"page":page,'openId':openId,"type":"customer"},    //参数值
     		type:"POST",   //请求方式
     		success:function(data){
 				var t1 = 0;
@@ -333,7 +333,7 @@
 			$.ajax({
     				url:"wx/getMobileData",    //请求的url地址
     				async:false,
-    				data:{"status":status,"limit":2,"page":page,'openId':openId,'type':'customerService'},    //参数值
+    				data:{"status":status,"limit":2,"page":page,'openId':openId,"type":"customer"},    //参数值
     				type:"POST",   //请求方式
     				success:function(data){
 						if(data.length<1){

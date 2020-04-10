@@ -186,6 +186,8 @@
             	}, 2000);
           	}else{
 				formData.append('report',$value);
+				$tooltips.css('display','block');
+				$tooltips.text('数据提交中');
 				$.ajax({
     				url:"maintenanceFeedback",    //请求的url地址
     				async:false,
@@ -203,7 +205,6 @@
 							$tooltips.addClass('weui-toptips_warn');
 							$('#feedbackButton').removeClass('weui-btn_disabled');
 						}
-						$tooltips.css('display','block');
 						setTimeout(function () {
   							$tooltips.css('display','none');
  						}, 2000);
