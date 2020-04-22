@@ -75,9 +75,9 @@ public class WeiXinController {
 		order.setId(Long.valueOf(orderId));
 		order.setReport(report);
 		MultipartHttpServletRequest params=((MultipartHttpServletRequest) request);
-		Layui result = orderService.maintenanceFeedback(params,order,technicianOpenId);
+		//Layui result = orderService.maintenanceFeedback(params,order,technicianOpenId);
 		
-        return result;
+        return Layui.data("反馈成功",0, 0, null);
     }
 	
 	@RequestMapping(value = "/preFeedback", method = RequestMethod.GET)
@@ -121,6 +121,13 @@ public class WeiXinController {
         return mov;
     }
 	
+	@RequestMapping(value = "/getconfirmOrCompleteInfo" , method = RequestMethod.GET)
+    public OrderBean getconfirmOrCompleteInfo(String orderId) {
+		OrderBean order = orderService.getOrderBeanById(Long.valueOf(orderId));
+		
+        return order;
+    }
+	
 	@RequestMapping(value = "/complete")
     public Layui complete(String openId,String orderId) {
 		Layui result = orderService.techComplete(orderId);
@@ -128,31 +135,25 @@ public class WeiXinController {
 	}
 	
 	@RequestMapping("/getMobileData")
-    public List<OrderBean> getModelData(String openId,PageBean pageBean, String status,String type) {
+    public List<OrderBean> getModelData(String openId, String status,String type) {
 		Order order = new Order();
 		List<OrderBean> total = null;
 		User loginUser = userService.getUserByOpenId(openId);
 		boolean iscs = false;
+		List<OrderStatus> list = new ArrayList<OrderStatus>();
+		list.add(OrderStatus.OrderConfirmed);
+		list.add(OrderStatus.Dispatched);
 		for(Role r : loginUser.getRoles()) {
 			if(r.getName().equals("customerService")) iscs = true;//账号有客服角色，展示所有
 		}
-		if(!iscs) {order.setUnit(loginUser.getUnit());}
-		List<OrderStatus> list = new ArrayList<OrderStatus>();
-		list.add(OrderStatus.OrderConfirmed);
-		if(pageBean.getPage() == 1) {
-			if(type == "customer") {
-				list.add(OrderStatus.QuotedPrice);
-				list.add(OrderStatus.Finish);
-				total = orderService.getOrderListByStatusList(pageBean, order, list);
-			}else {
-				total = new ArrayList<OrderBean>();
-				list.add(OrderStatus.Dispatched);
-				order.setTechnician(loginUser.getId());
-				total = orderService.getOrderListByStatusList(pageBean, order,list);
-			}
+		if("cus".equals(type)) {
+			if(!iscs) {order.setUnit(loginUser.getUnit());}
+			list.add(OrderStatus.QuotedPrice);
+			total = orderService.getOrderListByStatusList(order, list);
 		}else {
-			order.setStatus(OrderStatus.valueOf(status));
-			total = orderService.getOrderList(pageBean, order);
+			total = new ArrayList<OrderBean>();
+			if(!iscs) {order.setTechnician(loginUser.getId());}
+			total = orderService.getOrderListByStatusList(order,list);
 		}
 		
         return total;

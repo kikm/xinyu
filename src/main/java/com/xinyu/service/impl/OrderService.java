@@ -80,9 +80,9 @@ public class OrderService implements IOrderService {
 	}
 	
 	@Override
-	public List<OrderBean> getOrderListByStatusList(PageBean pageBean,Order order,List<OrderStatus> statusList) {
+	public List<OrderBean> getOrderListByStatusList(Order order,List<OrderStatus> statusList) {
 		
-		List<Order> orderList = orderDao.getOrderCriteriaQueryByStatusList(order, pageBean,statusList);
+		List<Order> orderList = orderDao.getOrderCriteriaQueryByStatusList(order,statusList);
 		List<OrderBean> data = this.OrderToOrderBean(orderList);
 		
 		return data;

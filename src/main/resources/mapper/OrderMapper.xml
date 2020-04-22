@@ -116,9 +116,7 @@
 			<if test="order.technician!=null">
 				and technician=#{order.technician}
 			</if>
-        	
-			ORDER BY ot.order_no
-			limit #{pageBean.start},#{pageBean.end}) AS o
+			ORDER BY ot.order_no) as o
         left join t_device d on d.id = o.device_id
         left join t_unit u on u.id = o.unit_id
         left join t_order_part op on op.order_id = o.id

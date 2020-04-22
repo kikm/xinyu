@@ -79,18 +79,21 @@ public class UserController {
 			User userOri = userService.getUserByOpenId(openID); //
 			//WeiXinUtil.getUserInfo(openID); 
 			if(userOri != null) { 
-				mov = new ModelAndView("/mobile/orderListMobile");//已绑定账号 
+				mov = new ModelAndView("/mobile/orderList");//已绑定账号 
 			} 
 			mov.addObject("user",userOri == null?new User():userOri); 
 			mov.addObject("openId", openID); 
+			mov.addObject("type", "cus");
 		}
-		//mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");
+		//mov = new ModelAndView("/mobile/orderList");//已绑定账号
+		mov.addObject("type","cus"); mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");//oCnlEuB6eJ9dhV-ubMV1uP2_r7iY
+		
 		return mov;
 	}
 	
 	@RequestMapping(value = "/mobileTenLogin", method = RequestMethod.GET)
     public ModelAndView mobileTenLoginAuthentication(String code) {
-		ModelAndView mov = new ModelAndView("/mobile/allInOneTen"); //未绑定账号\客户页面
+		ModelAndView mov = new ModelAndView("/mobile/allInOne"); //未绑定账号\客户页面
 		String openID = null; 
 		JSONObject jsonOpenID = null; 
 		if(code != null){
@@ -99,12 +102,16 @@ public class UserController {
 			User userOri = userService.getUserByOpenId(openID); //
 			//WeiXinUtil.getUserInfo(openID); 
 			if(userOri != null) { 
-				mov = new ModelAndView("/mobile/pendingOrderList");//已绑定账号 
+				mov = new ModelAndView("/mobile/orderList");//已绑定账号 
 			} 
+			mov.addObject("type", "ten");
 			mov.addObject("user",userOri == null?new User():userOri); 
 			mov.addObject("openId", openID); 
 		}
-		//mov.addObject("openId", "oCnlEuB6eJ9dhV-ubMV1uP2_r7iY");
+		
+		 //mov = new ModelAndView("/mobile/orderList");//已绑定账号
+		 mov.addObject("type","ten"); mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");
+		 
 
 		return mov;
 	}

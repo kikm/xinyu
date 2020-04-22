@@ -40,5 +40,5 @@ public interface OrderDao {
 
 	public Order getDepathAndTechUser(Long orderId);
 
-	public List<Order> getOrderCriteriaQueryByStatusList(Order order, PageBean pageBean, List<OrderStatus> list);
+	public List<Order> getOrderCriteriaQueryByStatusList(Order order, List<OrderStatus> list);
 }
