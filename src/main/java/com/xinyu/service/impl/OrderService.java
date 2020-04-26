@@ -236,9 +236,11 @@ public class OrderService implements IOrderService {
         			order.setCreateDate(new Date());
         		}
         		orderDao.saveOrUpdateOrder(order);
-        		for(OrderPart p : order.getPartList()) {
-        			p.setOrderNo(order.getOrderNo());
-        			p.setOrderId(order.getId());
+        		if(order.getPartList() != null) {
+        			for(OrderPart p : order.getPartList()) {
+        				p.setOrderNo(order.getOrderNo());
+        				p.setOrderId(order.getId());
+        			}
         		}
         		if(order.getUpkeep() != null) {
         			if(isNew) {
@@ -301,7 +303,7 @@ public class OrderService implements IOrderService {
 			FileUpDownLoadUtils.deleteFile(deleteFile);
 		}
         
-		return Layui.data("保存成功",0, 0, null);
+		return Layui.data("保存成功",0, order.getId().intValue(), null);
 	}
 
 	@Override
@@ -324,9 +326,10 @@ public class OrderService implements IOrderService {
 			return Layui.data("技术人员未绑定账号，无法派单", 1, 0, null);
 		}
 		User depathuser = userDao.findByUserId(depathUserId);
+		if(depathuser == null) depathuser = userDao.findByOpenId(depathUserId);
 		List<Order> orderList = orderDao.getOrderByIds(idList);
 		Map<String,String> data = new HashMap<String,String>();
-		String msg = "";
+		String msg = "派送成功";
 		for(Order order : orderList) {
 			if(order.getStatus() != OrderStatus.preOrder) {
 				continue;

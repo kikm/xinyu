@@ -54,6 +54,15 @@
 </fieldset>	
  
 <form class="layui-form" id="orderForm" lay-filter="orderForm" method="POST" enctype='multipart/form-data'>
+	
+	<div class="layui-form-item">
+  	<div class="layui-inline">
+      <label class="layui-form-label">上传解析</label>
+      <div class="layui-input-inline">
+        <input type="file" name="file" id="test20">
+      </div>
+    </div>
+  </div>
   <div class="layui-form-item">
   	<div class="layui-inline">
     	<label class="layui-form-label">工单号</label>
@@ -559,6 +568,20 @@
       		  });
 		    }
 		  });
+		  
+		  upload.render({
+			 elem: '#test20'
+			 ,url: '../wx/baiduOCR' //改成您自己的上传接口
+			 ,done: function(res){
+			  form.val('orderForm', {//filter
+					"contact": res.contact // "name": "value"
+				    ,"address": res.address
+				    ,"phone": res.phone
+				    ,"facility": res.facility
+				    ,"description": res.description
+				});
+			}
+		});
 		  
 		  //创建一个编辑器
 		  var editIndex = layedit.build('LAY_demo_editor');

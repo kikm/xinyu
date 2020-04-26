@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,viewport-fit=cover">
+    <title>新域公司</title>
+    <link rel="stylesheet" href="../style/weui/weui.css"/>
+    <link rel="stylesheet" href="../style/weui/example.css"/>
+</head>
+<body ontouchstart>
+  <input type="hidden" id="hidopenId" name="openId" th:value="${openId}">
+  <input type="hidden" id="orderNo" name="orderNoTemp" th:value="${orderNo}">
+  <input type="hidden" id="orderId" value="">
+  <div class="weui-toptips weui-toptips_warn js_tooltips"></div>
+
+  <div class="container js_container" id="container">
+  </div>
+    
+<div style="display:none">
+	<input class="unitList" th:each="unit:${units}" th:value="${unit.id}" th:name="${unit.name}">
+</div>
+<div style="display:none" id="depathU">
+	<div th:each="depath:${depathList}">
+	<label class="weui-cell weui-cell_active weui-check__label" th:for="${depath.id}">
+    	<div class="weui-cell__bd">
+        	<p th:text="${depath.name}"></p>
+        </div>
+        <div class="weui-cell__ft">
+            	<input type="radio" class="weui-check" name="technicianId" th:value="${depath.id}" th:id="${depath.id}" />
+        	<span class="weui-icon-checked"></span>
+        </div>
+	</label>
+	</div>
+</div>
+<script type="text/html" id="tpl_home">
+<div class="page">
+  <div class="weui-form">
+    <div class="weui-form__text-area">
+      <h1 class="weui-form__title">
+		<img src="../images/xinyulogo.jpg" alt="XinYu" height="21px" />&nbsp;新域
+	  </h1>
+      <div class="weui-form__desc">新建工单</div>
+    </div>
+	<form id='feedbackForm' enctype='multipart/form-data' method='POST'>
+    <div class="weui-form__control-area">
+      <div class="weui-cells__group weui-cells__group_form">
+        <div class="weui-cells__title"></div>
+        <div class="weui-cells weui-cells_form">
+          <div class="weui-cell weui-cell_active weui-cell_readonly">
+            <div class="weui-cell__hd"><label class="weui-label">工单号</label></div>
+            <div class="weui-cell__bd">
+                <input name="orderNo" class="weui-input" readonly>
+            </div>
+          </div>
+		  <div class="weui-cell weui-cell_active">
+            <div class="weui-cell weui-cell_active weui-cell_access weui-cell_select weui-cell_select-after" style="padding-left: 1px;">
+            	<div class="weui-cell__hd">单位</div>
+            	<div class="weui-cell__bd"  data="" style="padding-left: 58px;" id="showPicker">请选择</div>
+				<input type="hidden" name="unit.id">
+          </div>
+          </div>
+		  <div class="weui-cell weui-cell_active weui-cell_switch">
+                <div class="weui-cell__bd">加急</div>
+                <div class="weui-cell__ft">
+                    <label for="switchCP" class="weui-switch-cp">
+                        <input id="switchCP" name="isUrgent" class="weui-switch-cp__input" type="checkbox">
+                        <div class="weui-switch-cp__box"></div>
+                    </label>
+                </div>
+            </div>
+          <div class="weui-cell weui-cell_active">
+            <div class="weui-cell__hd"><label class="weui-label">联系人</label></div>
+            <div class="weui-cell__bd">
+                <input name="contact" class="weui-input">
+            </div>
+          </div>
+          <div class="weui-cell weui-cell_active">
+            <div class="weui-cell__hd"><label class="weui-label">联系电话</label></div>
+            <div class="weui-cell__bd">
+                <input name="phone" class="weui-input" type="number" pattern="[0-9]*">
+            </div>
+          </div>
+		  <div class="weui-cell weui-cell_active">
+            <div class="weui-cell__hd"><label class="weui-label">设备名称</label></div>
+            <div class="weui-cell__bd">
+                <input name="facility" class="weui-input" >
+            </div>
+          </div>
+		  <div class="weui-cell weui-cell_active">
+            <div class="weui-cell__hd"><label class="weui-label">设备地址</label></div>
+            <div class="weui-cell__bd">
+                <input name="address" class="weui-input">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="weui-cells__group weui-cells__group_form">
+        <div class="weui-cells__title" style="font-size:17px;color: rgba(0, 0, 0);padding-left: 19px;">故障描述</div>
+        <div class="weui-cells weui-cells_form">
+            <div class="weui-cell">
+                <div class="weui-cell__bd">
+                    <textarea name="description" class="weui-textarea" placeholder="请输入文本" rows="3"></textarea>
+                    <div class="weui-textarea-counter"><span>0</span>/200</div>
+                </div>
+            </div>
+        </div>
+		</form>
+		<div class="weui-cells weui-cells_form" id="uploader">
+     <div class="weui-cell">
+         <div class="weui-cell__bd">
+             <div class="weui-uploader">
+                 <div class="weui-uploader__hd">
+                     <p class="weui-uploader__title">图片上传解析</p>
+                     <div class="weui-uploader__info"><span id="uploadCount">0</span>/1</div>
+                 </div>
+                 <div class="weui-uploader__bd">
+                     <ul class="weui-uploader__files" id="uploaderFiles"></ul>
+                     <div class="weui-uploader__input-box">
+                         <input id="uploaderInput" class="weui-uploader__input" type="file" accept="image/*" multiple="" />
+                     </div>
+                 </div>
+             </div>
+         </div>
+     </div>
+	<div class="weui-form__opr-area">
+      <a class="weui-btn weui-btn_primary weui-btn_disabled" href="javascript:" id="showTooltips">确定</a>
+    </div>
+ </div>
+
+
+</div>
+
+<script type="text/javascript">
+    $(function(){
+		var formData = new FormData($( "#feedbackForm" )[0]); 
+		formData.append('openId',$('#hidopenId').val());
+		$("input[name='orderNo']").val($("#orderNo").val());
+		var $textarea = $('.weui-textarea');
+		var $tooltips = $('.js_tooltips');
+		var uploadCount = 0;
+		weui.uploader('#uploader', {
+   			url: 'baiduOCR',
+   			auto: true,
+   			type: 'file',
+   			fileVal: 'file',
+   			compress: {
+       			width: 1600,
+       			height: 1600,
+       			quality: .8
+   			},
+   			onBeforeQueued: function(files) {
+       			// `this` 是轮询到的文件, `files` 是所有文件
+       			if(["image/jpg", "image/jpeg", "image/png", "image/gif"].indexOf(this.type) < 0){
+           			weui.alert('请上传图片');
+           			return false; // 阻止文件添加
+       			}
+       			if(this.size > 10 * 1024 * 1024){
+           			weui.alert('请上传不超过10M的图片');
+           			return false;
+       			}
+       			if (files.length > 1) { // 防止一下子选择过多文件
+           			weui.alert('最多只能上传1张图片，请重新选择');
+           			return false;
+       			}
+       			if (uploadCount + 1 > 1) {
+           			weui.alert('最多只能上传1张图片');
+           			return false;
+       			}
+       			++uploadCount;
+				$('#uploadCount').text(uploadCount);
+       			// return true; // 阻止默认行为，不插入预览图的框架
+   			},
+   			onQueued: function(){
+       			console.log(this);
+				
+       			// console.log(this.status); // 文件的状态：'ready', 'progress', 'success', 'fail'
+       			// console.log(this.base64); // 如果是base64上传，file.base64可以获得文件的base64
+
+       			// this.upload(); // 如果是手动上传，这里可以通过调用upload来实现；也可以用它来实现重传。
+       			// this.stop(); // 中断上传
+
+       			// return true; // 阻止默认行为，不显示预览图的图像
+   			},
+   			onBeforeSend: function(data, headers){
+       			console.log(this, data, headers);
+       			// $.extend(data, { test: 1 }); // 可以扩展此对象来控制上传参数
+       			// $.extend(headers, { Origin: 'http://127.0.0.1' }); // 可以扩展此对象来控制上传头部
+
+       			// return false; // 阻止文件上传
+   			},
+   			onProgress: function(procent){
+       			console.log(this, procent);
+       			// return true; // 阻止默认行为，不使用默认的进度显示
+   			},
+   			onSuccess: function (ret) {
+				console.log(ret);
+       			$("input[name='phone']").val(ret.phone);
+				$("input[name='contact']").val(ret.contact);
+				$("input[name='address']").val(ret.address);
+				$("textArea[name='description']").val(ret.description);
+				$("textArea[name='description']").trigger("input");
+				$("input[name='facility']").val(ret.facility);
+       			// return true; // 阻止默认行为，不使用默认的成功态
+   			},
+   			onError: function(err){
+       			console.log(this, err);
+       			// return true; // 阻止默认行为，不使用默认的失败态
+   			}
+		});
+
+		$textarea.on('input', function(){
+        	var $value = $textarea.val();
+			$('.weui-textarea-counter').children("span").eq(0).text($value.length);
+        	if ($value){
+          		$('#showTooltips').removeClass('weui-btn_disabled');
+        	}else{
+          		$('#showTooltips').addClass('weui-btn_disabled');
+       		}
+      	});
+
+		$('#showPicker').on('click', function () {
+			data = [];
+			$(".unitList").each(function(){
+				var jsonObj={
+      				'label':$(this).attr("name"),
+      				'value' :$(this).val()
+
+				};
+				data.push(jsonObj);
+			});
+        	weui.picker(data, {
+            	onChange: function (result) {
+                	
+            	},
+            	onConfirm: function (result) {
+                	$('#showPicker').html(result[0].label);
+					$('input[name="unit.id"]').val(result[0].value);
+            	},
+            	title: '选择单位'
+        	});
+    	});
+
+		$('#showTooltips').on('click', function(){
+        	if ($(this).hasClass('weui-btn_disabled')) return;
+			formData = new FormData($( "#feedbackForm" )[0]);
+			$(this).addClass('weui-btn_disabled');
+			var button = $(this);
+          	var $value = $textarea.val();
+                
+          	if($value.length == ''){
+            	$cell.addClass('weui-cell_warn');
+            	$tooltips.fadeIn(100);
+            	setTimeout(function () {
+              		$tooltips.fadeOut(100);
+            	}, 2000);
+          	}else{
+				//formData.append('description',$value);
+				$tooltips.css('display','block');
+				$tooltips.text('数据提交中');
+				$.ajax({
+    				url:"saveOrUpdateOrder",    //请求的url地址
+    				async:false,
+    				type:"POST",   //请求方式
+    				data:formData,    //参数值
+					contentType: false,   //jax 中 contentType 设置为 false 是为了避免 JQuery 对其操作，从而失去分界符，而使服务器不能正常解析文件
+                	processData: false,
+    				success:function(req){
+						$tooltips.text(req.msg);
+						if(req.code == 0){
+							$tooltips.removeClass('weui-toptips_warn');
+							$tooltips.addClass('weui-toptips_success');
+							$("#orderId").val(req.count);
+							window.pageManager.go('depath');
+						}else {
+							$tooltips.removeClass('weui-toptips_success');
+							$tooltips.addClass('weui-toptips_warn');
+							$('#showTooltips').removeClass('weui-btn_disabled');
+						}
+						setTimeout(function () {
+  							$tooltips.css('display','none');
+ 						}, 2000);
+    				},
+				});
+          	}
+
+		});
+
+
+	});
+</script>
+</script>
+
+<script type="text/html" id="tpl_depath">
+<div class="page">
+  <div class="weui-form">
+    <div class="weui-form__text-area">
+      <h2 class="weui-form__title">选择技术员派单</h2>
+    </div>
+    <div class="weui-form__control-area">
+      <div class="weui-cells__group weui-cells__group_form">
+        <div class="weui-cells weui-cells_radio" id="weui-cells_radio">
+        </div>
+      </div>
+    </div>
+    <div class="weui-form__opr-area">
+      <a class="weui-btn weui-btn_primary" href="javascript:" id="showTooltipsDepath">确定</a>
+    </div>
+  </div>
+  <div id="js_toast" style="display: none;">
+      <div class="weui-mask_transparent"></div>
+      <div class="weui-toast">
+          <!--<i class="weui-icon-success-no-circle weui-icon_toast"></i>-->
+          <p class="weui-toast__content">已完成</p>
+      </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+    $(function(){
+        var $tooltips = $('.js_tooltips');
+      	var $toast = $('#js_toast');
+		$("#weui-cells_radio").append($("#depathU").html());
+		$("input[type='radio']").eq(0).click();
+
+        $('#showTooltipsDepath').on('click', function(){
+			$('#showTooltipsDepath').addClass('weui-btn_disabled');
+			var did = $("input[name='technicianId']").val();
+			var openId = $('#hidopenId').val();
+			var orderId = $('#orderId').val();
+            $.ajax({
+    				url:"depathOrders",    //请求的url地址
+    				async:false,
+    				type:"POST",   //请求方式
+    				data:{"technicianId":did,"ids":orderId+",","openId":openId},    //参数值
+    				success:function(req){
+						$toast.find(".weui-toast__content").text(req.msg);
+						console.log(req.msg);
+						if(req.code == 0){
+							$tooltips.removeClass('weui-toptips_warn');
+							$tooltips.addClass('weui-toptips_success');
+						}else {
+							$tooltips.removeClass('weui-toptips_success');
+							$tooltips.addClass('weui-toptips_warn');
+							$('#showTooltipsDepath').removeClass('weui-btn_disabled');
+						}
+						setTimeout(function () {
+  							$tooltips.css('display','none');
+ 						}, 2000);
+    				},
+				});
+
+            $toast.fadeIn(100);
+            setTimeout(function () {
+              $toast.fadeOut(100);
+            }, 2000);
+        });
+    });
+</script>
+</script>
+    
+    <script src="../scripts/weui/zepto.min.js"></script>
+    <script src="../scripts/weui/weui.min.js"></script>
+    <script src="../scripts/weui/example.js"></script>
+</body>
+</html>

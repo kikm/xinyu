@@ -2,25 +2,34 @@ package com.xinyu.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.baidu.aip.ocr.AipOcr;
+import com.xinyu.Constance;
 import com.xinyu.bean.Layui;
 import com.xinyu.bean.OrderBean;
 import com.xinyu.bean.OrderStatus;
-import com.xinyu.bean.PageBean;
 import com.xinyu.model.Order;
 import com.xinyu.model.Role;
+import com.xinyu.model.Unit;
 import com.xinyu.model.User;
 import com.xinyu.service.IOrderService;
 import com.xinyu.service.IUserService;
@@ -75,9 +84,9 @@ public class WeiXinController {
 		order.setId(Long.valueOf(orderId));
 		order.setReport(report);
 		MultipartHttpServletRequest params=((MultipartHttpServletRequest) request);
-		//Layui result = orderService.maintenanceFeedback(params,order,technicianOpenId);
+		Layui result = orderService.maintenanceFeedback(params,order,technicianOpenId);
 		
-        return Layui.data("反馈成功",0, 0, null);
+        return result;
     }
 	
 	@RequestMapping(value = "/preFeedback", method = RequestMethod.GET)
@@ -158,5 +167,113 @@ public class WeiXinController {
 		
         return total;
     }
+	
+	@RequestMapping(value = "/startOrder", method = RequestMethod.GET)
+    public ModelAndView startOrder(String code) {
+		ModelAndView mov = new ModelAndView("/mobile/startOrder"); //未绑定账号\客户页面
+		String openID = null; 
+		net.sf.json.JSONObject jsonOpenID = null; 
+		List<Unit> unitList = orderService.getUnit();
+		List<User> orderDepathList = orderService.getDepathList();
+		Layui orderNo = orderService.getNewOrderNo();
+		mov.addObject("units", unitList);
+		mov.addObject("depathList", orderDepathList);
+		mov.addObject("orderNo", orderNo.get("msg"));
+		if(code != null){
+			jsonOpenID = WeiXinUtil.getOpenID(code); 
+			openID =  (String)jsonOpenID.get("openid");//"oCnlEuFjrHbyecP-JwXMeT0Jcoh8";
+			mov.addObject("openId", openID); 
+		}
+		
+		mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");
+
+		return mov;
+	}
+	
+	@RequestMapping("/saveOrUpdateOrder")
+	public Layui saveOrUpdateOrder(HttpServletRequest request, Order order, String deleteFile, String deleteOrderPart) {
+		MultipartHttpServletRequest params = ((MultipartHttpServletRequest) request);
+		Layui result = orderService.saveOrUpdateOrder(params, order, deleteFile, deleteOrderPart);
+
+		return result;
+	}
+	
+	@RequestMapping("/depathOrders")
+	public Layui depathOrder(String ids, String technicianId,String openId) {
+		Layui result = orderService.depathOrder(ids, technicianId, openId);
+
+		return result;
+	}
+	
+	@RequestMapping("/baiduOCR")
+    public Order baiduOCR(HttpServletRequest request) {
+		// 初始化一个AipOcr
+	    AipOcr client = new AipOcr(Constance.BAIDUOCR_APP_ID, Constance.BAIDUOCR_API_KEY, Constance.BAIDUOCR_SECRET_KEY);
+	
+	    // 可选：设置网络连接参数
+	    client.setConnectionTimeoutInMillis(2000);
+	    client.setSocketTimeoutInMillis(60000);
+	
+	    // 可选：设置代理服务器地址, http和socket二选一，或者均不设置
+	    //client.setHttpProxy("proxy_host", proxy_port);  // 设置http代理
+	    //client.setSocketProxy("proxy_host", proxy_port);  // 设置socket代理
+	
+	    // 可选：设置log4j日志输出格式，若不设置，则使用默认配置
+	    // 也可以直接通过jvm启动参数设置此环境变量
+	    //System.setProperty("aip.log4j.conf", "path/to/your/log4j.properties");
+	    MultipartHttpServletRequest params=((MultipartHttpServletRequest) request);
+	    List<MultipartFile> files = params.getFiles("file");   
+        MultipartFile file = null; 
+        file = files.get(0);    
+        byte[] bytes = null;
+        if (!file.isEmpty()) {    
+        	try {    
+        		bytes = file.getBytes();    
+            } catch (Exception e) {
+                	e.printStackTrace();
+                    return null;  
+            }    
+        }
+	    // 调用接口
+	    JSONObject res = client.basicGeneral(bytes, new HashMap<String, String>());
+	    JSONArray words_result = (JSONArray)res.get("words_result");
+	    System.out.println(words_result.toString());
+	    Order order = new Order();
+	    String phone = "";
+	    String contact = "";
+	    String description = "";
+	    String address = "";
+	    String facility = "";
+	    for(int i = 0;i<words_result.length();i++) {
+	    	Pattern digit = Pattern.compile("^-?\\d+(\\.\\d+)?$");
+	    	Pattern name = Pattern.compile("[\u4E00-\u9FA5]{2,5}(?:·[\u4E00-\u9FA5]{2,5})*");
+	    	String words = words_result.getJSONObject(i).get("words").toString();
+	        if (digit.matcher(words).matches()) {
+	        	phone = words;
+	        }
+	        if (words.indexOf("棱")!=-1||words.indexOf("公司")!=-1||words.indexOf("楼")!=-1||words.indexOf("院")!=-1||words.indexOf("房")!=-1||words.indexOf("堂")!=-1||words.indexOf("厦")!=-1) {
+	        	if(words.indexOf("棱")!=-1||words.indexOf("空")!=-1) {
+	        		words = words.replaceAll("棱", "楼");
+	        		words = words.replaceAll("空", "室");
+	        	}
+	        	address = words;
+	        }
+	        if (name.matcher(words).matches()&&words.length()<4&&words.indexOf("修人")==-1) {
+	        	contact = words;
+	        }
+	        if (words.indexOf("描")!=-1||words.indexOf("述")!=-1) {
+	        	description = words_result.getJSONObject(i+1).get("words").toString();
+	        }
+	        if (words.indexOf("名称")!=-1) {
+	        	facility = words_result.getJSONObject(i+1).get("words").toString();
+	        }
+	    }
+	    order.setContact(contact);
+	    order.setPhone(phone);
+	    order.setDescription(description);
+	    order.setAddress(address);
+	    order.setFacility(facility);
+	    return order;
+	}
 
 }

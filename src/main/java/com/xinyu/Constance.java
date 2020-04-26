@@ -16,6 +16,10 @@ public class Constance {
 	public static final String REDIRECT_INDEX_PAGE="redirect:index";
 	public static final String USER="loginUser";
 	
+	public static final String BAIDUOCR_APP_ID = "19586750";
+    public static final String BAIDUOCR_API_KEY = "HtGDo6ZG3OWYDjoZ5w9odhDw";
+    public static final String BAIDUOCR_SECRET_KEY = "83UVGfq5bWwUrlXG9H7VM3HGsOTpzMaK";
+	
 	public static final String EFFECT_Config="effectConfig";
 	
 	public static final String LOCALE = "locale";//国家化 语言环境 中文：zh_CN 英文：en_US

@@ -15,7 +15,6 @@ import com.xinyu.Constance;
 import com.xinyu.bean.Layui;
 import com.xinyu.bean.MenuBean;
 import com.xinyu.bean.PageBean;
-import com.xinyu.model.Device;
 import com.xinyu.model.Unit;
 import com.xinyu.model.User;
 import com.xinyu.service.IMenuService;
@@ -115,6 +114,8 @@ public class UserController {
 
 		return mov;
 	}
+	
+	
 	
 	@RequestMapping("/userList")
     public ModelAndView getUserList() {

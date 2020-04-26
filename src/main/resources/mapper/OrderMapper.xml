@@ -184,7 +184,7 @@
 	            <if test="order.imageUrls != null ">image_urls,</if>  
 	            <if test="order.upkeep != null ">upkeep,</if>  
 	            <if test="order.completeDate != null ">ts_user_complete,</if>  
-	            <if test="order.device.id != null ">device_id,</if> 
+	            <if test="order.device != null and order.device.id != null ">device_id,</if> 
 	            <if test="order.unit.id != null ">unit_id,</if>
 	            <if test="order.isUrgent != null ">isUrgent,</if>
 	            <if test="order.confirmUser != null ">confirm_user,</if>
@@ -205,7 +205,7 @@
 	            <if test="order.imageUrls != null ">#{order.imageUrls},</if>  
 	            <if test="order.upkeep != null ">#{order.upkeep},</if>  
 	            <if test="order.completeDate != null ">#{order.completeDate},</if>  
-	            <if test="order.device.id != null ">#{order.device.id},</if> 
+	            <if test="order.device != null and order.device.id != null ">#{order.device.id},</if> 
 	            <if test="order.unit.id != null ">#{order.unit.id},</if> 
 	            <if test="order.isUrgent != null ">#{order.isUrgent},</if>  
 	            <if test="order.confirmUser != null ">#{order.confirm_user},</if>
