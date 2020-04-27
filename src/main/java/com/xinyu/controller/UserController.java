@@ -133,8 +133,8 @@ public class UserController {
 	
 	@RequestMapping("/saveOrUpdateUser")
 	@ResponseBody
-    public Layui saveOrUpdateUser(User d,String addRoles) {
-		Layui result = userService.saveOrUpdateUser(d, addRoles);
+    public Layui saveOrUpdateUser(User d,String addRoles,String oldid) {
+		Layui result = userService.saveOrUpdateUser(d, addRoles,oldid);
 		
         return result;
     }

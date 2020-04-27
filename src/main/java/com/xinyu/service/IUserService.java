@@ -9,7 +9,7 @@ public interface IUserService {
 
 	public User getUserByOpenId(String openID);
 
-	public Layui saveOrUpdateUser(User d, String deleteRole);
+	public Layui saveOrUpdateUser(User d, String deleteRole,String oldid);
 
 	public Layui deleteUser(String id);
 

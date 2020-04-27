@@ -38,7 +38,7 @@
         from t_menu m 
         left join t_role_menu rm on m.id=rm.menu_id 
         left join t_role_user ru on ru.role_id=rm.role_id
-        WHERE m.menu_level > 0 
+        WHERE m.menu_level > 0 and enabled = 1
         <if test="userId!=null">
 	        and ru.user_id= #{userId}  
         </if>

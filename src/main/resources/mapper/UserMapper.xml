@@ -139,13 +139,14 @@
     </insert>
     
     <insert id="saveOrUpdateUser" useGeneratedKeys="true" keyProperty="id" parameterType="com.xinyu.model.User">  
-	        insert into t_user ( id, user_name, unit_id, password, phone ) values 
-	        (#{user.id},#{user.name},#{user.unit.id},#{user.password},#{user.telephone})
+	        insert into t_user ( id, user_name, unit_id, password, phone,wx_openID ) values 
+	        (#{user.id},#{user.name},#{user.unit.id},#{user.password},#{user.telephone},#{user.openID})
 	        ON DUPLICATE KEY UPDATE
 	        user_name =VALUES(user_name)
 	        ,unit_id =VALUES(unit_id)
 	        ,password =VALUES(password)
 	        ,phone =VALUES(phone)
+	        ,wx_openID =VALUES(wx_openID)
 	</insert> 
 	
 	<delete id="deleteUserRole">

@@ -45,6 +45,8 @@
       <label class="layui-form-label required">ID</label>
       <div class="layui-input-inline">
         <input type="text" name="id" autocomplete="off" class="layui-input">
+        <input type="hidden" name="oldid" autocomplete="off" class="layui-input">
+        <input type="hidden" name="openID" autocomplete="off" class="layui-input">
       </div>
     </div>
     <div class="layui-inline">
@@ -173,8 +175,10 @@
 	                	form.val('userForm', {//filter
 	                		"name": user.name
 	                		,"id": user.id
+	                		,"oldid": user.id
 	                		,"password": user.password
 	                		,"telephone": user.telephone
+	                		,"openID": user.openID
 	    				});
 	                	$("select[name='unit.id']").val(user.unit.id);
 	                	form.render("select");

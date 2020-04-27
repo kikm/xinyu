@@ -114,9 +114,12 @@ public class UserService implements UserDetailsService,IUserService {
 
 	@Override
 	@Transactional
-	public Layui saveOrUpdateUser(User d,String roles) {
+	public Layui saveOrUpdateUser(User d,String roles,String oldid) {
 		synchronized(d) {
         	try {
+        		if(StringUtils.isNotBlank(oldid)&&!d.getId().equals(oldid)) {
+        			userDAO.deleteUser(oldid);
+        		}
         		userDAO.saveOrUpdateUser(d);
         		userDAO.deleteUserRole(d.getId());
         		List<Long> roleIdList = new ArrayList<Long>();
