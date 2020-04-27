@@ -351,9 +351,9 @@ public class OrderService implements IOrderService {
 			orderTemp.setTechnician(technicianId);
 			if(isSend) {
 				orderDao.updateOrderStatus(orderTemp);
-				msg += orderTemp.getOrderNo()+":"+"派送成功";
+				msg += order.getOrderNo()+":"+"派送成功";
 			}else {
-				msg += orderTemp.getOrderNo()+":"+"派送失败";
+				msg += order.getOrderNo()+":"+"派送失败";
 			}
 		}
 		return Layui.data(msg, 0, 0, null);

@@ -540,6 +540,12 @@ public class WeiXinUtil
 	        btn13.setUrl("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx8a556ef7c6e66c7e&"
 	    			+ "redirect_uri=http%3a%2f%2fwww.xywxfw.com%2fxinyu%2fmobileTenLogin&response_type=code&scope=snsapi_base&state=1#wechat_redirect"); 
 	    
+	        ViewButton btn14 = new ViewButton();  
+	        btn14.setName("发起工单");  
+	        btn14.setType("view");  
+	        btn14.setUrl("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx8a556ef7c6e66c7e&"
+	    			+ "redirect_uri=http%3a%2f%2fwww.xywxfw.com%2fxinyu%2fwx%2fstartOrder&response_type=code&scope=snsapi_base&state=1#wechat_redirect"); 
+	        
 	        ViewButton btn21 = new ViewButton();  
 	        btn21.setName("历史订单 ");  
 	        btn21.setType("view");  
@@ -553,7 +559,7 @@ public class WeiXinUtil
 	        
 	        ComplexButton mainBtn1 = new ComplexButton();  
 	        mainBtn1.setName("电脑维护");  
-	        mainBtn1.setSub_button(new Button[] {btn11,btn12,btn13});
+	        mainBtn1.setSub_button(new Button[] {btn11,btn12,btn13,btn14});
 	        
 	        ComplexButton mainBtn2 = new ComplexButton();  
 	        mainBtn2.setName("会员服务");  

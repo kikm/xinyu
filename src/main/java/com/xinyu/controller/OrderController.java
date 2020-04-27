@@ -1,5 +1,6 @@
 package com.xinyu.controller;
 
+import java.util.Calendar;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ import com.xinyu.bean.OrderStatus;
 import com.xinyu.bean.PageBean;
 import com.xinyu.model.Device;
 import com.xinyu.model.Order;
+import com.xinyu.model.OrderPart;
 import com.xinyu.model.Unit;
 import com.xinyu.model.User;
 import com.xinyu.service.IOrderService;
@@ -43,6 +45,7 @@ public class OrderController {
 		mov.addObject("orderDepathList", orderDepathList);
 		mov.addObject("unitList", unitList);
 		mov.addObject("dList", dList);
+		mov.addObject("pageBean", new PageBean());
 		return mov;
 	}
 
@@ -129,6 +132,24 @@ public class OrderController {
 	public void download(String path, HttpServletResponse response) {
 		
 		FileUpDownLoadUtils.download(path, response);
+	}
+	
+	@RequestMapping("/print")
+    public ModelAndView print(String orderId) {
+		Order order = orderService.getOrderById(Long.valueOf(orderId));
+		ModelAndView mov = new ModelAndView("printwuzi-servicenoprice");
+		Calendar calendar = Calendar.getInstance(); 
+		mov.addObject("orderNo", order.getOrderNo());
+		mov.addObject("year", calendar.get(Calendar.YEAR));
+		mov.addObject("mon", calendar.get(Calendar.MONTH)+1);
+		mov.addObject("day", calendar.get(Calendar.DATE));
+		mov.addObject("cusName", order.getContact());
+		mov.addObject("description", order.getDescription());
+		for(OrderPart p : order.getPartList()) {
+			int i = 1;
+			mov.addObject("part"+i, p.getName());
+		}
+		return mov;
 	}
 
 }

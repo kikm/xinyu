@@ -760,10 +760,10 @@ AIUBAADtFAAAAAA=
   <td class=xl1517814 width=69 style='width:52pt'></td>
  </tr>
  <tr height=32 style='mso-height-source:userset;height:24.0pt'>
-  <td colspan=3 height=32 class=xl8217814 style='height:24.0pt'>客户名称：</td>
-  <td colspan=4 class=xl8417814>年<span style='mso-spacerun:yes'>&nbsp;&nbsp;
-  </span>月<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>日</td>
-  <td class=xl7117814>单号：WZ0000010</td>
+  <td colspan=3 height=32 class=xl8217814 style='height:24.0pt'>客户名称：<span th:text="${cusName}"></span></td>
+  <td colspan=4 class=xl8417814><span th:text="${year}"></span>年<span style='mso-spacerun:yes'>&nbsp;&nbsp;
+  </span><span th:text="${mon}"></span>月<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span><span th:text="${day}"></span>日</td>
+  <td class=xl7117814>单号：<span th:text="${orderNo}"></span></td>
   <td class=xl1517814></td>
   <td class=xl1517814></td>
   <td class=xl1517814></td>
@@ -810,13 +810,13 @@ AIUBAADtFAAAAAA=
   <td height=43 class=xl6917814 width=21 style='height:32.25pt;border-top:none;
   width:16pt'>1</td>
   <td class=xl6917814 width=277 style='border-top:none;border-left:none;
-  width:208pt'>　</td>
+  width:208pt'><span th:text="${part1}"></span></td>
   <td class=xl6917814 width=29 style='border-top:none;border-left:none;
   width:22pt'>E<font class="font517814">A</font></td>
   <td class=xl7017814 width=39 style='border-top:none;border-left:none;
-  width:29pt'>　</td>
+  width:29pt'></td>
   <td colspan=3 class=xl7517814 width=266 style='border-right:.5pt solid black;
-  border-left:none;width:200pt'>　</td>
+  border-left:none;width:200pt'><span th:text="${description}"></span></td>
   <td class=xl1517814></td>
   <td class=xl1517814></td>
   <td class=xl1517814></td>
@@ -830,13 +830,13 @@ AIUBAADtFAAAAAA=
   <td height=42 class=xl6917814 width=21 style='height:31.5pt;border-top:none;
   width:16pt'>2</td>
   <td class=xl6917814 width=277 style='border-top:none;border-left:none;
-  width:208pt'>　</td>
+  width:208pt'><span th:text="${part2}"></span></td>
   <td class=xl6917814 width=29 style='border-top:none;border-left:none;
   width:22pt'>E<font class="font517814">A</font></td>
   <td class=xl7017814 width=39 style='border-top:none;border-left:none;
-  width:29pt'>　</td>
+  width:29pt'></td>
   <td colspan=3 class=xl7217814 width=266 style='border-right:.5pt solid black;
-  border-left:none;width:200pt'>　</td>
+  border-left:none;width:200pt'></td>
   <td class=xl1517814></td>
   <td class=xl1517814></td>
   <td class=xl1517814></td>
@@ -850,13 +850,13 @@ AIUBAADtFAAAAAA=
   <td height=45 class=xl6917814 width=21 style='height:33.75pt;border-top:none;
   width:16pt'>3</td>
   <td class=xl6917814 width=277 style='border-top:none;border-left:none;
-  width:208pt'>　</td>
+  width:208pt'><span th:text="${part3}"></span></td>
   <td class=xl6917814 width=29 style='border-top:none;border-left:none;
   width:22pt'>E<font class="font517814">A</font></td>
   <td class=xl7017814 width=39 style='border-top:none;border-left:none;
-  width:29pt'>　</td>
+  width:29pt'></td>
   <td colspan=3 class=xl7517814 width=266 style='border-right:.5pt solid black;
-  border-left:none;width:200pt'>　</td>
+  border-left:none;width:200pt'></td>
   <td class=xl1517814></td>
   <td class=xl1517814></td>
   <td class=xl1517814></td>
@@ -870,13 +870,13 @@ AIUBAADtFAAAAAA=
   <td height=42 class=xl6917814 width=21 style='height:31.5pt;border-top:none;
   width:16pt'>4</td>
   <td class=xl6917814 width=277 style='border-top:none;border-left:none;
-  width:208pt'>　</td>
+  width:208pt'><span th:text="${part4}"></span></td>
   <td class=xl6917814 width=29 style='border-top:none;border-left:none;
   width:22pt'>E<font class="font517814">A</font></td>
   <td class=xl7017814 width=39 style='border-top:none;border-left:none;
-  width:29pt'>　</td>
+  width:29pt'></td>
   <td colspan=3 class=xl7517814 width=266 style='border-right:.5pt solid black;
-  border-left:none;width:200pt'>　</td>
+  border-left:none;width:200pt'></td>
   <td class=xl1517814></td>
   <td class=xl1517814></td>
   <td class=xl1517814></td>
@@ -890,7 +890,7 @@ AIUBAADtFAAAAAA=
   <td height=44 class=xl6917814 width=21 style='height:33.0pt;border-top:none;
   width:16pt'>5</td>
   <td height=44 class=xl6917814 width=277 style='height:33.0pt;border-top:none;
-  border-left:none;width:208pt'><!--[if gte vml 1]><v:shape id="AutoShape_x0020_27"
+  border-left:none;width:208pt'><span th:text="${part5}"></span><!--[if gte vml 1]><v:shape id="AutoShape_x0020_27"
    o:spid="_x0000_s2399" type="#_x0000_t75" alt="viewfile?f=94A2AAFA23ED35DBC3A210E0712C809BD524670107EB88ECA8907A0B0B826309542144B405E8CC565E8EDC6907812F444ECFEA3D0EFE5E910EC2D8A8E55A8C551CB7B6DD67931FF457E6FBF424F302EE7B4B09ABB8CFD888B66ADE267AFB7DB6E0C4D19B27436ABD&amp;sid=45IuAiSENzXZCF8R&amp;end"
    style='position:absolute;margin-left:47pt;margin-top:0;width:1pt;height:10pt;
    z-index:4;visibility:visible;mso-wrap-style:square;v-text-anchor:top'
@@ -1008,9 +1008,9 @@ cnMvZG93bnJldi54bWxQSwUGAAAAAAQABAD1AAAAHQcAAAAA
   <td class=xl6917814 width=29 style='border-top:none;border-left:none;
   width:22pt'>E<font class="font517814">A</font></td>
   <td class=xl6917814 width=39 style='border-top:none;border-left:none;
-  width:29pt'>　</td>
+  width:29pt'></td>
   <td colspan=3 class=xl7217814 width=266 style='border-right:.5pt solid black;
-  border-left:none;width:200pt'>　</td>
+  border-left:none;width:200pt'></td>
   <td class=xl1517814></td>
   <td class=xl1517814></td>
   <td class=xl1517814></td>

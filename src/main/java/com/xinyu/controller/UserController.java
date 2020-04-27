@@ -44,12 +44,6 @@ public class UserController {
 		return "login";
 	}
 	
-	@RequestMapping("/print")
-    public String print() {
-		
-		return "printwuzi-servicenoprice";
-	}
-	
 	@RequestMapping("/echarts")
     public String echarts() {
 		
@@ -85,7 +79,7 @@ public class UserController {
 			mov.addObject("type", "cus");
 		}
 		//mov = new ModelAndView("/mobile/orderList");//已绑定账号
-		mov.addObject("type","cus"); mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");//oCnlEuB6eJ9dhV-ubMV1uP2_r7iY
+		//mov.addObject("type","cus"); mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");//oCnlEuB6eJ9dhV-ubMV1uP2_r7iY
 		
 		return mov;
 	}
@@ -109,7 +103,7 @@ public class UserController {
 		}
 		
 		 //mov = new ModelAndView("/mobile/orderList");//已绑定账号
-		 mov.addObject("type","ten"); mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");
+		 //mov.addObject("type","ten"); mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");
 		 
 
 		return mov;

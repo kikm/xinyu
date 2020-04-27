@@ -103,22 +103,22 @@
      <div class="layui-inline">
       <label class="layui-form-label required">联系电话</label>
       <div class="layui-input-inline">
-        <input type="tel" name="phone" lay-verify="required|phone" autocomplete="off" class="layui-input">
+        <input type="tel" name="phone" lay-verify="required" autocomplete="off" class="layui-input">
       </div>
     </div>
   </div> 
   
   <div class="layui-form-item">
-  	<div class="layui-inline">
-      <label class="layui-form-label">邮箱</label>
-      <div class="layui-input-inline">
-        <input type="text" name="email" lay-verify="email" autocomplete="off" class="layui-input">
-      </div>
-    </div>
     <div class="layui-inline">
       <label class="layui-form-label  required">地址</label>
       <div class="layui-input-inline">
         <input type="text" name="address" lay-verify="required" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+  	<div class="layui-inline">
+      <label class="layui-form-label">邮箱</label>
+      <div class="layui-input-inline">
+        <input type="text" name="email" autocomplete="off" class="layui-input">
       </div>
     </div>
   </div>
@@ -216,7 +216,6 @@
       <thead>
         <tr>
         	<th>文件名</th>
-        	<th>状态</th>
         	<th>操作</th>
       	</tr>
       </thead>
@@ -349,7 +348,7 @@
 		    		  	
 		     		  	layer.msg(result.msg);
 		     	  });
-		    	  $("#tableSearch").click();
+		    	  tableReload();
 		      break;
 		      case 'depathOrder':
 		    	  var ids = '';
@@ -384,7 +383,7 @@
 					                }
 					            });
 							}
-							$("#tableSearch").click();
+							tableReload();
 							layer.close(index);	        
 						}
 				  });
@@ -393,12 +392,23 @@
 		      
 		      //自定义头工具栏右侧图标 - 提示
 		      case 'LAYTABLE_TIP':
+		    	  var id = '';
+		    	  if(checkStatus.data.length < 1){
+		    	  	layer.msg("请选择工单");
+		    	  	return;
+		    	  }
+		    	  if(checkStatus.data.length > 1){
+			    	  	layer.msg("最多选择一张工单");
+			    	  	return;
+			      }
+		    	  var orderId = checkStatus.data[0].id;
 		    	  $.ajax({
 		                type : "post",
-		                url : "../print",
+		                url : "print",
 		                async : false,
-		                data : {},  // 你的formid
+		                data : {"orderId":orderId},  // 你的formid
 		                success : function(data) {
+		                	console.log(data);
 		                	$("div#printIframe").html(data);
 		                }
 		            });
@@ -475,7 +485,6 @@
 	                		var tr = $(['<tr id="upload-edit-'+ index +'">'
 	  	          	      	  ,'<td style="display:none">'+imageUrl[index]+'</td>'
 	  	          	          ,'<td>'+ filename +'</td>'
-	  	          	          ,'<td>等待上传</td>'
 	  	          	          ,'<td>'
 	  	          	            ,'<button class="layui-btn layui-btn-xs layui-btn-danger" onclick="editDelteFile(this)">删除</button>'
 	  	          	            ,'<a href="download?path='+dfilename+'" class="layui-btn layui-btn-xs layui-btn-danger" target="_blank">下载</button>'
@@ -550,7 +559,6 @@
       		  obj.preview(function(index, file, result){
         	  var tr = $(['<tr id="upload-'+ index +'">'
 	          ,'<td>'+ file.name +'</td>'
-	          ,'<td>等待上传</td>'
 	          ,'<td>'
 	            ,'<button class="layui-btn layui-btn-xs layui-btn-danger demo-delete">删除</button>'
 	          ,'</td>'
@@ -609,6 +617,25 @@
 		    for(let i in files){
 		    	formData.append("file[]",files[i]);
 		    }
+		    var upkeep = $("input[name='upkeep']").val();
+		    if(upkeep != null&& upkeep != ""){
+			  	var devId = $("select[name='device.id']").val();
+			  	var partLid = $("input[name='partListId']").val();
+			  	var report = $("input[name='report']").val();
+			  	if(devId == null||devId ==""){
+				  	layer.msg('设备类型不能为空');
+			  		return false;
+			  	}
+			  	if(partLid == null||partLid ==""){
+				  	layer.msg('配件不能为空');
+			  		return false;
+			  	}
+			  	if(report == null||report ==""){
+				  	layer.msg('维修建议不能为空');
+			  		return false;
+			  	}
+			  	
+		    }
 		    
 	        $.ajax({
                 cache : true,
@@ -624,7 +651,7 @@
                 success : function(data) {
                 	if (data.code == 0) {
                       	$("#formReset").click();
-                      	$("#tableSearch").click();
+                      	tableReload();
                       	$("#fileList").empty();
                       	var form = layui.form;
                       	for (let x in files) {
@@ -766,6 +793,17 @@
 			// 提交表单
 			$form.submit();
 			return false;
+		}
+		
+		function tableReload(){
+			var table = layui.table;
+			table.reload('tableReload', {
+				where: {
+					orderNo: $('#parm1').val(),
+			   		unitName: $('#parm2').val(),
+			   		status: $('#parm3').val()
+				}
+			}, 'data');
 		}
 		
 		
