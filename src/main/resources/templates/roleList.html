@@ -245,7 +245,7 @@
                 success : function(data) {
                 	if (data.code == 0) {
                       	$("#formReset").click();
-                      	$("#tableSearch").click();
+                      	tableReload();
                       	layer.msg('提交成功');
                       	exchange();
                       } else {
@@ -291,6 +291,16 @@
 				$('#list').addClass('layui-hide');
 				$('#newOrEdit').removeClass('layui-hide');
 			}
+		}
+		
+		function tableReload(){
+			var table = layui.table;
+			var param1 = $('#parm1').val();
+			table.reload('tableReload', {
+				where: {
+					roleName: param1
+				}
+			}, 'data');
 		}
 		
 		

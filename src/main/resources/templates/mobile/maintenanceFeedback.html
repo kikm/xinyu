@@ -25,8 +25,18 @@
 		工单维修反馈
 	  </h1>
     </div>
-	<form id='feedbackForm' enctype='multipart/form-data' method='POST'>
     <div class="weui-form__control-area">
+	<div class="weui-cells__group weui-cells__group_form">
+		<div class="weui-cells__title">报修详情</div>
+        <div class="weui-cells weui-cells_form">
+            <div class="weui-cell">
+                <div class="weui-cell__bd">
+                    <img src="../img/1584695950769-20200320051918815.jpg" alt="">
+                </div>
+            </div>
+        </div>
+	</div>
+	<form id='feedbackForm' enctype='multipart/form-data' method='POST'>
       <div class="weui-cells__group weui-cells__group_form">
         <div class="weui-cells__title">文本域</div>
         <div class="weui-cells weui-cells_form">
@@ -172,10 +182,10 @@
         	if ($(this).hasClass('weui-btn_disabled')) return;
 			$(this).addClass('weui-btn_disabled');
 			if ($loadingToast.css('display') != 'none') return;
+            $loadingToast.fadeIn(100);
 			var button = $(this);
           	var $value = $textarea.val();
 
-            $loadingToast.fadeIn(100);
                 
           	if($value.length == ''){
             	$cell.addClass('weui-cell_warn');
@@ -195,6 +205,7 @@
 					contentType: false,   //jax 中 contentType 设置为 false 是为了避免 JQuery 对其操作，从而失去分界符，而使服务器不能正常解析文件
                 	processData: false,
     				success:function(req){
+						$loadingToast.fadeOut(100);
 						$tooltips.text(req.msg);
 						if(req.code == 0){
 							$tooltips.removeClass('weui-toptips_warn');

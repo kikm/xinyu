@@ -6,6 +6,7 @@ public class OrderPart extends Part{
 	private String orderNo;
 	private Long orderId;
 	private Float offer;
+	private Integer num = 1;
 	
 	
 	public Long getOpid() {
@@ -32,6 +33,13 @@ public class OrderPart extends Part{
 	public void setOffer(Float offer) {
 		this.offer = offer;
 	}
+	public Integer getNum() {
+		return num;
+	}
+	public void setNum(Integer num) {
+		this.num = num;
+	}
+	
 	
 
 }

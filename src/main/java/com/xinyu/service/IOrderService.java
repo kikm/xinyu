@@ -49,5 +49,7 @@ public interface IOrderService {
 	public OrderBean getOrderBeanById(Long id);
 
 	public List<OrderBean> getOrderListByStatusList(Order order, List<OrderStatus> statusList);
+
+	public Map<String, Integer> getDepathCount();
 	
 }

@@ -399,6 +399,7 @@ public class OrderService implements IOrderService {
 		data.put("report", order.getReport());
 		data.put("feedbackTime",sdf.format(new Date()));
 		data.put("userName", user.getName());
+		data.put("phone", user.getTelephone());
 		WeiXinUtil.sendTemplate(duser.getOpenID(),null,data,OrderStatus.MaintenanceFeedback,temp.getIsUrgent());
 		return Layui.data("反馈成功",0, 0, null);  
 	}
@@ -472,6 +473,25 @@ public class OrderService implements IOrderService {
 		}
 		
 		return Layui.data("结单成功", 0, 0, null);
+	}
+
+	@Override
+	public Map<String, Integer> getDepathCount() {
+		Map<String, Integer> baseMap = new HashMap<String, Integer>();
+	    List<Map<String, Object>> baseList = orderDao.getDepathCount();
+	    for (Map<String, Object> map:baseList) {
+	        String base = null;
+	        Integer fare = null;
+	        for (Map.Entry<String,Object>  entry:map.entrySet()) {
+	            if ("user_name".equals(entry.getKey())) {
+	                base =  String.valueOf(entry.getValue());
+	            }else if ("count".equals(entry.getKey())) {
+	                fare = new Integer(String.valueOf(entry.getValue()));
+	            }
+	            baseMap.put(base,fare);
+	        }
+	    }
+	    return baseMap;
 	}
 
 }

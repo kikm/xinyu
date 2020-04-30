@@ -2,6 +2,7 @@ package com.xinyu.controller;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,6 +27,7 @@ import com.xinyu.model.Unit;
 import com.xinyu.model.User;
 import com.xinyu.service.IOrderService;
 import com.xinyu.util.FileUpDownLoadUtils;
+import com.xinyu.util.WeiXinUtil;
 
 @Controller
 @RequestMapping("/order")
@@ -36,12 +38,14 @@ public class OrderController {
 
 	@RequestMapping("/orderList")
 	public ModelAndView getOrderList() {
-		ModelAndView mov = new ModelAndView();
+		ModelAndView mov = new ModelAndView("orderList");
 		List<Unit> unitList = orderService.getUnit();
 		List<Device> dList = orderService.getDeviceList();
 		List<User> orderDepathList = orderService.getDepathList();
+		Map<String,Integer> depathCount = orderService.getDepathCount();
 		mov.setViewName("orderList");
 		mov.addObject("statusList", OrderStatus.values());
+		mov.addObject("depathCount",depathCount);
 		mov.addObject("orderDepathList", orderDepathList);
 		mov.addObject("unitList", unitList);
 		mov.addObject("dList", dList);
@@ -127,6 +131,12 @@ public class OrderController {
 		Layui result = orderService.finishOrder(ids, userId);
 		return result;
 	}
+	
+	@RequestMapping("/refreshCount")
+	@ResponseBody
+	public Map<String,Integer> refreshCount() {
+		return orderService.getDepathCount();
+	}
 
 	@RequestMapping("/download")
 	public void download(String path, HttpServletResponse response) {
@@ -137,18 +147,29 @@ public class OrderController {
 	@RequestMapping("/print")
     public ModelAndView print(String orderId) {
 		Order order = orderService.getOrderById(Long.valueOf(orderId));
-		ModelAndView mov = new ModelAndView("printwuzi-servicenoprice");
+		String view = "printwuzi-servicenoprice";
+		if(order.getUnit().getName().indexOf("设计") != -1){
+			view = "printsheji-servicewithprice";
+		}
+		ModelAndView mov = new ModelAndView(view);
 		Calendar calendar = Calendar.getInstance(); 
 		mov.addObject("orderNo", order.getOrderNo());
 		mov.addObject("year", calendar.get(Calendar.YEAR));
 		mov.addObject("mon", calendar.get(Calendar.MONTH)+1);
 		mov.addObject("day", calendar.get(Calendar.DATE));
-		mov.addObject("cusName", order.getContact());
+		mov.addObject("cusName", order.getAddress());
 		mov.addObject("description", order.getDescription());
+		Float total = 0f;
 		for(OrderPart p : order.getPartList()) {
 			int i = 1;
 			mov.addObject("part"+i, p.getName());
+			mov.addObject("part"+i+"_number", p.getNum());
+			mov.addObject("part"+i+"_single", p.getPartCost());
+			mov.addObject("part"+i+"_total", p.getPartCost()*p.getNum());
+			total += p.getPartCost()*p.getNum();
 		}
+		mov.addObject("total", total);
+		mov.addObject("chitotal", WeiXinUtil.numberTOChiString(total));
 		return mov;
 	}
 

@@ -684,5 +684,105 @@ public class WeiXinUtil
 	    	}
 			
 	    }
+	    
+	    public static String numberTOChiString(Float x) {
+			String yuan="亿千百拾万千百拾元角分";
+			String big="壹贰叁肆伍陆柒捌玖";
+			String end="";
+			int y=(int)Math.round(x*100-0.5);//去小数
+			int xiaoshu=y%100;
+			y=y/100;
+			String money=String.valueOf(y);//转换成字符串形式
+			if (y==0&&xiaoshu==0) {//小数整数均为零时
+				end=end+"零元";
+			}
+			else if (y==10&&xiaoshu==0) {//为10时
+				end="拾元整"+end;
+			}
+			else if (y!=0&&xiaoshu==0&&y!=10&&y%10!=0) {//小数为零而整数不为零
+				int j=money.length()-1;
+	            int k=8;
+	            while(j>=0)
+	            {
+	            	if(money.charAt(j)=='0'&&money.charAt(j-1)=='0')
+	                {
+	                    j--;
+	                    k--;
+	                    continue;
+	                }
+	            	else if (money.charAt(j)=='0'&&money.charAt(j-1)!='0') {
+	            		
+						end="零"+end;
+						j--;
+						k--;
+						continue;
+					}
+	                end=big.charAt(money.charAt(j)-'1')+""+yuan.charAt(k)+""+end;//按照标号去寻找对应的大写和单位
+	                j--;
+	                k--;
+	            }
+	            end=end+"整";
+			}
+			else if (y==0&&xiaoshu!=0) {//只有小数时
+				int m=xiaoshu/10;
+				int n=xiaoshu%10;
+				if (m!=0) {
+					 end=end+big.charAt(m-1)+"角";
+				}
+				if (n!=0) {
+					 end=end+big.charAt(n-1)+"分";
+				}
+			}
+			else if (y!=0&&xiaoshu!=0&&y!=10&&y%10!=0) {//全都不为零时
+				int m=xiaoshu/10;
+				int n=xiaoshu%10;
+				if (m!=0) {
+					 end=end+big.charAt(m-1)+"角";
+				}
+				if (n!=0) {
+					 end=end+big.charAt(n-1)+"分";
+				}
+				int j=money.length()-1;
+	            int k=8;
+	            while(j>=0)
+	            {
+	            	if(money.charAt(j)=='0'&&money.charAt(j-1)=='0')
+	                {
+	                    j--;
+	                    k--;
+	                    continue;
+	                }
+	            	else if (money.charAt(j)=='0'&&money.charAt(j-1)!='0') {
+						end="零"+end;
+						j--;
+						k--;
+						continue;
+					}
+	                end=big.charAt(money.charAt(j)-'1')+""+yuan.charAt(k)+""+end;
+	                j--;
+	                k--;
+	            }
+			}
+	          else if (y%10==0) {//所求数是10的倍数时
+	        	  int j=money.length()-1;
+	              int k=8;
+	              while(j>=0)
+	              {
+	              	if(money.charAt(j)=='0')
+	                  {
+	                      j--;
+	                      k--;
+	                      continue;
+	                  }
+	              	
+	                  end=big.charAt(money.charAt(j)-'1')+""+yuan.charAt(k)+""+end;
+	                  j--;
+	                  k--;
+	              }
+	              end=end+"元整";
+	            
+			}
+			return end;
+		}
      
 }

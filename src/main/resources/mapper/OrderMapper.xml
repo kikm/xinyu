@@ -44,6 +44,7 @@
             <result column="pcategory" property="category" jdbcType="VARCHAR"/>
             <result column="poffer" property="offer" jdbcType="FLOAT"/>
             <result column="pcost" property="partCost" jdbcType="FLOAT"/>
+            <result column="num" property="num" jdbcType="INTEGER"/>
         </collection>
     </resultMap>
     
@@ -220,6 +221,7 @@
             <set>
                 part_id =#{item.id},
 				part_offer=#{item.offer}
+				num=#{item.num}
             </set>
             <where>
                 id=#{item.opid}
@@ -235,12 +237,14 @@
 				<if test="item.orderId != null ">order_id,</if>  
 				<if test="item.id != null ">part_id,</if>  
 				<if test="item.offer != null ">part_offer</if> 
+				<if test="item.num != null ">num</if> 
 			</trim>  
 			<trim prefix="values (" suffix=")" suffixOverrides="," >  
 				<if test="item.orderNo != null ">#{item.orderNo},</if>  
 				<if test="item.orderId != null ">#{item.orderId},</if>  
 				<if test="item.id != null ">#{item.id},</if>  
 				<if test="item.offer != null ">#{item.offer}</if>  
+				<if test="item.num != null ">#{item.num}</if>  
 			</trim>
 		</foreach>
 	</insert>   
@@ -294,5 +298,15 @@
         from t_order o 
         where o.id = #{orderId}
     </select>
+    
+    <select id="getDepathCount" resultType="java.util.HashMap">
+    	SELECT u.user_name,m.count
+			FROM (
+				SELECT COUNT(depath_user) COUNT,technician
+				FROM t_order
+				WHERE STATUS IN('Dispatched','OrderConfirmed')
+				GROUP BY technician) m
+		LEFT JOIN t_user u ON m.technician = u.id
+	</select>
     
 </mapper>

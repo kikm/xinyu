@@ -1,6 +1,7 @@
 package com.xinyu.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -9,7 +10,6 @@ import com.xinyu.bean.OrderStatus;
 import com.xinyu.bean.PageBean;
 import com.xinyu.model.Order;
 import com.xinyu.model.OrderPart;
-import com.xinyu.model.Part;
 
 @Mapper
 public interface OrderDao {
@@ -41,4 +41,6 @@ public interface OrderDao {
 	public Order getDepathAndTechUser(Long orderId);
 
 	public List<Order> getOrderCriteriaQueryByStatusList(Order order, List<OrderStatus> list);
+	
+	public List<Map<String, Object>> getDepathCount();
 }

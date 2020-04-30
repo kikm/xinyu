@@ -33,6 +33,9 @@
       	</select>
       	</div>
   		<button class="layui-btn" id="tableSearch" data-type="reload">搜索</button>
+  		<div class="layui-inline">
+			<button class="layui-btn layui-btn-sm layui-btn-warm layui-btn-radius" th:each="depathCount:${depathCount}" th:text="|${depathCount.key} ${depathCount.value}|"></button> 
+  		</div>
 	</div>
 	<table  id="orderList" lay-filter="order"></table>
 	<script type="text/html" id="toolbar">
@@ -178,7 +181,7 @@
     <div class="layui-inline">
       <label class="layui-form-label required">维修配件</label>
       <div class="layui-input-inline">
-      <select class="partListId" id="partListId" name="partList[0].id" lay-search="">
+      <select class="partListId" id="partListId" lay-filter="orderPart" name="partList[0].id" lay-search="">
         <option value="3">直接选择或搜索选择</option>
       </select>
       <input type="text" style="display:none;" name="partList[0].opid" >
@@ -186,8 +189,8 @@
     </div>
     <div class="layui-inline">
       <label class="layui-form-label">采购价</label>
-      <div class="layui-input-inline" >
-        <input type="text" name="partList[0].partCost" placeholder="￥" autocomplete="off" class="layui-input">
+      <div class="layui-input-inline" style="padding:9px" >
+      	<label  name="partList[0].partCost"></label>
       </div>
     </div>
     <div class="layui-inline">
@@ -245,16 +248,16 @@
     <div class="layui-inline">
       <label class="layui-form-label">维修配件</label>
       <div class="layui-input-inline">
-      <select class="partListId" dataType="id" name="" lay-search="">
+      <select class="partListId" lay-filter="orderPart" dataType="id" name="" lay-search="">
         <option value="">直接选择或搜索选择</option>
       </select>
       <input type="hidden" dataType="opid" name="">
       </div>
     </div>
     <div class="layui-inline">
-      <label class="layui-form-label required">采购价</label>
-      <div class="layui-input-inline" >
-        <input type="text" dataType="partCost" name="" placeholder="￥" autocomplete="off" class="layui-input">
+      <label class="layui-form-label">采购价</label>
+      <div class="layui-input-inline" style="padding:9px">
+      	<label dataType="partCost" name=""></label>
       </div>
     </div>
     <div class="layui-inline">
@@ -274,8 +277,8 @@
  <div class="layui-form" >
   <div class="layui-form-item">
     <label class="layui-form-label">技术员：</label>
-    <div class="layui-input-block">
-    	<input type="radio" name="userId" th:each="user:${orderDepathList}" th:value="${user.id}"
+    <div class="layui-input-block" th:each="user:${orderDepathList}">
+    	<input type="radio" name="userId"  th:value="${user.id}"
                                 th:title="${user.name}">
     </div>
 </div>
@@ -362,6 +365,7 @@
 		    	  var userId = "";
 		    	  layer.open({
 						type:0,
+						area: ['400px', '400px'],
 						title:"选择派单人员",
 						content:$("#depathOrder").html(),
 						success: function(layero){
@@ -380,11 +384,13 @@
 					                data : {'ids':ids,'technicianId':userId},  // 你的formid
 					                success : function(data) {
 					                	layer.msg(data.msg);
+					                	if(data.code == 0){
+					                		tableReload();
+					                	}
 					                }
 					            });
 							}
-							tableReload();
-							layer.close(index);	        
+							        
 						}
 				  });
 		    	  
@@ -408,7 +414,6 @@
 		                async : false,
 		                data : {"orderId":orderId},  // 你的formid
 		                success : function(data) {
-		                	console.log(data);
 		                	$("div#printIframe").html(data);
 		                }
 		            });
@@ -471,7 +476,7 @@
 	                	for(let i=0;i<order.partList.length;i++){
 	                		$("#partList select[name='partList["+i+"].id").val(order.partList[i].id);
 	                		$("#partList input[name='partList["+i+"].opid']").val(order.partList[i].opid);
-	                		$("#partList input[name='partList["+i+"].partCost']").val(order.partList[i].partCost);
+	                		$("#partList label[name='partList["+i+"].partCost']").text(order.partList[i].partCost);
 	                		$("#partList input[name='partList["+i+"].offer']").val(order.partList[i].offer);
 	                		
 	                	} 
@@ -683,7 +688,7 @@
 			  $.post('getPartDataByDevice',{"deviceId":data.value},function(result){
 	     		var partHtml = "";
 	     		for (var i = 0; i < result.data.length; i++) { 
-	  	    		partHtml += "<option value='"+result.data[i].id+"'>"+result.data[i].name+"</option>"
+	  	    		partHtml += "<option data-price='"+result.data[i].partCost+"' value='"+result.data[i].id+"'>"+result.data[i].name+"</option>"
 	  	    	 }
 	  	    	 $("select[class='partListId']").each(function(){
 	  	    		$(this).append(partHtml);
@@ -691,6 +696,14 @@
 				form.render("select");
 	     	 });
 			  $.ajaxSettings.async = true;
+		  }); 
+		  
+		  form.on('select(orderPart)', function(data){
+			  var form=layui.form;
+			  var select = data.elem;
+			  var name = $(select).attr("name").replace("id","partCost");
+			  var pastCost = $(select).find("option[value='"+data.value+"']").attr("data-price");
+			  $("label[name='"+name+"']").text(pastCost);
 		  }); 
 		 
 		  //表单赋值

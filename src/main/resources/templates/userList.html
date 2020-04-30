@@ -44,7 +44,7 @@
     <div class="layui-inline">
       <label class="layui-form-label required">ID</label>
       <div class="layui-input-inline">
-        <input type="text" name="id" autocomplete="off" class="layui-input">
+        <input type="text" name="id" lay-verify="required" autocomplete="off" class="layui-input">
         <input type="hidden" name="oldid" autocomplete="off" class="layui-input">
         <input type="hidden" name="openID" autocomplete="off" class="layui-input">
       </div>
@@ -52,7 +52,7 @@
     <div class="layui-inline">
     <label class="layui-form-label required">单位部门</label>
     <div class="layui-input-inline">
-      <select name="unit.id" lay-filter="unit" lay-search="">
+      <select name="unit.id" lay-verify="required" lay-filter="unit" lay-search="">
       	<option value="">直接选择或搜索选择</option>
       	<option th:each="unit:${unitList}" th:value="${unit.id}"
                                 th:text="${unit.name}"></option>
@@ -67,19 +67,19 @@
     <div class="layui-inline">
       <label class="layui-form-label required">用户名</label>
       <div class="layui-input-inline">
-        <input type="text" name="name"  autocomplete="off" class="layui-input">
+        <input type="text" name="name" lay-verify="required"  autocomplete="off" class="layui-input">
       </div>
     </div>
     <div class="layui-inline">
       <label class="layui-form-label required">密码</label>
       <div class="layui-input-inline">
-        <input type="password" name="password" autocomplete="off" class="layui-input">
+        <input type="password" name="password" lay-verify="required" autocomplete="off" class="layui-input">
       </div>
     </div>
     <div class="layui-inline">
       <label class="layui-form-label">联系电话</label>
       <div class="layui-input-inline">
-        <input type="text" name="telephone" autocomplete="off" class="layui-input">
+        <input type="text" name="telephone" lay-verify="required" autocomplete="off" class="layui-input">
       </div>
     </div>
   </div>
@@ -313,7 +313,7 @@
                 success : function(data) {
                 	if (data.code == 0) {
                       	$("#formReset").click();
-                      	$("#tableSearch").click();
+                      	tableReload();
                       	var form = layui.form;
                       	form.render("select");
                       	layer.msg('提交成功');
@@ -388,6 +388,16 @@
 				  	layer.close(index);
 			});
 			
+		}
+		
+		function tableReload(){
+			var table = layui.table;
+			var param1 = $('#parm1').val();
+			table.reload('tableReload', {
+				where: {
+					userName: param1
+				}
+			}, 'data');
 		}
 		
 		
