@@ -16,6 +16,7 @@
         <result column="description" property="description" jdbcType="VARCHAR" />
         <result column="status" property="status" jdbcType="VARCHAR" />
         <result column="isUrgent" property="isUrgent" jdbcType="BOOLEAN" />
+        <result column="isRedepath" property="isRedepath" jdbcType="BOOLEAN" />
         <result column="report" property="report" jdbcType="VARCHAR" />
         <result column="image_urls" property="imageUrls" jdbcType="VARCHAR" />
         <result column="upkeep" property="upkeep" jdbcType="FLOAT" />
@@ -44,7 +45,7 @@
             <result column="pcategory" property="category" jdbcType="VARCHAR"/>
             <result column="poffer" property="offer" jdbcType="FLOAT"/>
             <result column="pcost" property="partCost" jdbcType="FLOAT"/>
-            <result column="num" property="num" jdbcType="INTEGER"/>
+            <result column="opnum" property="num" jdbcType="INTEGER"/>
         </collection>
     </resultMap>
     
@@ -70,7 +71,7 @@
 		select o.*,
 		d.id did,d.name dname,d.agency dagency,
 		p.name pname,p.id pid,p.category pcategory,p.cost pcost,
-		op.part_offer poffer,op.id opid,
+		op.part_offer poffer,op.id opid,op.num opnum,
 		u.id uid,u.name uname 
 	</sql>
 	
@@ -163,6 +164,7 @@
 			device_id =#{order.device.id},
 			unit_id =#{order.unit.id},
 			isUrgent =#{order.isUrgent},
+			isRedepath =#{order.isRedepath},
 			confirm_user =#{order.confirmUser}
 	        where id = #{order.id}  
 	    </if>  
@@ -188,6 +190,7 @@
 	            <if test="order.device != null and order.device.id != null ">device_id,</if> 
 	            <if test="order.unit.id != null ">unit_id,</if>
 	            <if test="order.isUrgent != null ">isUrgent,</if>
+	            <if test="order.isRedepath != null ">isRedepath,</if>
 	            <if test="order.confirmUser != null ">confirm_user,</if>
 	            <if test="order.createDate != null ">create_time</if>
 	        </trim>  
@@ -209,6 +212,7 @@
 	            <if test="order.device != null and order.device.id != null ">#{order.device.id},</if> 
 	            <if test="order.unit.id != null ">#{order.unit.id},</if> 
 	            <if test="order.isUrgent != null ">#{order.isUrgent},</if>  
+	            <if test="order.isRedepath != null ">#{order.isRedepath},</if>  
 	            <if test="order.confirmUser != null ">#{order.confirm_user},</if>
 	            <if test="order.createDate != null ">#{order.createDate}</if>
 	        </trim>
@@ -236,14 +240,14 @@
 				<if test="item.orderNo != null ">order_no,</if>  
 				<if test="item.orderId != null ">order_id,</if>  
 				<if test="item.id != null ">part_id,</if>  
-				<if test="item.offer != null ">part_offer</if> 
+				<if test="item.offer != null ">part_offer,</if> 
 				<if test="item.num != null ">num</if> 
 			</trim>  
 			<trim prefix="values (" suffix=")" suffixOverrides="," >  
 				<if test="item.orderNo != null ">#{item.orderNo},</if>  
 				<if test="item.orderId != null ">#{item.orderId},</if>  
 				<if test="item.id != null ">#{item.id},</if>  
-				<if test="item.offer != null ">#{item.offer}</if>  
+				<if test="item.offer != null ">#{item.offer},</if>  
 				<if test="item.num != null ">#{item.num}</if>  
 			</trim>
 		</foreach>
@@ -259,10 +263,20 @@
 	</delete>
 	
 	<select id="getOrderByIds" parameterType="java.util.List" resultMap="BaseResultMap">
-        select o.*,u.id uid,u.name uname 
+        select o.*,u.id uid,u.name uname ,op.num opnum,p.name pname
         from t_order o 
         left join t_unit u on u.id = o.unit_id
+        left join t_order_part op on op.order_id = o.id
+        left join t_part p on p.id = op.part_id
         where o.id in
+        <foreach collection="list" item="id" index="index" open="(" separator="," close=")" >#{id}</foreach>
+    </select>
+    
+    <select id="getOrderPartByIds" parameterType="java.util.List" resultType="com.xinyu.model.OrderPart">
+        select o.order_no orderNo,o.num,p.name
+        from t_order_part o 
+        left join t_part p on o.part_id=p.id 
+        where o.order_id in
         <foreach collection="list" item="id" index="index" open="(" separator="," close=")" >#{id}</foreach>
     </select>
     
@@ -274,6 +288,17 @@
         	<if test="order.technician != null ">,technician=#{order.technician}</if>
         	<if test="order.depathDate != null ">,depath_time=#{order.depathDate}</if>
         	<if test="order.confirmUser != null ">,confirm_user=#{order.confirmUser}</if>
+        	<if test="order.isRedepath != null ">,isRedepath=#{order.isRedepath}</if>
+        </set>
+        <where>
+        	id=#{order.id}
+        </where>
+	</update>
+	
+	<update id="updateArrivalTime" >  
+    	UPDATE t_order o
+        <set>
+        	arrival_time=#{order.arrivalDate}
         </set>
         <where>
         	id=#{order.id}
@@ -294,7 +319,13 @@
 	</update>
     
     <select id="getDepathAndTechUser" resultMap="BaseResultMap">
-        select o.depath_user,o.technician,o.isUrgent,o.confirm_user,o.order_no,o.facility
+        select o.depath_user,o.technician,o.isUrgent,o.confirm_user,o.order_no,o.facility,o.description,o.sn
+        from t_order o 
+        where o.id = #{orderId}
+    </select>
+    
+    <select id="getOrderImages" resultType="java.lang.String">
+        select o.image_urls
         from t_order o 
         where o.id = #{orderId}
     </select>

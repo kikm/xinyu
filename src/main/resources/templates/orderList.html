@@ -42,6 +42,8 @@
   		<div class="layui-btn-container">
     		<button class="layui-btn layui-btn-sm" lay-event="newOrder">新增</button>
 			<button class="layui-btn layui-btn-sm" lay-event="depathOrder">派单</button>
+			<button class="layui-btn layui-btn-sm" lay-event="redepathOrder">转单</button>
+			<button class="layui-btn layui-btn-sm" lay-event="arrivalNotice">到货</button>
 			<button class="layui-btn layui-btn-sm" lay-event="finishOrder">结单</button>
   		</div>
 	</script>
@@ -106,7 +108,7 @@
      <div class="layui-inline">
       <label class="layui-form-label required">联系电话</label>
       <div class="layui-input-inline">
-        <input type="tel" name="phone" lay-verify="required" autocomplete="off" class="layui-input">
+        <input type="tel" name="phone" lay-verify="required|number" autocomplete="off" class="layui-input">
       </div>
     </div>
   </div> 
@@ -170,9 +172,9 @@
       </div>
     </div>
     <div class="layui-inline">
-      <label class="layui-form-label required">维修费</label>
+      <label class="layui-form-label">维修费</label>
       <div class="layui-input-inline">
-        <input type="text" name="upkeep" placeholder="￥" autocomplete="off" class="layui-input">
+        <input type="text" name="upkeep" lay-verify="numb" placeholder="￥" autocomplete="off" class="layui-input">
       </div>
     </div>
   </div>
@@ -188,15 +190,15 @@
       </div>
     </div>
     <div class="layui-inline">
-      <label class="layui-form-label">采购价</label>
-      <div class="layui-input-inline" style="padding:9px" >
-      	<label  name="partList[0].partCost"></label>
+      <label class="layui-form-label">数量</label>
+      <div class="layui-input-inline" >
+      	<input type="text" name="partList[0].num" lay-verify="numb" autocomplete="off" class="layui-input">
       </div>
     </div>
     <div class="layui-inline">
       <label class="layui-form-label required">报价</label>
       <div class="layui-input-inline" >
-        <input type="text" name="partList[0].offer" placeholder="￥" autocomplete="off" class="layui-input">
+        <input type="text" name="partList[0].offer" lay-verify="numb" placeholder="￥" autocomplete="off" class="layui-input">
       </div>
     </div>
     <div class="layui-inline">
@@ -235,7 +237,7 @@
   </div>-->
   <div class="layui-form-item">
     <div class="layui-input-block">
-	  <button type="button" class="layui-btn layui-btn-normal" id="LAY-component-form-setval">赋值</button>
+	  <!-- <button type="button" class="layui-btn layui-btn-normal" id="LAY-component-form-setval">赋值</button> -->
       <button id="orderCommit" class="layui-btn" lay-submit="" lay-filter="order">立即提交</button>
       <button type="reset" id="formReset" class="layui-btn layui-btn-primary">重置</button>
       <button type="button" onclick="backcall()" class="layui-btn layui-btn-primary">返回</button>
@@ -255,15 +257,15 @@
       </div>
     </div>
     <div class="layui-inline">
-      <label class="layui-form-label">采购价</label>
-      <div class="layui-input-inline" style="padding:9px">
-      	<label dataType="partCost" name=""></label>
+      <label class="layui-form-label">数量</label>
+      <div class="layui-input-inline">
+      	<input type="text" name="" dataType="num" lay-verify="numb" autocomplete="off" class="layui-input">
       </div>
     </div>
     <div class="layui-inline">
       <label class="layui-form-label">报价</label>
       <div class="layui-input-inline" >
-        <input type="text" dataType="offer" name="" placeholder="￥" autocomplete="off" class="layui-input">
+        <input type="text" dataType="offer" lay-verify="numb" name="" placeholder="" autocomplete="off" class="layui-input">
       </div>
     </div>
     <div class="layui-inline">
@@ -395,6 +397,87 @@
 				  });
 		    	  
 		      break;
+		      case 'redepathOrder':
+		    	  var ids = '';
+		    	  if(checkStatus.data.length < 1){
+		    	  	layer.msg("请选择工单");
+		    	  	return;
+		    	  }
+		    	  for(let i = 0;i<checkStatus.data.length;i++){
+		    		  ids += checkStatus.data[i].id+",";
+		    	  }
+		    	  var userId = "";
+		    	  layer.open({
+						type:0,
+						area: ['400px', '400px'],
+						title:"选择派单人员",
+						content:$("#depathOrder").html(),
+						success: function(layero){
+							var form = layui.form;
+							form.render("radio");
+							form.on('radio', function(data){
+								userId = data.value; //被点击的radio的value值
+							}); 
+					    },
+						yes:function(index, layero){
+							if(userId != ""&&userId != null){
+								$.ajax({
+					                type : "post",
+					                url : "redepathOrders",
+					                async : false,
+					                data : {'ids':ids,'technicianId':userId},  // 你的formid
+					                success : function(data) {
+					                	layer.msg(data.msg);
+					                	if(data.code == 0){
+					                		tableReload();
+					                	}
+					                }
+					            });
+							}
+							        
+						}
+				  });
+		    	  
+		      break;
+		      
+		      case 'arrivalNotice':
+		    	  var ids = '';
+		    	  if(checkStatus.data.length < 1){
+		    	  	layer.msg("请选择工单");
+		    	  	return;
+		    	  }
+		    	  for(let i = 0;i<checkStatus.data.length;i++){
+		    		  ids += checkStatus.data[i].id+",";
+		    	  }
+		    	  var msg = "";
+		    	  $.ajax({
+		                type : "post",
+		                url : "getOrderPartInfo",
+		                async : false,
+		                data : {'ids':ids},  // 你的formid
+		                success : function(data) {
+		                	msg = data.msg;
+		                }
+		            });
+		    	  layer.msg(msg, {
+		    	        time: 20000, //20s后自动关闭
+		    	        btn: ['确定', '取消'],
+		    	        btn1: function(index, layero){
+		    	        	$.ajax({
+				                type : "post",
+				                url : "arrivalNotice",
+				                async : false,
+				                data : {'ids':ids},  // 你的formid
+				                success : function(data) {
+				                	layer.msg(data.msg);
+				                }
+				            });
+		    	        }
+		    	   
+		    	      });	
+		    	  
+		    	  
+		      break;
 		      
 		      //自定义头工具栏右侧图标 - 提示
 		      case 'LAYTABLE_TIP':
@@ -453,6 +536,9 @@
 	                			addPart();
 	                		}
 	                	}
+	                	for (let x in files) {
+	          		          delete files[x];
+	          		    }
 	                	form.val('orderForm', {//filter
 	                		"orderNo": order.orderNo
 	                		,"status": order.status
@@ -478,21 +564,22 @@
 	                		$("#partList input[name='partList["+i+"].opid']").val(order.partList[i].opid);
 	                		$("#partList label[name='partList["+i+"].partCost']").text(order.partList[i].partCost);
 	                		$("#partList input[name='partList["+i+"].offer']").val(order.partList[i].offer);
+	                		$("#partList input[name='partList["+i+"].num']").val(order.partList[i].num);
 	                		
 	                	} 
 	                	form.render("select");
 	                	//文件列表
 	                	var imageUrl = order.imageUrls==null?"":order.imageUrls.split(";")
 	                	for(let index=0;index < imageUrl.length;index++){
-	                		var filename = imageUrl[index].substr(imageUrl[index].indexOf('\\')+1,imageUrl[index].indexOf('-')-1);
-	                		var dfilename = imageUrl[index].substr(imageUrl[index].indexOf('\\')+1,imageUrl[index].length);
+	                		if(imageUrl[index] == null||imageUrl[index] == "") continue;
+	                		var filename = imageUrl[index].substr(0,imageUrl[index].lastIndexOf('-'));
 	                		filename +=imageUrl[index].substr(imageUrl[index].lastIndexOf('.'),imageUrl[index].length);
 	                		var tr = $(['<tr id="upload-edit-'+ index +'">'
 	  	          	      	  ,'<td style="display:none">'+imageUrl[index]+'</td>'
 	  	          	          ,'<td>'+ filename +'</td>'
 	  	          	          ,'<td>'
 	  	          	            ,'<button class="layui-btn layui-btn-xs layui-btn-danger" onclick="editDelteFile(this)">删除</button>'
-	  	          	            ,'<a href="download?path='+dfilename+'" class="layui-btn layui-btn-xs layui-btn-danger" target="_blank">下载</button>'
+	  	          	            ,'<a href="download?path='+imageUrl[index]+'" class="layui-btn layui-btn-xs layui-btn-danger" target="_blank">下载</button>'
 	  	          	          ,'</td>'
 	  	          	          ,'</tr>'].join(''));
 	  	                  
@@ -584,15 +671,40 @@
 		  
 		  upload.render({
 			 elem: '#test20'
+			 ,field:'file[]'
 			 ,url: '../wx/baiduOCR' //改成您自己的上传接口
+			 ,choose: function(obj){
+				    //将每次选择的文件追加到文件队列
+				    files = this.files = obj.pushFile();
+				    fileListView.empty();
+				    delete files[0];
+				    obj.preview(function(index, file, result){
+			        	  var tr = $(['<tr id="upload-'+ index +'">'
+				          ,'<td>'+ file.name +'</td>'
+				          ,'<td>'
+				            ,'<button class="layui-btn layui-btn-xs layui-btn-danger demo-delete">删除</button>'
+				          ,'</td>'
+				          ,'</tr>'].join(''));
+			        
+					        //删除
+					        tr.find('.demo-delete').on('click', function(){
+					          delete files[index]; //删除对应的文件
+					          tr.remove();
+					          uploadListIns.config.elem.next()[0].value = ''; //清空 input file 值，以免删除后出现同名文件不可选
+					        });
+			        
+					        fileListView.append(tr);
+			      	});
+			 }
 			 ,done: function(res){
-			  form.val('orderForm', {//filter
+			  	form.val('orderForm', {//filter
 					"contact": res.contact // "name": "value"
 				    ,"address": res.address
 				    ,"phone": res.phone
 				    ,"facility": res.facility
 				    ,"description": res.description
 				});
+			  	
 			}
 		});
 		  
@@ -606,13 +718,12 @@
 		        return '标题至少得5个字符啊';
 		      }
 		    }
-		    ,pass: [
-		      /^[\S]{6,12}$/
-		      ,'密码必须6到12位，且不能出现空格'
-		    ]
-		    ,content: function(value){
-		      layedit.sync(editIndex);
-		    }
+		    ,numb: function(value){
+			    if(value.length != ""){
+			    	if(!/^[0-9]+(.[0-9]{2})?$/.test(value))
+						return '只能填写数字，且不能出现空格,最多两位小数';
+				}
+			}
 		  });
 		  
 		  //监听提交
@@ -625,8 +736,8 @@
 		    var upkeep = $("input[name='upkeep']").val();
 		    if(upkeep != null&& upkeep != ""){
 			  	var devId = $("select[name='device.id']").val();
-			  	var partLid = $("input[name='partListId']").val();
-			  	var report = $("input[name='report']").val();
+			  	var partLid = $("select[class='partListId']").val();
+			  	var report = $("textarea[name='report']").val();
 			  	if(devId == null||devId ==""){
 				  	layer.msg('设备类型不能为空');
 			  		return false;
@@ -701,9 +812,9 @@
 		  form.on('select(orderPart)', function(data){
 			  var form=layui.form;
 			  var select = data.elem;
-			  var name = $(select).attr("name").replace("id","partCost");
+			  var name = $(select).attr("name").replace("id","offer");
 			  var pastCost = $(select).find("option[value='"+data.value+"']").attr("data-price");
-			  $("label[name='"+name+"']").text(pastCost);
+			  $("input[name='"+name+"']").attr("placeholder","采购价："+pastCost);
 		  }); 
 		 
 		  //表单赋值
@@ -798,7 +909,6 @@
 		function download(button){
 			var tr = $(button).parent().parent();
 			var filename = tr.children("td").eq(0).text();
-			console.log(tr.children("td").eq(0).text());
 			// 构造隐藏的form表单
 			var $form = $("#downloadForm");
 			// 添加提交参数

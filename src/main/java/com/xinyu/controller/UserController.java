@@ -91,6 +91,8 @@ public class UserController {
 		JSONObject jsonOpenID = null; 
 		if(code != null){
 			jsonOpenID = WeiXinUtil.getOpenID(code); 
+			System.out.println(jsonOpenID);
+			System.out.println(code);
 			openID =  (String)jsonOpenID.get("openid");//"oCnlEuFjrHbyecP-JwXMeT0Jcoh8";
 			User userOri = userService.getUserByOpenId(openID); //
 			//WeiXinUtil.getUserInfo(openID); 
@@ -102,8 +104,8 @@ public class UserController {
 			mov.addObject("openId", openID); 
 		}
 		
-		 //mov = new ModelAndView("/mobile/orderList");//已绑定账号
-		 //mov.addObject("type","ten"); mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");
+//		 mov = new ModelAndView("/mobile/orderList");//已绑定账号
+//		 mov.addObject("type","ten"); mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");
 		 
 
 		return mov;

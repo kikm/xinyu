@@ -10,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import com.xinyu.model.User;
 import com.xinyu.service.IOrderService;
 import com.xinyu.service.IUserService;
 import com.xinyu.service.IWxService;
+import com.xinyu.util.FileUpDownLoadUtils;
 import com.xinyu.util.WeiXinUtil;
 
 @RestController
@@ -80,7 +82,7 @@ public class WeiXinController {
 	
 	
 	@RequestMapping("/maintenanceFeedback")
-    public Layui saveOrUpdateOrder(HttpServletRequest request,Order order,String orderId,String technicianOpenId,String report) {
+    public Layui maintenanceFeedback(HttpServletRequest request,Order order,String orderId,String technicianOpenId,String report) {
 		order.setId(Long.valueOf(orderId));
 		order.setReport(report);
 		MultipartHttpServletRequest params=((MultipartHttpServletRequest) request);
@@ -94,8 +96,12 @@ public class WeiXinController {
 		ModelAndView mov = new ModelAndView("/mobile/maintenanceFeedback");//未绑定账号
 		mov.addObject("technicianOpenId", technicianOpenId);
 		mov.addObject("depathUserOpenId", depathUserOpenId);
+		String image = orderService.getOrderImage(orderId);
+		if(StringUtils.isNotBlank(image)){
+			image = image.split(";")[0];
+		}
 		mov.addObject("orderId", orderId);
-
+		mov.addObject("image", image);
 		return mov;
 	}
 	
@@ -185,7 +191,7 @@ public class WeiXinController {
 			mov.addObject("openId", openID); 
 		}
 		
-		mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");
+		//mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");
 
 		return mov;
 	}
@@ -222,9 +228,12 @@ public class WeiXinController {
 	    // 也可以直接通过jvm启动参数设置此环境变量
 	    //System.setProperty("aip.log4j.conf", "path/to/your/log4j.properties");
 	    MultipartHttpServletRequest params=((MultipartHttpServletRequest) request);
-	    List<MultipartFile> files = params.getFiles("file");   
+	    List<MultipartFile> files = params.getFiles("file[]");
+	    if(files == null || files.size() < 1) {
+	    	files = params.getFiles("file");
+	    }
         MultipartFile file = null; 
-        file = files.get(0);    
+        file = files.get(0);
         byte[] bytes = null;
         if (!file.isEmpty()) {    
         	try {    
@@ -252,9 +261,10 @@ public class WeiXinController {
 	        	phone = words;
 	        }
 	        if (words.indexOf("棱")!=-1||words.indexOf("公司")!=-1||words.indexOf("楼")!=-1||words.indexOf("院")!=-1||words.indexOf("房")!=-1||words.indexOf("堂")!=-1||words.indexOf("厦")!=-1) {
-	        	if(words.indexOf("棱")!=-1||words.indexOf("空")!=-1) {
+	        	if(words.indexOf("棱")!=-1||words.indexOf("空")!=-1||words.indexOf("德")!=-1) {
 	        		words = words.replaceAll("棱", "楼");
 	        		words = words.replaceAll("空", "室");
+	        		words = words.replaceAll("德", "物");
 	        	}
 	        	address = words;
 	        }

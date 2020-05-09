@@ -21,6 +21,8 @@
   <input type="hidden" name="phone">
   <input type="hidden" name="contact">
   <input type="hidden" name="facility">
+  <input type="hidden" name="photoname">
+  
   <div class="weui-toptips weui-toptips_success js_tooltips" style="display: none; opacity: 1;">错误提示</div>
   <div class="container js_container" id="container">
   </div>
@@ -57,7 +59,7 @@
                 <div class="weui-tabbar__item" status="QuotedPrice">
                     <div style="display: inline-block; position: relative;">
                         <img src="images/quotedPriceicon.jpg" alt="" class="weui-tabbar__icon">
-                        <span class="weui-badge" style="position: absolute;top: -2px;right: -13px;">8</span>
+                        <span class="weui-badge" style="position: absolute;top: -2px;right: -13px;"></span>
                     </div>
                     <p class="weui-tabbar__label">已报价</p>
                 </div>
@@ -234,6 +236,8 @@
 					$("input[name='upkeep']").val(data.upkeep);
 					$("input[name='phone']").val(data.phone);
 					$("input[name='total']").val(data.total);
+					$("input[name='facility']").val(data.facility);
+					$("input[name='contact']").val(data.contact);
     			}
 			});	
 			$('#hidorderId').val(orderId);
@@ -262,8 +266,9 @@
 						$("input[name='upkeep']").val(data.upkeep);
 						$("input[name='phone']").val(data.phone);
 						$("input[name='total']").val(data.total);
-						$("input[name='total']").val(data.contact);
-						$("input[name='total']").val(data.facility);
+						$("input[name='contact']").val(data.contact);
+						$("input[name='facility']").val(data.facility);
+						$("input[name='photoname']").val(data.imageUrls);
     				}
 				});	
 				$("input[name='operType']").val("complete");
@@ -286,8 +291,18 @@
 		工单维修反馈
 	  </h1>
     </div>
-	<form id='feedbackForm' enctype='multipart/form-data' method='POST'>
     <div class="weui-form__control-area">
+	<div class="weui-cells__group weui-cells__group_form">
+		<div class="weui-cells__title">报修详情</div>
+        <div class="weui-cells weui-cells_form">
+            <div class="weui-cell">
+                <div class="weui-cell__bd">
+                    <img id="orderInfoImage" style="max-width:100%" src="../img" alt="">
+                </div>
+            </div>
+        </div>
+	</div>
+	<form id='feedbackForm' enctype='multipart/form-data' method='POST'>
       <div class="weui-cells__group weui-cells__group_form">
         <div class="weui-cells__title">文本域</div>
         <div class="weui-cells weui-cells_form">
@@ -342,6 +357,8 @@
 		formData.append('technicianOpenId',$('#hidopenId').val());
 		formData.append('depathopenId',$('#hiddepathopenId').val());
 		formData.append('orderId',$('#hidorderId').val());
+		var pname = $("input[name='photoname']").val();
+		$("#orderInfoImage").attr("src","/img/"+pname);
 		var $textarea = $('.weui-textarea');
 		var $tooltips = $('.js_tooltips');
 		var uploadCount = 0;
@@ -537,6 +554,8 @@
 		$('.upkeep').text($("input[name='upkeep']").val());
 		$('.phone').text($("input[name='phone']").val());
 		$('.total').text($("input[name='total']").val());
+		$('.facility').text($("input[name='facility']").val());
+		$('.contact').text($("input[name='contact']").val());
 		var url = type=='confirm'?"wx/cusConfirm":"wx/complete";
 		$('.page__desc').text(type=='confirm'?'报价确认':'完工确认');
 

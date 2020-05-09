@@ -55,7 +55,7 @@ public class WeiXinUtil
 		public static String menu_create_url = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN";
 		
 		public static String menu_delete_url = "https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=ACCESS_TOKEN";
-		
+		 								
 		public static String oauth_url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=APPSECRET&code=LAST_CODE&grant_type=authorization_code";
 		
 		public static String userinfo_url = "https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID";
@@ -68,21 +68,33 @@ public class WeiXinUtil
 		
 		public static String sendTemplateMsg_url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN";
 		
-		public final static String appid = "wx8a556ef7c6e66c7e";//"wxaa2c5483f0eeb6ff";
+		//public final static String appid = "wx8a556ef7c6e66c7e";
+		public final static String appid = "wx5cca62b9889189ab";
 		
-		public final static String AppSecret = "c3f81e702075355137b68fa15cef4128";//"b18343831c4f4f892ec4d03b2b23572c";
-		
+		//public final static String AppSecret = "c3f81e702075355137b68fa15cef4128";
+		public final static String AppSecret = "ebb24c3b2ae010f746ff8701f7019bf0";
 		public final static String encodingAESKey = "F9f8V2GP5ZnOHjLGQUJiFgMvgUdYezrk1vGcNXAP7Kn";
 		
-		public final static String templateId_depath = "SiqAzxib9MSyomsOac-_N2Fzlhf9kRbI_8cJlzBv2kg";
+		//public final static String templateId_depath = "SiqAzxib9MSyomsOac-_N2Fzlhf9kRbI_8cJlzBv2kg";
+		public final static String templateId_depath = "ymsQJae7cfYMexJmEM4dsVeI1pT9T21ps9wga4Ewz_g";
 		
-		public final static String templateId_feedback = "2oFVIB-ZhDf5XOLyUe92y9ilAXI3AfUJUiU0rg0NS4o";
+		//public final static String templateId_feedback = "2oFVIB-ZhDf5XOLyUe92y9ilAXI3AfUJUiU0rg0NS4o";
+		public final static String templateId_feedback = "-9aqEiZ9oVwZ1MbC85Bb9Q2_wT5DF2AvVephy1MtSX0";
 		
-		public final static String templateId_confirm = "KX13m9veQYyxL6SUV5gPd7BOgb7kMLyXYcfr9NPEVlk";
+		//public final static String templateId_confirm = "KX13m9veQYyxL6SUV5gPd7BOgb7kMLyXYcfr9NPEVlk";
+		public final static String templateId_confirm = "lVulVPMdC4V6Cu7iFEAfcaouKCIYahu2zZEWzkKmeZk";
 		
-		public final static String templateId_complete = "mU4Hjuhz1fyl-DU6TEZhQ1bd7rPoUluRs0KDYQ863XI";
+		//public final static String templateId_complete = "mU4Hjuhz1fyl-DU6TEZhQ1bd7rPoUluRs0KDYQ863XI";
+		public final static String templateId_complete = "eBjRLSrHZDW3DxpgZuoLhZE6TNDfWoPZzLe3w-tVuKg";
 		
-		public final static String templateId_price = "zdUWjbrxkshwA7W3aLNSiK2EiVPo781eQUSqbK833z0";
+		//public final static String templateId_price = "zdUWjbrxkshwA7W3aLNSiK2EiVPo781eQUSqbK833z0";
+		public final static String templateId_price = "gQbyUL6TX5JRwpSfVk1q-AzaSwu7cyPNfnpQWxQgjeM";
+		
+		//public final static String templateId_redepath = "sANABUvSRTZsHEmv8py02T_knk4NdbupUp0EPAUZvYc";
+		public final static String templateId_redepath = "1EB94ZOU-SygE61PAXgrazRMd2Gytnm5leUaxSZF-uA";
+		
+		//public final static String templateId_arrnotice = "03kgcS9Qz0Ky7ZfSLPTEHx5HkQrgJRxx7uUVQTcdi8E";
+		public final static String templateId_arrnotice = "vQtSL-TvsBE8P7jEaWcBjaXvxU6_m58xNz5z7rFQ7ks";
 		
 		public final static AccessToken accessToken = new AccessToken();
 		/** 
@@ -181,6 +193,7 @@ public class WeiXinUtil
 		
 		public static JSONObject getOpenID(String code){
 			String url = oauth_url.replace("LAST_CODE", code).replace("APPSECRET", AppSecret).replace("APPID", appid);
+			System.out.println(url);
 			JSONObject jsonObject = httpRequest(url, "GET", null);
 			System.out.println(jsonObject.toString());
 			return jsonObject;
@@ -537,19 +550,19 @@ public class WeiXinUtil
 	        ViewButton btn13 = new ViewButton();  
 	        btn13.setName("技术员入口");  
 	        btn13.setType("view");  
-	        btn13.setUrl("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx8a556ef7c6e66c7e&"
+	        btn13.setUrl("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5cca62b9889189ab&"
 	    			+ "redirect_uri=http%3a%2f%2fwww.xywxfw.com%2fxinyu%2fmobileTenLogin&response_type=code&scope=snsapi_base&state=1#wechat_redirect"); 
 	    
 	        ViewButton btn14 = new ViewButton();  
 	        btn14.setName("发起工单");  
 	        btn14.setType("view");  
-	        btn14.setUrl("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx8a556ef7c6e66c7e&"
+	        btn14.setUrl("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5cca62b9889189ab&"
 	    			+ "redirect_uri=http%3a%2f%2fwww.xywxfw.com%2fxinyu%2fwx%2fstartOrder&response_type=code&scope=snsapi_base&state=1#wechat_redirect"); 
 	        
 	        ViewButton btn21 = new ViewButton();  
 	        btn21.setName("历史订单 ");  
 	        btn21.setType("view");  
-	        btn21.setUrl("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx8a556ef7c6e66c7e&"
+	        btn21.setUrl("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5cca62b9889189ab&"
 	    			+ "redirect_uri=http%3a%2f%2fwww.xywxfw.com%2fxinyu%2fmobileCusLogin&response_type=code&scope=snsapi_base&state=1#wechat_redirect"); 
 	  
 	        CommonButton btn22 = new CommonButton();  
@@ -597,80 +610,130 @@ public class WeiXinUtil
 	    public static Boolean sendTemplate(String openId,String tourl,Map<String,String> msgdata,OrderStatus type,Boolean isUrgent) {
 	    	WeiXinUtil.getAccessToken();
 	    	JSONObject jsonObject = new JSONObject();
+	    	if(StringUtils.isBlank(openId)){
+	    		return Boolean.FALSE;
+	    	}
 	    	jsonObject.put("touser", openId);   // openid
 	    	String color = isUrgent?"#EC0000":"#173177";
+	    	String befo = isUrgent?"【加急】":"";
 	    	JSONObject data = new JSONObject();
 	    	JSONObject first = new JSONObject();
-	    	first.put("value", msgdata.get("orderNo"));
-	    	first.put("color", color);
-	    	data.put("orderNo",first);
 	    	String template_id = "";
 	    	JSONObject keyword1 = new JSONObject();
 	    	JSONObject keyword2 = new JSONObject();
 	    	JSONObject keyword3 = new JSONObject();
 	    	JSONObject keyword4 = new JSONObject();
+	    	JSONObject keyword5 = new JSONObject();
 	    	JSONObject remark = new JSONObject();
+	    	first.put("color", color);
 	    	keyword1.put("color", color);
 	    	keyword2.put("color", color);
 	    	keyword3.put("color", color);
 	    	keyword4.put("color", color);
+	    	keyword5.put("color", color);
 	    	remark.put("color", color);
 	    	if(type.equals(OrderStatus.Dispatched)) {
-	    		template_id = templateId_depath;
-	    		keyword1.put("value", msgdata.get("unit"));
-		    	keyword2.put("value", msgdata.get("contact"));
-		    	keyword3.put("value", msgdata.get("phone"));
-		    	keyword4.put("value", msgdata.get("address"));
-		    	remark.put("value", msgdata.get("description"));
-	    		data.put("unit",keyword1);
-		    	data.put("contact",keyword2);
-		    	data.put("phone",keyword3);
-		    	data.put("address",keyword4);
-		    	data.put("description",remark);
+	    		if(msgdata.get("redepathUser") != null) {
+	    			template_id = templateId_redepath;
+	    			first.put("value", befo+"您好，【"+msgdata.get("unit")+"-"+msgdata.get("contact")+"】上报工单已转派");
+	    			keyword1.put("value", msgdata.get("orderNo"));
+	    			keyword2.put("value", msgdata.get("redepathUser"));
+	    			keyword3.put("value", msgdata.get("redepathUserPhone"));
+	    			remark.put("value", "由【"+msgdata.get("beforeUser")+"】转派到"+msgdata.get("【redepathUser】处理"));
+	    			data.put("first",first);
+	    			data.put("keyword1",keyword1);
+	    			data.put("keyword2",keyword2);
+	    			data.put("keyword3",keyword3);
+	    			data.put("remark",remark);
+	    		}else {
+	    			template_id = templateId_depath;
+	    			first.put("value", befo+"您好，现有【"+msgdata.get("unit")+"-"+msgdata.get("contact")+"】上报一条故障维修工单,由【"+msgdata.get("depathUser")+"】派发，请及时接收处理");
+	    			keyword1.put("value", msgdata.get("orderNo"));
+	    			keyword2.put("value", msgdata.get("description"));
+	    			keyword3.put("value", msgdata.get("date"));
+	    			remark.put("value", msgdata.get("address")+"-联系电话："+msgdata.get("phone"));
+	    			data.put("first",first);
+	    			data.put("keyword1",keyword1);
+	    			data.put("keyword2",keyword2);
+	    			data.put("keyword3",keyword3);
+	    			data.put("remark",remark);
+	    		}
 	    	}else if(type.equals(OrderStatus.MaintenanceFeedback)){
 	    		template_id = templateId_feedback;
-	    		keyword1.put("value", msgdata.get("report"));
-		    	keyword2.put("value", msgdata.get("feedbackTime"));
-		    	keyword3.put("value", msgdata.get("userName"));
-		    	remark.put("value", msgdata.get("phone"));
-	    		data.put("report",keyword1);
-		    	data.put("feedbackTime",keyword2);
-		    	data.put("userName",keyword3);
-		    	data.put("phone",remark);
+    			first.put("value",befo+msgdata.get("orderNo")+"检修完成，反馈时间："+msgdata.get("feedbackTime"));
+	    		keyword1.put("value", msgdata.get("model"));
+		    	keyword2.put("value", msgdata.get("facility"));
+		    	keyword3.put("value", msgdata.get("description"));
+		    	keyword4.put("value", msgdata.get("userName"));
+		    	keyword5.put("value", msgdata.get("report"));
+		    	//remark.put("value", msgdata.get(""));
+		    	data.put("first",first);
+    			data.put("keyword1",keyword1);
+    			data.put("keyword2",keyword2);
+    			data.put("keyword3",keyword3);
+    			data.put("keyword4",keyword4);
+    			data.put("keyword5",keyword5);
+    			//data.put("remark",remark);
 	    	}else if(type.equals(OrderStatus.OrderConfirmed)) {
 	    		template_id = templateId_confirm;
-		    	keyword1.put("value", msgdata.get("userName"));
-		    	keyword2.put("value", msgdata.get("confirmTime"));
-		    	data.put("userName",keyword1);
-		    	data.put("confirmTime",keyword2);
+	    		first.put("value", befo+"工单报价客户账号【"+msgdata.get("confirmUser")+"】已确认通过，开始采购维修");
+    			keyword1.put("value", msgdata.get("total"));
+    			keyword2.put("value", msgdata.get("orderNo"));
+    			keyword3.put("value", "采购维修");
+    			keyword4.put("value", msgdata.get("facility"));
+    			remark.put("value", "确认时间："+msgdata.get("confirmTime"));
+    			data.put("first",first);
+    			data.put("keyword1",keyword1);
+    			data.put("keyword2",keyword2);
+    			data.put("keyword3",keyword3);
+    			data.put("keyword4",keyword4);
+    			data.put("remark",remark);
 	    	}else if(type.equals(OrderStatus.Complete)) {
 	    		template_id = templateId_complete;
-	    		keyword1.put("value", msgdata.get("technician"));
-		    	keyword2.put("value", msgdata.get("depathUser"));
-		    	keyword3.put("value", msgdata.get("phone"));
-		    	keyword4.put("value", msgdata.get("status"));
-		    	remark.put("value", msgdata.get("completeDate"));
-	    		data.put("technician",keyword1);
-		    	data.put("depathUser",keyword2);
-		    	data.put("phone",keyword3);
-		    	data.put("status",keyword4);
-		    	data.put("completeDate",remark);
+	    		first.put("value","您好，设备【"+msgdata.get("facility"+"】故障已修复"));
+	    		keyword1.put("value", msgdata.get("orderNo"));
+		    	keyword2.put("value", msgdata.get("facility"));
+		    	keyword3.put("value", msgdata.get("description"));
+		    	keyword4.put("value", msgdata.get("report"));
+		    	keyword5.put("value", msgdata.get("completeDate"));
+		    	remark.put("value", "维修技术员："+msgdata.get("technician")+" 联系电话"+msgdata.get("phone"));
+		    	data.put("first",first);
+    			data.put("keyword1",keyword1);
+    			data.put("keyword2",keyword2);
+    			data.put("keyword3",keyword3);
+    			data.put("keyword4",keyword4);
+    			data.put("keyword5",keyword5);
+    			data.put("remark",remark);
 	    	}else if(type.equals(OrderStatus.QuotedPrice)) {
 	    		template_id = templateId_price;
-	    		keyword1.put("value", msgdata.get("deviceName"));
-		    	keyword2.put("value", msgdata.get("description"));
-		    	keyword3.put("value", msgdata.get("report"));
-		    	keyword4.put("value", msgdata.get("total"));
-		    	remark.put("value", msgdata.get("phone"));
-	    		data.put("deviceName",keyword1);
-		    	data.put("description",keyword2);
-		    	data.put("report",keyword3);
-		    	data.put("total",keyword4);
-		    	data.put("phone",remark);
+	    		first.put("value","您好，工单编号："+msgdata.get("orderNo")+"维修设备【"+msgdata.get("facility"+"】总价:"+msgdata.get("total")+"，请确认"));
+	    		keyword1.put("value", msgdata.get("cusInfo"));
+		    	keyword2.put("value", msgdata.get("facility")+msgdata.get("description")+"维修");
+		    	keyword3.put("value", msgdata.get("address"));
+		    	keyword4.put("value", msgdata.get("priceDate"));
+		    	remark.put("value", "咨询电话："+msgdata.get("phone"));
+		    	data.put("first",first);
+    			data.put("keyword1",keyword1);
+    			data.put("keyword2",keyword2);
+    			data.put("keyword3",keyword3);
+    			data.put("keyword4",keyword4);
+    			data.put("keyword5",keyword5);
+    			data.put("remark",remark);
+	    	}else {
+	    		template_id = templateId_arrnotice;
+	    		first.put("value","您好，工单编号："+msgdata.get("orderNo")+"维修设备已到货");
+	    		keyword1.put("value", msgdata.get("partList"));
+		    	keyword2.put("value", msgdata.get("number"));
+		    	keyword3.put("value", msgdata.get("arrTime"));
+		    	//remark.put("value", "咨询电话："+msgdata.get("phone"));
+		    	data.put("first",first);
+		    	data.put("keyword1",keyword1);
+    			data.put("keyword2",keyword2);
+    			data.put("keyword3",keyword3);
+    			//data.put("remark",remark);
 	    	}
 	    	jsonObject.put("template_id", template_id);
 	    	jsonObject.put("url", tourl);
-	    	
 	    	jsonObject.put("data", data);
 	    	String jsonData = JSONObject.fromObject(jsonObject).toString();
 	    	String url = sendTemplateMsg_url.replace("ACCESS_TOKEN", accessToken.getToken());

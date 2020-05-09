@@ -93,8 +93,11 @@ public class OrderController {
 
 	@RequestMapping("/saveOrUpdateOrder")
 	@ResponseBody
-	public Layui saveOrUpdateOrder(HttpServletRequest request, Order order, String deleteFile, String deleteOrderPart) {
+	public Layui saveOrUpdateOrder(HttpServletRequest request,@SessionAttribute(Constance.USER_ID)String depathUserId, Order order, String deleteFile, String deleteOrderPart) {
 		MultipartHttpServletRequest params = ((MultipartHttpServletRequest) request);
+		if(order.getDepathUser() == null&&order.getUpkeep()!= null) {
+			order.setDepathUser(depathUserId);
+		}
 		Layui result = orderService.saveOrUpdateOrder(params, order, deleteFile, deleteOrderPart);
 
 		return result;
@@ -104,6 +107,14 @@ public class OrderController {
 	@ResponseBody
 	public Order getOrderInfo(Long id) {
 		Order result = orderService.getOrderById(id);
+
+		return result;
+	}
+	
+	@RequestMapping("/getOrderPartInfo")
+	@ResponseBody
+	public Layui getOrderPartInfo(String ids) {
+		Layui result = orderService.getOrderPartByIds(ids);
 
 		return result;
 	}
@@ -121,6 +132,23 @@ public class OrderController {
 	public Layui depathOrder(String ids, String technicianId,
 			@SessionAttribute(Constance.USER_ID) String depathUserId) {
 		Layui result = orderService.depathOrder(ids, technicianId, depathUserId);
+
+		return result;
+	}
+	
+	@RequestMapping("/redepathOrders")
+	@ResponseBody
+	public Layui redepathOrder(String ids, String technicianId,
+			@SessionAttribute(Constance.USER_ID) String depathUserId) {
+		Layui result = orderService.redepathOrder(ids, technicianId, depathUserId);
+
+		return result;
+	}
+	
+	@RequestMapping("/arrivalNotice")
+	@ResponseBody
+	public Layui arrivalNotice(String ids) {
+		Layui result = orderService.arrivalNotice(ids);
 
 		return result;
 	}

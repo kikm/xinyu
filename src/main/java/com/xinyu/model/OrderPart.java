@@ -6,7 +6,7 @@ public class OrderPart extends Part{
 	private String orderNo;
 	private Long orderId;
 	private Float offer;
-	private Integer num = 1;
+	private Integer num;
 	
 	
 	public Long getOpid() {

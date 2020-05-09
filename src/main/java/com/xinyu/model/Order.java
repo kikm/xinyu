@@ -12,6 +12,7 @@ public class Order implements Serializable {
 	private Long id;
 	private String orderNo;
 	private Boolean isUrgent = false;
+	private Boolean isRedepath = false;
 	private Unit unit;
 	private String contact;
 	private String address;
@@ -34,6 +35,7 @@ public class Order implements Serializable {
 	private Date feedbackDate;
 	private String confirmUser;
 	private Date createDate;
+	private Date arrivalDate;
 	public Long getId() {
 		return id;
 	}
@@ -184,6 +186,20 @@ public class Order implements Serializable {
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
 	}
+	public Boolean getIsRedepath() {
+		return isRedepath;
+	}
+	public void setIsRedepath(Boolean isRedepath) {
+		this.isRedepath = isRedepath;
+	}
+	public Date getArrivalDate() {
+		return arrivalDate;
+	}
+	public void setArrivalDate(Date arrivalDate) {
+		this.arrivalDate = arrivalDate;
+	}
+	
+	
 	
 	
 	

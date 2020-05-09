@@ -51,5 +51,13 @@ public interface IOrderService {
 	public List<OrderBean> getOrderListByStatusList(Order order, List<OrderStatus> statusList);
 
 	public Map<String, Integer> getDepathCount();
+
+	public String getOrderImage(String orderId);
+
+	public Layui redepathOrder(String ids, String technicianId, String depathUserId);
+
+	public Layui arrivalNotice(String ids);
+
+	public Layui getOrderPartByIds(String ids);
 	
 }

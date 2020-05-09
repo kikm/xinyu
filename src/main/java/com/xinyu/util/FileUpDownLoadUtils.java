@@ -24,7 +24,7 @@ import org.springframework.http.ResponseEntity;
 
 public class FileUpDownLoadUtils {
 	
-	private static String usrDir = "C:\\xinyu\\orderImage";
+	private static String usrDir = "C:\\xinyu\\orderImage\\";
 
 	/**
      * 根据路径确定目录，没有目录，则创建目录
@@ -53,7 +53,7 @@ public class FileUpDownLoadUtils {
         String filenameStr = fileName.substring(0, fileName.lastIndexOf("."));// 去掉后缀的文件名
         String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);// 后缀
         if (fileName.trim() != "") {// 如果名称不为"",说明该文件存在，否则说明该文件不存在
-            path += "\\" + filenameStr +"-"+ nowStr + "." + suffix;// 定义上传路径
+            path += filenameStr +"-"+ nowStr + "." + suffix;// 定义上传路径
         }
         return path;
     }
@@ -93,7 +93,7 @@ public class FileUpDownLoadUtils {
 	 */
 	public static void download(String path, HttpServletResponse response) {
 		try {
-			File file = new File(usrDir +"\\"+ path);
+			File file = new File(usrDir + path);
 			if (!file.exists()) {
 				response.setContentType("text/html;charset=utf-8");
 				response.getWriter().print("找不到指定的文件");

@@ -105,6 +105,10 @@ public class OrderService implements IOrderService {
 		OrderBean oBean = this.OrderToOrderBean(orderList).get(0);
 		User u = userDao.findByUserId(orderResult.getDepathUser());
 		oBean.setPhone(u.getTelephone());
+		if(StringUtils.isNotBlank(oBean.getImageUrls())) {
+			String firstImage = oBean.getImageUrls().split(";")[0];
+			oBean.setImageUrls(firstImage);
+		}
 		return oBean;
 	}
 	
@@ -127,12 +131,13 @@ public class OrderService implements IOrderService {
 			bean.setOrderNo(o.getOrderNo());
 			bean.setUpkeep(o.getUpkeep());
 			bean.setSn(o.getSn());
+			bean.setImageUrls(o.getImageUrls());
 			result.add(bean);
 			
 			if(o.getUpkeep() != null) {
 				float total = o.getUpkeep();
 				for(OrderPart op : o.getPartList()) {
-					total +=op.getOffer();
+					total +=op.getOffer()*op.getNum();
 				}
 				bean.setTotal(total);
 			}
@@ -207,7 +212,20 @@ public class OrderService implements IOrderService {
 	public Layui saveOrUpdateOrder(MultipartHttpServletRequest params,Order order,String deleteFile,String deleteOrderPart) {
 		
 		
-        List<MultipartFile> files = params.getFiles("file");   
+		Boolean isNew = order.getId() == null?true:false;
+        List<MultipartFile> files = params.getFiles("file[]");
+        String oldOI = "";
+        String keepImg = "";
+        if(!isNew) {
+        	oldOI = orderDao.getOrderImages(String.valueOf(order.getId()));
+        	if(StringUtils.isNotBlank(oldOI)) {
+        		String[] fileArr = oldOI.split(";");
+        		for(String f : fileArr) {
+        			keepImg += deleteFile.indexOf(f)!=-1?"":f+";";
+        		}
+        		
+        	}
+        }
         MultipartFile file = null; 
         String imageurls = "";
         for (int i = 0; i < files.size(); ++i) {    
@@ -217,13 +235,14 @@ public class OrderService implements IOrderService {
                     byte[] bytes = file.getBytes();    
                     String imageUrl = FileUpDownLoadUtils.uploadFile(bytes,file.getOriginalFilename());
                     imageurls += imageUrl+";";
+                    keepImg += imageUrl+";";
                 } catch (Exception e) {
                 	e.printStackTrace();
                     return Layui.data("保存图片错误",1, 0, null);  
                 }    
             }
         }  
-        order.setImageUrls(imageurls.length()>1?imageurls.substring(0,imageurls.length()-1):null);
+        order.setImageUrls(keepImg.length()>1?keepImg:null);
         if(order.getUpkeep() == null) {
 			order.setStatus(OrderStatus.preOrder);
 		}else {
@@ -231,7 +250,7 @@ public class OrderService implements IOrderService {
 		}
         synchronized(order) {
         	try {
-        		Boolean isNew = order.getId() == null?true:false;
+        		
         		if(isNew) {
         			order.setCreateDate(new Date());
         		}
@@ -269,16 +288,20 @@ public class OrderService implements IOrderService {
         			}
         		}
         		if(OrderStatus.QuotedPrice.equals(order.getStatus())) {
+        			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         			List<User> userList = userDao.getUserListByUnit(order.getUnit().getId());
         			if(userList != null&&userList.size()>0) {
         				Order temp = orderDao.getDepathAndTechUser(order.getId());
-        				User duser = userDao.findByUserId(temp.getDepathUser());
+        				User duser = userDao.findByUserId(temp.getDepathUser() == null?order.getDepathUser():temp.getDepathUser());
         				Map<String,String> data = new HashMap<String,String>();
         				data.put("orderNo", order.getOrderNo());
-        				data.put("deviceName", temp.getFacility());
+        				data.put("facility", temp.getFacility());
         				data.put("description", order.getDescription());
         				data.put("report", order.getReport());
+        				data.put("address", order.getAddress());
+        				data.put("cusInfo", order.getUnit().getName()+order.getContact());
         				data.put("partCost", order.getOrderNo());
+        				data.put("priceDate", sdf.format(new Date()));
         				data.put("upkeep",String.valueOf(order.getUpkeep()));
         				float total = order.getUpkeep();
         				for(OrderPart op : order.getPartList()) {
@@ -308,9 +331,8 @@ public class OrderService implements IOrderService {
 
 	@Override
 	public Layui depathOrder(String ids,String technicianId,String depathUserId) {
-		//WeiXinUtil.deleteMenu();
-		//WeiXinUtil.createMenu(WeiXinUtil.getMenu());
-		//WeiXinUtil.setIndustry();
+		WeiXinUtil.deleteMenu();
+		WeiXinUtil.createMenu(WeiXinUtil.getMenu());
 		String[] idarr = ids.split(",");
 		List<Long> idList = new ArrayList<Long>();
 		for(String id : idarr) {
@@ -329,9 +351,72 @@ public class OrderService implements IOrderService {
 		if(depathuser == null) depathuser = userDao.findByOpenId(depathUserId);
 		List<Order> orderList = orderDao.getOrderByIds(idList);
 		Map<String,String> data = new HashMap<String,String>();
-		String msg = "派送成功";
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		data.put("depathUser", depathuser.getName());
+		data.put("date", sdf.format(new Date()));
+		String msg = "派送结果";
 		for(Order order : orderList) {
-			if(order.getStatus() != OrderStatus.preOrder) {
+			if(order.getStatus() != OrderStatus.preOrder&&order.getStatus() != OrderStatus.QuotedPrice) {
+				continue;
+			}
+			data.put("orderNo", order.getOrderNo());
+			data.put("address", order.getAddress());
+			data.put("contact", order.getContact());
+			data.put("phone", order.getPhone());
+			data.put("unit", order.getUnit().getName());
+			data.put("description", order.getDescription());
+			String url = "http://xywxfw.com/xinyu/wx/preFeedback?technicianOpenId="+user.getOpenID()+"&orderId="+order.getId()+"&depathUserOpenId="+depathuser.getOpenID();
+			Order orderTemp = new Order();
+			orderTemp.setId(order.getId());
+			if(order.getStatus() == OrderStatus.preOrder)
+				orderTemp.setStatus(OrderStatus.Dispatched);
+			else {
+				orderTemp.setStatus(order.getStatus());
+				url = "http://xywxfw.com/xinyu/wx/preComplete?technicianOpenId="+user.getOpenID()+"&orderId="+order.getId()+"&depathUserOpenId="+depathuser.getOpenID();
+			}
+			Boolean isSend = WeiXinUtil.sendTemplate(user.getOpenID(),url,data,OrderStatus.Dispatched,order.getIsUrgent());
+			orderTemp.setDepathDate(new Date());
+			orderTemp.setDepathUser(depathUserId);
+			orderTemp.setTechnician(technicianId);
+			if(isSend) {
+				orderDao.updateOrderStatus(orderTemp);
+				msg += order.getOrderNo()+":"+"派送成功";
+			}else {
+				msg += order.getOrderNo()+":"+"派送失败";
+			}
+		}
+		return Layui.data(msg, 0, 0, null);
+	}
+	
+	@Override
+	public Layui redepathOrder(String ids,String technicianId,String depathUserId) {
+		String[] idarr = ids.split(",");
+		List<Long> idList = new ArrayList<Long>();
+		for(String id : idarr) {
+			if(StringUtils.isNotBlank(id)) {
+				idList.add(Long.valueOf(id));
+			}
+		}
+		if(StringUtils.isBlank(technicianId)) {
+			return Layui.data("未选择派单人员", 1, 0, null);
+		}
+		User user = userDao.findByUserId(technicianId);
+		if(StringUtils.isBlank(user.getOpenID())) {
+			return Layui.data("技术人员未绑定账号，无法派单", 1, 0, null);
+		}
+		User depathuser = userDao.findByUserId(depathUserId);
+		if(depathuser == null) depathuser = userDao.findByOpenId(depathUserId);
+		List<Order> orderList = orderDao.getOrderByIds(idList);
+		Map<String,String> data = new HashMap<String,String>();
+		String msg = "转派成功";
+		for(Order order : orderList) {
+			User beforeUser = userDao.findByUserId(order.getTechnician());
+			if(order.getStatus() == OrderStatus.Dispatched&&order.getIsRedepath()) {
+				msg += order.getOrderNo()+":"+"已转派一次，不能多次转派";
+				continue;
+			}
+			if(technicianId.equals(order.getTechnician())) {
+				msg += order.getOrderNo()+":"+"转派人与原技术人一致";
 				continue;
 			}
 			data.clear();
@@ -341,19 +426,81 @@ public class OrderService implements IOrderService {
 			data.put("phone", order.getPhone());
 			data.put("unit", order.getUnit().getName());
 			data.put("description", order.getDescription());
+			data.put("redepathUser", user.getName());
+			data.put("redepathUserPhone", user.getTelephone());
+			data.put("beforeUser", beforeUser.getName());
 			String url = "http://xywxfw.com/xinyu/wx/preFeedback?technicianOpenId="+user.getOpenID()+"&orderId="+order.getId()+"&depathUserOpenId="+depathuser.getOpenID();
-			Boolean isSend = WeiXinUtil.sendTemplate(user.getOpenID(),url,data,OrderStatus.Dispatched,order.getIsUrgent());
 			Order orderTemp = new Order();
+			if(order.getStatus() == OrderStatus.preOrder)
+				orderTemp.setStatus(OrderStatus.Dispatched);
+			else {
+				orderTemp.setStatus(order.getStatus());
+				url = "http://xywxfw.com/xinyu/wx/preComplete?technicianOpenId="+user.getOpenID()+"&orderId="+order.getId()+"&depathUserOpenId="+depathuser.getOpenID();
+			}
+			Boolean isSend = WeiXinUtil.sendTemplate(user.getOpenID(),url,data,OrderStatus.Dispatched,order.getIsUrgent());
+			WeiXinUtil.sendTemplate(beforeUser.getOpenID(),url,data,OrderStatus.Dispatched,order.getIsUrgent());
 			orderTemp.setId(order.getId());
 			orderTemp.setStatus(OrderStatus.Dispatched);
+			orderTemp.setIsRedepath(true);
 			orderTemp.setDepathDate(new Date());
 			orderTemp.setDepathUser(depathUserId);
 			orderTemp.setTechnician(technicianId);
 			if(isSend) {
 				orderDao.updateOrderStatus(orderTemp);
-				msg += order.getOrderNo()+":"+"派送成功";
+				msg += order.getOrderNo()+":"+"转派成功";
 			}else {
-				msg += order.getOrderNo()+":"+"派送失败";
+				msg += order.getOrderNo()+":"+"转派失败";
+			}
+		}
+		return Layui.data(msg, 0, 0, null);
+	}
+	
+	@Override
+	public Layui arrivalNotice(String ids) {
+		String[] idarr = ids.split(",");
+		List<Long> idList = new ArrayList<Long>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		for(String id : idarr) {
+			if(StringUtils.isNotBlank(id)) {
+				idList.add(Long.valueOf(id));
+			}
+		}
+		List<Order> orderList = orderDao.getOrderByIds(idList);
+		Map<String,String> data = new HashMap<String,String>();
+		String msg = "";
+		for(Order order : orderList) {
+			if(StringUtils.isBlank(order.getTechnician())) {
+				msg += order.getOrderNo()+":"+"工单未派单";
+				continue;
+			}
+			if(order.getArrivalDate() != null) {
+				msg += order.getOrderNo()+":"+"到货通知已发送";
+				continue;
+			}
+			User user = userDao.findByUserId(order.getTechnician());
+			if(order.getStatus() != OrderStatus.preOrder&&order.getStatus() != OrderStatus.OrderConfirmed) {
+				continue;
+			}
+			data.clear();
+			data.put("orderNo", order.getOrderNo());
+			data.put("description", order.getDescription());
+			data.put("report", order.getReport());
+			String partList = "";
+			Integer number = 0;
+			for(OrderPart op : order.getPartList()) {
+				partList = partList+op.getName()+"/";
+				number = number+op.getNum();	
+			}
+			data.put("partList", partList.length()>1?partList.substring(0,partList.length()-1):order.getDevice().getName());
+			data.put("number", String.valueOf(number));
+			data.put("arrTime", sdf.format(new Date()));
+			order.setArrivalDate(new Date());
+			Boolean isSend = WeiXinUtil.sendTemplate(user.getOpenID(),null,data,OrderStatus.Finish,order.getIsUrgent());
+			if(isSend) {
+				orderDao.updateArrivalTime(order);
+				msg += order.getOrderNo()+":"+"通知成功";
+			}else {
+				msg += order.getOrderNo()+":"+"通知失败";
 			}
 		}
 		return Layui.data(msg, 0, 0, null);
@@ -397,6 +544,9 @@ public class OrderService implements IOrderService {
 		Map<String,String> data = new HashMap<String,String>();
 		data.put("orderNo", temp.getOrderNo());
 		data.put("report", order.getReport());
+		data.put("model", temp.getSn());
+		data.put("facility", temp.getFacility());
+		data.put("description", temp.getDescription());
 		data.put("feedbackTime",sdf.format(new Date()));
 		data.put("userName", user.getName());
 		data.put("phone", user.getTelephone());
@@ -413,14 +563,17 @@ public class OrderService implements IOrderService {
 		order.setConfirmUser(confirmUser.getId());
 		orderDao.updateOrderStatus(order);
 		Order otemp = orderDao.getDepathAndTechUser(Long.valueOf(orderId));
+		OrderBean obean = this.getOrderBeanById(Long.valueOf(orderId));
 		User duser = userDao.findByUserId(otemp.getDepathUser());
 		User tuser = userDao.findByUserId(otemp.getTechnician());
         String strDateFormat = "yyyy-MM-dd HH:mm:ss";
         SimpleDateFormat sdf = new SimpleDateFormat(strDateFormat);
 		Map<String,String> data = new HashMap<String,String>();
 		data.put("orderNo", otemp.getOrderNo());
+		data.put("confirmUser", confirmUser.getName());
+		data.put("facility", obean.getFacility());
 		data.put("confirmTime",sdf.format(new Date()));
-		data.put("userName", duser.getName());
+		data.put("total",String.valueOf(obean.getTotal()));
 		String url = "http://xywxfw.com/xinyu/wx/preComplete?technicianOpenId="+tuser.getOpenID()+"&orderId="+order.getId()+"&depathUserOpenId="+duser.getOpenID();
 		//通知客服和技术人员
 		WeiXinUtil.sendTemplate(duser.getOpenID(),url,data,OrderStatus.OrderConfirmed,otemp.getIsUrgent());
@@ -492,6 +645,39 @@ public class OrderService implements IOrderService {
 	        }
 	    }
 	    return baseMap;
+	}
+
+	@Override
+	public String getOrderImage(String orderId) {
+		String images = orderDao.getOrderImages(orderId);
+		return images;
+	}
+
+	@Override
+	public Layui getOrderPartByIds(String ids) {
+		String[] idarr = ids.split(",");
+		List<Long> idList = new ArrayList<Long>();
+		for(String id : idarr) {
+			if(StringUtils.isNotBlank(id)) {
+				idList.add(Long.valueOf(id));
+			}
+		}
+		List<OrderPart> opList = orderDao.getOrderPartByIds(idList);
+		String msg = "到货配件确认：<br/>";
+		Map<String,String> map = new HashMap<String,String>();
+		for(OrderPart op : opList) {
+			if(map.get(op.getOrderNo()) == null)
+				map.put(op.getOrderNo(), op.getName()+"/"+op.getNum()+"\r\n");
+			else {
+				String value = map.get(op.getOrderNo());
+				value = value + op.getName()+"/"+op.getNum()+"\r\n";
+				map.put(op.getOrderNo(), value);
+			}
+		}
+		for(String key : map.keySet()) {
+			msg = msg+key+":"+map.get(key)+"<br/>";
+		}
+		return Layui.data(msg, 0, 0, null);
 	}
 
 }

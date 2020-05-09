@@ -54,10 +54,10 @@
           </div>
 		  <div class="weui-cell weui-cell_active">
             <div class="weui-cell weui-cell_active weui-cell_access weui-cell_select weui-cell_select-after" style="padding-left: 1px;">
+				<input type="hidden" name="unit.id">
             	<div class="weui-cell__hd">单位</div>
             	<div class="weui-cell__bd"  data="" style="padding-left: 58px;" id="showPicker">请选择</div>
-				<input type="hidden" name="unit.id">
-          </div>
+          	</div>
           </div>
 		  <div class="weui-cell weui-cell_active weui-cell_switch">
                 <div class="weui-cell__bd">加急</div>
@@ -131,6 +131,7 @@
 </div>
 
 <script type="text/javascript">
+    var files;
     $(function(){
 		var formData = new FormData($( "#feedbackForm" )[0]); 
 		formData.append('openId',$('#hidopenId').val());
@@ -142,7 +143,7 @@
    			url: 'baiduOCR',
    			auto: true,
    			type: 'file',
-   			fileVal: 'file',
+   			fileVal: 'file[]',
    			compress: {
        			width: 1600,
        			height: 1600,
@@ -168,10 +169,10 @@
        			}
        			++uploadCount;
 				$('#uploadCount').text(uploadCount);
+				files = this.files;
        			// return true; // 阻止默认行为，不插入预览图的框架
    			},
    			onQueued: function(){
-       			console.log(this);
 				
        			// console.log(this.status); // 文件的状态：'ready', 'progress', 'success', 'fail'
        			// console.log(this.base64); // 如果是base64上传，file.base64可以获得文件的base64
@@ -182,18 +183,15 @@
        			// return true; // 阻止默认行为，不显示预览图的图像
    			},
    			onBeforeSend: function(data, headers){
-       			console.log(this, data, headers);
        			// $.extend(data, { test: 1 }); // 可以扩展此对象来控制上传参数
        			// $.extend(headers, { Origin: 'http://127.0.0.1' }); // 可以扩展此对象来控制上传头部
 
        			// return false; // 阻止文件上传
    			},
    			onProgress: function(procent){
-       			console.log(this, procent);
        			// return true; // 阻止默认行为，不使用默认的进度显示
    			},
    			onSuccess: function (ret) {
-				console.log(ret);
        			$("input[name='phone']").val(ret.phone);
 				$("input[name='contact']").val(ret.contact);
 				$("input[name='address']").val(ret.address);
@@ -243,12 +241,36 @@
 		$('#showTooltips').on('click', function(){
         	if ($(this).hasClass('weui-btn_disabled')) return;
 			formData = new FormData($( "#feedbackForm" )[0]);
+			formData.append("file[]",files);
 			$(this).addClass('weui-btn_disabled');
 			var button = $(this);
           	var $value = $textarea.val();
-                
+			var unit = $('input[name="unit.id"]').val()
+			var phone = $("input[name='phone']").val();
+			var contact = $("input[name='contact']").val();
+			var address = $("input[name='address']").val();
+			var facility = $("input[name='facility']").val();
+			var msg = "";
+			if(unit == ''){
+				msg = "请选择单位";
+            }else if(phone == ''){
+				msg = "请填写联系方式";
+			}else if(phone == ''){
+				msg = "请填写联系人";
+			}else if(phone == ''){
+				msg = "请填写地址";
+			}else if(phone == ''){
+				msg = "请填写设备类型";
+			}    
+			if(msg != ""){ 
+				$tooltips.text(msg);
+            	$tooltips.fadeIn(100);
+            	setTimeout(function () {
+              		$tooltips.fadeOut(100);
+            	}, 2000);
+				return;
+			}
           	if($value.length == ''){
-            	$cell.addClass('weui-cell_warn');
             	$tooltips.fadeIn(100);
             	setTimeout(function () {
               		$tooltips.fadeOut(100);
@@ -324,7 +346,7 @@
 
         $('#showTooltipsDepath').on('click', function(){
 			$('#showTooltipsDepath').addClass('weui-btn_disabled');
-			var did = $("input[name='technicianId']").val();
+			var did = $("input[name='technicianId']:checked").val();
 			var openId = $('#hidopenId').val();
 			var orderId = $('#orderId').val();
             $.ajax({

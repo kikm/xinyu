@@ -10,6 +10,7 @@
 <body ontouchstart>
   <input type="hidden" id="hidopenId" name="technicianOpenId" th:value="${technicianOpenId}">
   <input type="hidden" id="hidorderId" name="Id" th:value="${orderId}">
+  <input type="hidden" id="photoname" th:value="${image}">
   <div class="weui-toptips weui-toptips_warn js_tooltips"></div>
 
   <div class="container js_container" id="container">
@@ -31,7 +32,7 @@
         <div class="weui-cells weui-cells_form">
             <div class="weui-cell">
                 <div class="weui-cell__bd">
-                    <img src="../img/1584695950769-20200320051918815.jpg" alt="">
+                    <img id="orderInfoImage" style="max-width:100%" src="../img" alt="">
                 </div>
             </div>
         </div>
@@ -99,6 +100,8 @@
 		var formData = new FormData($( "#feedbackForm" )[0]); 
 		formData.append('technicianOpenId',$('#hidopenId').val());
 		formData.append('orderId',$('#hidorderId').val());
+		var pname = $("#photoname").val();
+		$("#orderInfoImage").attr("src","/img/"+pname);
 		var $textarea = $('.weui-textarea');
 		var $tooltips = $('.js_tooltips');
 		var $loadingToast = $('#loadingToast');
@@ -195,8 +198,6 @@
             	}, 2000);
           	}else{
 				formData.append('report',$value);
-				$tooltips.css('display','block');
-				$tooltips.text('数据提交中');
 				$.ajax({
     				url:"maintenanceFeedback",    //请求的url地址
     				async:false,
@@ -205,7 +206,8 @@
 					contentType: false,   //jax 中 contentType 设置为 false 是为了避免 JQuery 对其操作，从而失去分界符，而使服务器不能正常解析文件
                 	processData: false,
     				success:function(req){
-						$loadingToast.fadeOut(100);
+						$tooltips.css('display','block');
+						$loadingToast.fadeOut();
 						$tooltips.text(req.msg);
 						if(req.code == 0){
 							$tooltips.removeClass('weui-toptips_warn');

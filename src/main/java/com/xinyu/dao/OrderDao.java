@@ -43,4 +43,11 @@ public interface OrderDao {
 	public List<Order> getOrderCriteriaQueryByStatusList(Order order, List<OrderStatus> list);
 	
 	public List<Map<String, Object>> getDepathCount();
+
+	public String getOrderImages(String orderId);
+	
+	public void updateArrivalTime(@Param("order")Order order);
+
+	public List<OrderPart> getOrderPartByIds(List<Long> list);
+
 }
