@@ -132,6 +132,7 @@ public class OrderService implements IOrderService {
 			bean.setUpkeep(o.getUpkeep());
 			bean.setSn(o.getSn());
 			bean.setImageUrls(o.getImageUrls());
+			bean.setTechName(o.getTechName());
 			result.add(bean);
 			
 			if(o.getUpkeep() != null) {
@@ -299,7 +300,7 @@ public class OrderService implements IOrderService {
         				data.put("description", order.getDescription());
         				data.put("report", order.getReport());
         				data.put("address", order.getAddress());
-        				data.put("cusInfo", order.getUnit().getName()+order.getContact());
+        				data.put("cusInfo", order.getContact());
         				data.put("partCost", order.getOrderNo());
         				data.put("priceDate", sdf.format(new Date()));
         				data.put("upkeep",String.valueOf(order.getUpkeep()));
@@ -331,8 +332,8 @@ public class OrderService implements IOrderService {
 
 	@Override
 	public Layui depathOrder(String ids,String technicianId,String depathUserId) {
-		WeiXinUtil.deleteMenu();
-		WeiXinUtil.createMenu(WeiXinUtil.getMenu());
+		//WeiXinUtil.deleteMenu();
+		//WeiXinUtil.createMenu(WeiXinUtil.getMenu());
 		String[] idarr = ids.split(",");
 		List<Long> idList = new ArrayList<Long>();
 		for(String id : idarr) {
@@ -376,7 +377,7 @@ public class OrderService implements IOrderService {
 			}
 			Boolean isSend = WeiXinUtil.sendTemplate(user.getOpenID(),url,data,OrderStatus.Dispatched,order.getIsUrgent());
 			orderTemp.setDepathDate(new Date());
-			orderTemp.setDepathUser(depathUserId);
+			orderTemp.setDepathUser(depathuser.getId());
 			orderTemp.setTechnician(technicianId);
 			if(isSend) {
 				orderDao.updateOrderStatus(orderTemp);
@@ -385,7 +386,10 @@ public class OrderService implements IOrderService {
 				msg += order.getOrderNo()+":"+"派送失败";
 			}
 		}
-		return Layui.data(msg, 0, 0, null);
+		Map<String ,Integer> count = this.getDepathCount();
+		List<Map<String ,Integer>> list = new ArrayList<Map<String ,Integer>>();
+		list.add(count);
+		return Layui.data(msg, 0, 0, list);
 	}
 	
 	@Override
@@ -479,6 +483,7 @@ public class OrderService implements IOrderService {
 			}
 			User user = userDao.findByUserId(order.getTechnician());
 			if(order.getStatus() != OrderStatus.preOrder&&order.getStatus() != OrderStatus.OrderConfirmed) {
+				msg = order.getOrderNo()+":工单状态已过期";
 				continue;
 			}
 			data.clear();
@@ -596,6 +601,9 @@ public class OrderService implements IOrderService {
         SimpleDateFormat sdf = new SimpleDateFormat(strDateFormat);
 		Map<String,String> data = new HashMap<String,String>();
 		data.put("orderNo", otemp.getOrderNo());
+		data.put("facility", otemp.getFacility());
+		data.put("description", otemp.getDescription());
+		data.put("report", otemp.getReport());
 		data.put("technician",tuser.getName());
 		data.put("depathUser", duser.getName());
 		data.put("phone", duser.getTelephone());
@@ -636,7 +644,7 @@ public class OrderService implements IOrderService {
 	        String base = null;
 	        Integer fare = null;
 	        for (Map.Entry<String,Object>  entry:map.entrySet()) {
-	            if ("user_name".equals(entry.getKey())) {
+	            if ("idname".equals(entry.getKey())) {
 	                base =  String.valueOf(entry.getValue());
 	            }else if ("count".equals(entry.getKey())) {
 	                fare = new Integer(String.valueOf(entry.getValue()));
@@ -678,6 +686,12 @@ public class OrderService implements IOrderService {
 			msg = msg+key+":"+map.get(key)+"<br/>";
 		}
 		return Layui.data(msg, 0, 0, null);
+	}
+
+	@Override
+	public Layui getTechOrder(String tech) {
+		List<Order> list = orderDao.getTechOrder(tech);
+		return Layui.data("", 0, 0, list);
 	}
 
 }

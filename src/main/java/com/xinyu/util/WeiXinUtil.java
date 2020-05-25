@@ -104,8 +104,21 @@ public class WeiXinUtil
 		 * @return 
 		 */  
 		public static AccessToken getAccessToken() {  
-			if(StringUtils.isBlank(accessToken.getToken())||accessToken.getExpireDate().getTime() > new Date().getTime()) {
-				String requestUrl = access_token_url.replace("APPID", appid).replace("APPSECRET", AppSecret);  
+			String requestUrl = access_token_url.replace("APPID", appid).replace("APPSECRET", AppSecret);  
+			if(StringUtils.isBlank(accessToken.getToken())) {
+				JSONObject jsonObject = httpRequest(requestUrl, "GET", null);  
+				// 如果请求成功  
+				if (null != jsonObject) {  
+					try {  
+						accessToken.setToken(jsonObject.getString("access_token"));  
+						accessToken.setExpiresIn(jsonObject.getInt("expires_in"));
+						accessToken.setExpireDate(new Date(System.currentTimeMillis()+accessToken.getExpiresIn()));
+					} catch (JSONException e) {  
+						// 获取token失败  
+						e.printStackTrace();  
+					}  
+				}  
+			}else if(accessToken.getExpireDate().getTime() < new Date().getTime()) {
 				JSONObject jsonObject = httpRequest(requestUrl, "GET", null);  
 				// 如果请求成功  
 				if (null != jsonObject) {  
@@ -690,7 +703,7 @@ public class WeiXinUtil
     			data.put("remark",remark);
 	    	}else if(type.equals(OrderStatus.Complete)) {
 	    		template_id = templateId_complete;
-	    		first.put("value","您好，设备【"+msgdata.get("facility"+"】故障已修复"));
+	    		first.put("value","您好，设备【"+msgdata.get("facility")+"】故障已修复");
 	    		keyword1.put("value", msgdata.get("orderNo"));
 		    	keyword2.put("value", msgdata.get("facility"));
 		    	keyword3.put("value", msgdata.get("description"));
@@ -706,7 +719,7 @@ public class WeiXinUtil
     			data.put("remark",remark);
 	    	}else if(type.equals(OrderStatus.QuotedPrice)) {
 	    		template_id = templateId_price;
-	    		first.put("value","您好，工单编号："+msgdata.get("orderNo")+"维修设备【"+msgdata.get("facility"+"】总价:"+msgdata.get("total")+"，请确认"));
+	    		first.put("value","您好，工单编号："+msgdata.get("orderNo")+"维修设备【"+msgdata.get("facility")+"】总价:"+msgdata.get("total")+"，请确认");
 	    		keyword1.put("value", msgdata.get("cusInfo"));
 		    	keyword2.put("value", msgdata.get("facility")+msgdata.get("description")+"维修");
 		    	keyword3.put("value", msgdata.get("address"));
@@ -739,6 +752,7 @@ public class WeiXinUtil
 	    	String url = sendTemplateMsg_url.replace("ACCESS_TOKEN", accessToken.getToken());
 	    	JSONObject jsonResult = httpRequest(url, "POST", jsonData);
 	    	if(jsonResult == null) return Boolean.FALSE; 
+	    	System.out.println(jsonResult);
 	    	int errcode = jsonResult.getInt("errcode");
 	    	if(errcode == 0){
 	    		return Boolean.TRUE;

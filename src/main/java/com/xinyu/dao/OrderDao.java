@@ -50,4 +50,6 @@ public interface OrderDao {
 
 	public List<OrderPart> getOrderPartByIds(List<Long> list);
 
+	public List<Order> getTechOrder(String tech);
+
 }

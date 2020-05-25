@@ -59,5 +59,7 @@ public interface IOrderService {
 	public Layui arrivalNotice(String ids);
 
 	public Layui getOrderPartByIds(String ids);
+
+	public Layui getTechOrder(String tech);
 	
 }

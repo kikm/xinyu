@@ -33,8 +33,8 @@
       	</select>
       	</div>
   		<button class="layui-btn" id="tableSearch" data-type="reload">搜索</button>
-  		<div class="layui-inline">
-			<button class="layui-btn layui-btn-sm layui-btn-warm layui-btn-radius" th:each="depathCount:${depathCount}" th:text="|${depathCount.key} ${depathCount.value}|"></button> 
+  		<div class="layui-inline" id="techOrderCount">
+			<button class="layui-btn layui-btn-sm layui-btn-warm layui-btn-radius" onclick="showTechOrder(this);" th:each="depathCount:${depathCount}" th:value="${#strings.substringBefore(depathCount.key,'-')}" th:text="|${#strings.substringAfter(depathCount.key,'-')} ${depathCount.value}|"></button> 
   		</div>
 	</div>
 	<table  id="orderList" lay-filter="order"></table>
@@ -323,7 +323,7 @@
 	      ,{field:'phone', title: '联系电话', minWidth: 150}
 	      ,{field:'statusName', width:135, title: '工单状态', sort: true}
 	      ,{field:'deviceName', width:135, title: '设备类型', sort: true}
-	      ,{field:'upkeep', width:135, title: '维修费', sort: true}
+	      ,{field:'techName', width:135, title: '技术员', sort: true}
 	      ,{fixed: 'right', title:'操作', toolbar: '#bar', width:150}
 	    	]
 	    ]
@@ -388,6 +388,12 @@
 					                	layer.msg(data.msg);
 					                	if(data.code == 0){
 					                		tableReload();
+					                		$("#techOrderCount").empty();
+					                		var map = data.data[0];
+					                		for(var key in map){
+					                			var html = '<button class="layui-btn layui-btn-sm layui-btn-warm layui-btn-radius" onclick="showTechOrder(this);" value="'+key.substring(0,key.indexOf('-'))+'">'+key.substring(key.indexOf('-')+1,key.length)+' '+map[key]+'</button>'
+												$("#techOrderCount").append(html)
+					                　　　　　　　　		}
 					                	}
 					                }
 					            });
@@ -531,7 +537,7 @@
 	                data : {"id":data.id},  // 你的formid
 	                success : function(order) {
 	                	var form = layui.form;
-	                	for(let i=0;i<order.partList.length;i++){
+	                	for(let i=1;i<order.partList.length;i++){
 	                		if(i != 0){
 	                			addPart();
 	                		}
@@ -915,6 +921,29 @@
 			$form.find("input[name='path']").attr("value",filename);
 			// 提交表单
 			$form.submit();
+			return false;
+		}
+		
+		function showTechOrder(button){
+			var tech = $(button).attr("value");
+			var techName = $(button).text();
+			$.ajax({
+                type : "post",
+                url : "getTechOrder",
+                async : false,
+                data : {'tech':tech},  // 你的formid
+                success : function(data) {
+                	var list = data.data;
+                	var content = "";
+                	for(let i=0;i<list.length;i++){
+                		content = content + list[i].orderNo+":"+list[i].address+"-"+list[i].contact+"</br>"
+                	}
+                	layer.open({
+                		title: techName
+                		,content: content
+                	});
+                }
+            });
 			return false;
 		}
 		

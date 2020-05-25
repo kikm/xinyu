@@ -36,6 +36,7 @@ public class Order implements Serializable {
 	private String confirmUser;
 	private Date createDate;
 	private Date arrivalDate;
+	private String techName;
 	public Long getId() {
 		return id;
 	}
@@ -198,6 +199,13 @@ public class Order implements Serializable {
 	public void setArrivalDate(Date arrivalDate) {
 		this.arrivalDate = arrivalDate;
 	}
+	public String getTechName() {
+		return techName;
+	}
+	public void setTechName(String techName) {
+		this.techName = techName;
+	}
+	
 	
 	
 	

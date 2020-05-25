@@ -200,5 +200,15 @@ public class OrderController {
 		mov.addObject("chitotal", WeiXinUtil.numberTOChiString(total));
 		return mov;
 	}
+	
+	@RequestMapping("/getTechOrder")
+	@ResponseBody
+	public Layui getTechOrder(String tech) {
+		
+		Layui result = orderService.getTechOrder(tech);
+		return result;
+	}
+	
+	
 
 }
