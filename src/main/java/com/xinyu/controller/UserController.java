@@ -15,6 +15,7 @@ import com.xinyu.Constance;
 import com.xinyu.bean.Layui;
 import com.xinyu.bean.MenuBean;
 import com.xinyu.bean.PageBean;
+import com.xinyu.model.Role;
 import com.xinyu.model.Unit;
 import com.xinyu.model.User;
 import com.xinyu.service.IMenuService;
@@ -62,50 +63,57 @@ public class UserController {
     }
 	
 	@RequestMapping(value = "/mobileCusLogin", method = RequestMethod.GET)
-    public ModelAndView mobileCusLoginAuthentication(String code) {
-		ModelAndView mov = new ModelAndView("/mobile/allInOne");//未绑定账号\客户页面
-		String openID = null; 
+    public ModelAndView mobileCusLoginAuthentication(String code,String openId) {
+		ModelAndView mov = new ModelAndView("/mobile/bandCount");//未绑定账号\客户页面
 		JSONObject jsonOpenID = null; 
 		if(code != null){
 			jsonOpenID = WeiXinUtil.getOpenID(code); 
-			openID =  (String)jsonOpenID.get("openid");//"oCnlEuFjrHbyecP-JwXMeT0Jcoh8";
-			User userOri = userService.getUserByOpenId(openID); //
-			//WeiXinUtil.getUserInfo(openID); 
-			if(userOri != null) { 
-				mov = new ModelAndView("/mobile/orderList");//已绑定账号 
-			} 
-			mov.addObject("user",userOri == null?new User():userOri); 
-			mov.addObject("openId", openID); 
-			mov.addObject("type", "cus");
+			openId =  (String)jsonOpenID.get("openid");//"oCnlEuFjrHbyecP-JwXMeT0Jcoh8";
 		}
-		//mov = new ModelAndView("/mobile/orderList");//已绑定账号
-		//mov.addObject("type","cus"); mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");//oCnlEuB6eJ9dhV-ubMV1uP2_r7iY
+		User userOri = userService.getUserByOpenId(openId); //
+		//WeiXinUtil.getUserInfo(openID); 
+		if(userOri != null) { 
+			mov = new ModelAndView("/mobile/orderList");//已绑定账号 
+		} 
+		mov.addObject("user",userOri == null?new User():userOri); 
+		mov.addObject("openId", openId); 
+		mov.addObject("type", "cus");
+//		mov = new ModelAndView("/mobile/orderList");//已绑定账号
+//		mov.addObject("type","cus"); 
+//		mov.addObject("openId", "onIRYuB19EGw1E9ojhwSJZe6Wxuo");//oCnlEuB6eJ9dhV-ubMV1uP2_r7iY
 		
 		return mov;
 	}
 	
 	@RequestMapping(value = "/mobileTenLogin", method = RequestMethod.GET)
-    public ModelAndView mobileTenLoginAuthentication(String code) {
-		ModelAndView mov = new ModelAndView("/mobile/allInOne"); //未绑定账号\客户页面
-		String openID = null; 
+    public ModelAndView mobileTenLoginAuthentication(String code,String openId) {
+		ModelAndView mov = new ModelAndView("/mobile/bandCount"); //未绑定账号\客户页面
 		JSONObject jsonOpenID = null; 
-		if(code != null){
+		if(StringUtils.isNotBlank(code)){
 			jsonOpenID = WeiXinUtil.getOpenID(code); 
-			System.out.println(jsonOpenID);
-			System.out.println(code);
-			openID =  (String)jsonOpenID.get("openid");//"oCnlEuFjrHbyecP-JwXMeT0Jcoh8";
-			User userOri = userService.getUserByOpenId(openID); //
-			//WeiXinUtil.getUserInfo(openID); 
-			if(userOri != null) { 
-				mov = new ModelAndView("/mobile/orderList");//已绑定账号 
-			} 
-			mov.addObject("type", "ten");
-			mov.addObject("user",userOri == null?new User():userOri); 
-			mov.addObject("openId", openID); 
+			openId =  (String)jsonOpenID.get("openid");//"oCnlEuFjrHbyecP-JwXMeT0Jcoh8";
 		}
+		User userOri = userService.getUserByOpenId(openId); //
+		if(userOri != null) { 
+			Boolean canView = false;
+			for(Role r : userOri.getRoles()) {
+				if(r.getName().equals("customerService")||r.getName().equals("technician")||r.getName().equals("admin"))
+					canView = true;//账号有客服角色，展示所有
+			}
+			if(canView) {
+				mov = new ModelAndView("/mobile/orderList");//已绑定账号 
+				mov.addObject("type", "ten");
+				mov.addObject("user",userOri == null?new User():userOri); 
+				mov.addObject("openId", openId); 
+			}else {
+				mov = new ModelAndView("/mobile/error");
+				mov.addObject("msg", "没有操作权限，请联系管理员"); 
+			}
+		} 
 		
-//		 mov = new ModelAndView("/mobile/orderList");//已绑定账号
-//		 mov.addObject("type","ten"); mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");
+//		mov = new ModelAndView("/mobile/orderList");//已绑定账号
+//		mov.addObject("type","ten"); 
+//		mov.addObject("openId", "onIRYuB19EGw1E9ojhwSJZe6Wxuo");
 		 
 
 		return mov;

@@ -27,7 +27,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private FilterInvocationSecurityMetadataSourceImpl filterMetadataSource; //权限过滤器（当前url所需要的访问权限）
 
     @Autowired
-    private AuthenticationEntryPointImpl entryPoint;// 配置验证异常处理
+    private AuthenticationEntryPointImpl entryPoint;// 登陆验证异常处理
     
     @Autowired
     private AccessDecisionManagerImpl deniedManager;//权限决策管理器

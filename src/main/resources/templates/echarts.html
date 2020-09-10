@@ -8,35 +8,34 @@
 <script src="scripts/layui/layui.all.js" type="text/javascript"></script>
 <link href="style/layui/layui.css" rel="stylesheet" type="text/css">
 <script src="scripts/jquery-3.4.1.min.js" type="text/javascript"></script>
-
-<style>
-.chart_box{
-	width: 100%;
-    height: 300px;  
-    margin: 0 auto;
-}
+<style type="text/css">
+    html,body{
+        height:100%;
+    }
+    .layui-col-xs3{
+    	height:100%
+    }
 </style>
-
 </head>
 <body>
-<div class="layui-container" style="margin:5px;width:100%"> 
-	<div class="layui-row layui-col-space10">
-    	<div class="layui-col-xs3">
-      		<div id="main" style="width:400px;height:400px"></div>
+<div class="layui-container" style="margin:5px;width:100%;height:100%;"> 
+	<div class="layui-row layui-col-space10" style="height:60%">
+    	<div class="layui-col-xs3" >
+      		<div id="main" style="height:100%"></div>
     	</div>
     	<div class="layui-col-xs3">
-      		<div id="main2" style="width:400px;height:400px"></div>
+      		<div id="main2" style="height:100%"></div>
     	</div>
     	<div class="layui-col-xs3">
-      		<div id="main3" style="width:400px;height:400px"></div>
+      		<div id="main3" style="height:100%"></div>
     	</div>
     	<div class="layui-col-xs3">
-      		<div id="main4" style="width:400px;height:400px"></div>
+      		<div id="main4" style="height:100%"></div>
     	</div>
  	</div>
- 	<div class="layui-row">
-	    <div class="layui-col-md12">
-	      <div class="grid-demo grid-demo-bg1">12/12</div>
+ 	<div class="layui-row" style="height:40%">
+	    <div class="layui-col-md12" style="height:100%">
+	      <div id="main5" style="height:100%"></div>
 	    </div>
   	</div>
 </div>
@@ -48,6 +47,7 @@
         var myChart2 = echarts.init(document.getElementById('main2'));
         var myChart3 = echarts.init(document.getElementById('main3'));
         var myChart4 = echarts.init(document.getElementById('main4'));
+        var myChart5 = echarts.init(document.getElementById('main5'));
         
         // 指定图表的配置项和数据
         var option = {
@@ -207,13 +207,82 @@
         	};
         myChart4.setOption(option4);
         
+        option5 = {
+        	    title: {
+        	        text: '折线图堆叠'
+        	    },
+        	    tooltip: {
+        	        trigger: 'axis'
+        	    },
+        	    legend: {
+        	        data: ['邮件营销', '联盟广告', '视频广告', '直接访问', '搜索引擎']
+        	    },
+        	    grid: {
+        	        left: '3%',
+        	        right: '4%',
+        	        bottom: '3%',
+        	        containLabel: true
+        	    },
+        	    toolbox: {
+        	        feature: {
+        	            saveAsImage: {}
+        	        }
+        	    },
+        	    xAxis: {
+        	        type: 'category',
+        	        boundaryGap: false,
+        	        data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+        	    },
+        	    yAxis: {
+        	        type: 'value'
+        	    },
+        	    series: [
+        	        {
+        	            name: '邮件营销',
+        	            type: 'line',
+        	            stack: '总量',
+        	            data: [120, 132, 101, 134, 90, 230, 210]
+        	        },
+        	        {
+        	            name: '联盟广告',
+        	            type: 'line',
+        	            stack: '总量',
+        	            data: [220, 182, 191, 234, 290, 330, 310]
+        	        },
+        	        {
+        	            name: '视频广告',
+        	            type: 'line',
+        	            stack: '总量',
+        	            data: [150, 232, 201, 154, 190, 330, 410]
+        	        },
+        	        {
+        	            name: '直接访问',
+        	            type: 'line',
+        	            stack: '总量',
+        	            data: [320, 332, 301, 334, 390, 330, 320]
+        	        },
+        	        {
+        	            name: '搜索引擎',
+        	            type: 'line',
+        	            stack: '总量',
+        	            data: [820, 932, 901, 934, 1290, 1330, 1320]
+        	        }
+        	    ]
+        	};
+        myChart5.setOption(option5);
         
-        window.onresize = function () {
+        
+        $(window).resize(function() {
         	myChart.resize();
         	myChart2.resize();
         	myChart3.resize();
         	myChart4.resize();
-	    }
+        	myChart5.resize();
+        });
+        
+        
+        
+        
 	}        
 </script>
 </body>

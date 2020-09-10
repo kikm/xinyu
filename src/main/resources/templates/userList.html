@@ -298,7 +298,6 @@
 		    	roles += getData[i].value+",";
 		    }
 		    formData.append("addRoles",roles);
-		    console.log(roles);
 	        $.ajax({
                 cache : true,
                 type : "post",
@@ -313,6 +312,8 @@
                 success : function(data) {
                 	if (data.code == 0) {
                       	$("#formReset").click();
+                      	$('input[name="oldid"]').val("");
+                      	$('input[name="openID"]').val("");
                       	tableReload();
                       	var form = layui.form;
                       	form.render("select");

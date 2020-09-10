@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="scripts/echarts.js" type="text/javascript"></script>
+<link rel="stylesheet" href="style/layui/layui.css">
+<script src="scripts/layui/layui.all.js" type="text/javascript"></script>
+<script src="scripts/jquery-3.4.1.min.js" type="text/javascript"></script>
+<script src="scripts/baiduApi.js" type="text/javascript"></script>
+<script src="scripts/bmap.min.js" type="text/javascript"></script>
+
+<style type="text/css">
+    html,body{
+        height:100%;
+    }
+    .layui-col-xs3{
+    	height:100%
+    }
+</style>
+</head>
+<body>
+<div id="container" style="width:100%;height:100%"></div>
+<script type="text/javascript">
+	
+	var chart = echarts.init(document.getElementById('container'));
+	option = {
+		    // 加载 bmap 组件
+		    bmap: {
+		        // 百度地图中心经纬度
+		        center: [110.340, 21.272],
+		        // 百度地图缩放
+		        zoom: 14,
+		        // 是否开启拖拽缩放，可以只设置 'scale' 或者 'move'
+		        roam: true,
+		        // 百度地图的自定义样式，见 http://developer.baidu.com/map/jsdevelop-11.htm
+		        mapStyle: {}
+		    },
+		    series: [{
+		        type: 'effectScatter',
+		        // 使用百度地图坐标系
+		        coordinateSystem: 'bmap',
+		        // 数据格式跟在 geo 坐标系上一样，每一项都是 [经度，纬度，数值大小，其它维度...]
+		        data: [[110.340, 21.2672,1],
+		        	  [110.140, 21.272,1],
+		        	  [110.240, 21.372,1],
+		        	  [110.3540, 21.2672,1],]
+		        
+		    }]
+		} 
+	chart.setOption(option);
+	// 获取百度地图实例，使用百度地图自带的控件
+	var bmap = chart.getModel().getComponent('bmap').getBMap();
+	bmap.addControl(new BMap.MapTypeControl());
+	bmap.addEventListener('click', function(e) {
+		option = {
+			    // 加载 bmap 组件
+			    bmap: {
+			        // 百度地图中心经纬度
+			        center: [110.340, 21.272],
+			        // 百度地图缩放
+			        zoom: 14,
+			        // 是否开启拖拽缩放，可以只设置 'scale' 或者 'move'
+			        roam: true,
+			        // 百度地图的自定义样式，见 http://developer.baidu.com/map/jsdevelop-11.htm
+			        mapStyle: {}
+			    },
+			    series: [{
+			        type: 'effectScatter',
+			        // 使用百度地图坐标系
+			        coordinateSystem: 'bmap',
+			        // 数据格式跟在 geo 坐标系上一样，每一项都是 [经度，纬度，数值大小，其它维度...]
+			        data: [ [e.point.lng, e.point.lat, 1]
+			        ]
+			    }]
+			} 
+		chart.setOption(option);
+		//var local = new BMap.LocalSearch(bmap, {
+			//renderOptions:{bmap: bmap}
+		//});
+		//local.search("湛江奥体中心");
+		//var point = new BMap.Point(e.point.lng, e.point.lat);   
+		//var marker = new BMap.Marker(point);        // 创建标注   
+		//bmap.addOverlay(marker);     
+	});
+	
+</script>
+</body>
+</html>

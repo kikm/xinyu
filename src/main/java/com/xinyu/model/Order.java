@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.xinyu.bean.OrderStatus;
 
 public class Order implements Serializable {
@@ -34,9 +35,12 @@ public class Order implements Serializable {
 	private Date depathDate;
 	private Date feedbackDate;
 	private String confirmUser;
+	private String confirmDate;
 	private Date createDate;
 	private Date arrivalDate;
+	private Date dtdDate;
 	private String techName;
+	private String confirmOpinion;
 	public Long getId() {
 		return id;
 	}
@@ -205,6 +209,26 @@ public class Order implements Serializable {
 	public void setTechName(String techName) {
 		this.techName = techName;
 	}
+	public Date getDtdDate() {
+		return dtdDate;
+	}
+	public void setDtdDate(Date dtdDate) {
+		this.dtdDate = dtdDate;
+	}
+	public String getConfirmOpinion() {
+		return confirmOpinion;
+	}
+	public void setConfirmOpinion(String confirmOpinion) {
+		this.confirmOpinion = confirmOpinion;
+	}
+	public String getConfirmDate() {
+		return confirmDate;
+	}
+	public void setConfirmDate(String confirmDate) {
+		this.confirmDate = confirmDate;
+	}
+	
+	
 	
 	
 	

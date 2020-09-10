@@ -96,6 +96,8 @@ public class WeiXinUtil
 		//public final static String templateId_arrnotice = "03kgcS9Qz0Ky7ZfSLPTEHx5HkQrgJRxx7uUVQTcdi8E";
 		public final static String templateId_arrnotice = "vQtSL-TvsBE8P7jEaWcBjaXvxU6_m58xNz5z7rFQ7ks";
 		
+		public final static String templateId_dtdnotice = "zmvfr6nih89GxnLXQcxCd6MICGvkdKYYC0Utljwy65g";
+		
 		public final static AccessToken accessToken = new AccessToken();
 		/** 
 		 * 获取access_token 
@@ -659,17 +661,33 @@ public class WeiXinUtil
 	    			data.put("keyword3",keyword3);
 	    			data.put("remark",remark);
 	    		}else {
-	    			template_id = templateId_depath;
-	    			first.put("value", befo+"您好，现有【"+msgdata.get("unit")+"-"+msgdata.get("contact")+"】上报一条故障维修工单,由【"+msgdata.get("depathUser")+"】派发，请及时接收处理");
-	    			keyword1.put("value", msgdata.get("orderNo"));
-	    			keyword2.put("value", msgdata.get("description"));
-	    			keyword3.put("value", msgdata.get("date"));
-	    			remark.put("value", msgdata.get("address")+"-联系电话："+msgdata.get("phone"));
-	    			data.put("first",first);
-	    			data.put("keyword1",keyword1);
-	    			data.put("keyword2",keyword2);
-	    			data.put("keyword3",keyword3);
-	    			data.put("remark",remark);
+	    			if(tourl != null) {
+	    				template_id = templateId_depath;
+	    				first.put("value", befo+"您好，现有【"+msgdata.get("unit")+"-"+msgdata.get("contact")+"】上报一条故障维修工单,由【"+msgdata.get("depathUser")+"】派发，请于【"+msgdata.get("dtdDate")+"】前处理");
+	    				keyword1.put("value", msgdata.get("orderNo"));
+	    				keyword2.put("value", msgdata.get("description"));
+	    				keyword3.put("value", msgdata.get("date"));
+	    				remark.put("value", msgdata.get("address")+"-联系电话："+msgdata.get("phone"));
+	    				data.put("first",first);
+	    				data.put("keyword1",keyword1);
+	    				data.put("keyword2",keyword2);
+	    				data.put("keyword3",keyword3);
+	    				data.put("remark",remark);
+	    			}
+	    			else {
+	    				template_id = templateId_dtdnotice;
+	    				first.put("value", befo+"您好，由【"+msgdata.get("address")+"-"+msgdata.get("contact")+"】申报工单已受理,工单编号【"+msgdata.get("orderNo")+"】,请留意相关信息");
+	    				keyword1.put("value", msgdata.get("tech"));
+	    				keyword2.put("value", msgdata.get("techphone"));
+	    				keyword3.put("value", msgdata.get("description"));
+	    				keyword4.put("value", msgdata.get("dtdDate")+"前上门");
+	    				data.put("first",first);
+	    				data.put("keyword1",keyword1);
+	    				data.put("keyword2",keyword2);
+	    				data.put("keyword3",keyword3);
+	    				data.put("keyword4",keyword4);
+	    				data.put("remark",remark);
+	    			}
 	    		}
 	    	}else if(type.equals(OrderStatus.MaintenanceFeedback)){
 	    		template_id = templateId_feedback;

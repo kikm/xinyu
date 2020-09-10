@@ -43,4 +43,14 @@ public interface UserDao {
 	public Long saveUnit(@Param("un")Unit un);
 	
 	public Integer checkUnitByName(String unitName);
+
+	public List<User> getUserByOrg(Long orgId);
+	
+	public List<User> getUserByEntiyOrg();
+
+	public void updateUserOrg(Long org, List<String> list);
+	
+	public void clearUserOrg(Long org);
+	
+	public User getUserByOpenId(String openId);
 }

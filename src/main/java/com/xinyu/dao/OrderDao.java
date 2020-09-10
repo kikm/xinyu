@@ -52,4 +52,8 @@ public interface OrderDao {
 
 	public List<Order> getTechOrder(String tech);
 
+	public List<Order> getOrderByOneText(Order order, String text);
+	
+	public Order getOrderSingleById(Long orderId);
+
 }

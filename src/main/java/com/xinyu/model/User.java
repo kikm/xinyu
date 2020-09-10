@@ -26,6 +26,7 @@ public class User implements UserDetails {
 	private String telephone;// 固定电话
 	private boolean enabled;// 用户状态   
 	private int isAdmin;// 是否管理员 0：不是    1：是
+	private Long orgId;// 是否管理员 0：不是    1：是
 	private Unit unit;
 	private String unitName;
 	private Set<Role> roles = new HashSet<Role>();// 所属角色
@@ -218,6 +219,12 @@ public class User implements UserDetails {
 	}
 	public void setUnitName(String unitName) {
 		this.unitName = unitName;
+	}
+	public Long getOrgId() {
+		return orgId;
+	}
+	public void setOrgId(Long orgId) {
+		this.orgId = orgId;
 	}
 	
 	

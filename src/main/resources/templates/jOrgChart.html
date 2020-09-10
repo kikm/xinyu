@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="../style/jquery.jOrgChart.css">
+    <link href="../style/layui/layui.css" rel="stylesheet" type="text/css">
+	<script src="../scripts/layui/layui.all.js" type="text/javascript"></script>
+    <script src="../scripts/jquery-3.4.1.min.js" type="text/javascript"></script>
+    <script src="../scripts/jquery-ui.min.js"></script>
+    <script src="../scripts/jquery.jOrgChart.js"></script>
+    <style>
+        a {
+            text-decoration: none;
+            color: #fff;
+            font-size: 12px;
+        }
+		
+        .jOrgChart .node {
+            width: 120px;
+            height: 50px;
+            line-height: 50px;
+            border-radius: 4px;
+            margin: 0 8px;
+        }
+        .jOrgChart .left {
+    		border-right: 5px solid black;
+		}
+        .org{
+	        width: 1000px;
+	     	height: 400px;
+	     	margin: 0 auto;
+        }
+        
+    </style>
+    
+</head>
+
+<body>
+
+
+
+    <div id='jOrgChart' class="org"></div>
+    <div id="orgUserSelect" style="display:none">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+  		<legend>架构用户选择</legend>
+	</fieldset>
+	<div class="layui-form-item">
+		<div id="orgUser" class="demo-transfer" style="margin:10px 110px"></div>
+	</div>
+  <div class="layui-form-item"></div> 
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <button id="userCommit" class="layui-btn"  onclick="submitOrgUser()">立即提交</button>
+    </div>
+  </div>
+  </div>
+    <script>
+
+        function showall(menu_list, parent) {
+            $.each(menu_list, function (index, val) {
+                if (val.childrens.length != null) {
+                    var li = $("<li></li>");
+                    li.append("<a href='javascript:void(0)' onclick=getOrgId(" + val.id + ");>" + val.name +
+                        "</a>").append("<ul></ul>").appendTo(parent);
+                    //递归显示
+                    showall(val.childrens, $(li).children().eq(1));
+                } else {
+                    $("<li></li>").append("<a href='javascript:void(0)' onclick=getOrgId(" + val.id + ");>" +
+                        val.name + "</a>").appendTo(parent);
+                }
+            });
+
+        }
+        var showlist = $("<ul id='org' style='display:none'></ul>");
+        var orgId = null;
+        function getOrgId(val) {
+        	orgId = val;
+        	layui.use(['transfer'], function(){
+                var dataTemp = null; 
+        		  layer = layui.layer
+        		  ,transfer = layui.transfer
+            //模拟数据
+      		  $.ajax({
+                    cache : true,
+                    type : "post",
+                    url : "orgUser",
+                    data : {"orgId":orgId},
+                    async : false,
+                    success : function(req) {
+                    	if (req.code == 0) {
+                    		dataTemp = req.data;                		
+                    	}
+                    }
+              });
+        		let val = []; 
+          	for(let i=0;i<dataTemp.length;i++){
+          		if(dataTemp[i].orgId != null){
+      	    		val.push(dataTemp[i].id);
+          		}
+          		
+          	}
+          	
+      		//定义标题及数据源
+      		  transfer.render({
+      		    elem: '#orgUser'
+      		    ,id:'orgUser'
+      		    ,title: ['未添加', '已添加']  //自定义标题
+      		  	,data: dataTemp
+      			,parseData: function(res){
+      			    return {
+      			      "value": res.id //数据值
+      			      ,"title": res.name //数据标题
+      			      ,"disabled": false  //是否禁用
+      			      ,"checked": false //是否选中
+      			    }
+      			  }
+      		    ,width: 200 //定义宽度
+      		    ,height: 250 //定义高度
+      		    ,value: val
+      		  })
+      		  
+      			$("#orgUserSelect").show();
+              })
+        }
+        
+        $(window).resize(function(){
+
+        	$(".row").css({
+
+	        	position:"absolute",
+	
+	        	left: ($(window).width() -$(".row").outerWidth())/2,
+	
+	        	top: ($(window).height() -$(".row").outerHeight())/2
+
+        	});
+
+        });
+        
+        function submitOrgUser(){
+        	transfer = layui.transfer;
+        	var getData = transfer.getData('orgUser');
+        	var orgUsers = "";
+        	for(let i=0;i<getData.length;i++){
+		    	orgUsers += getData[i].value+",";
+		    }
+        	$.ajax({
+                type : "post",
+                url : "updateUserOrg",
+                async : false,
+                data : {"orgId":orgId,"userIds":orgUsers},  // 你的formid
+                success : function(data) {
+                	layer.msg(data.msg);
+                }
+             });
+        }
+        
+
+
+        $(function(){
+        	$.ajax({
+                type : "get",
+                url : "orgTree",
+                async : false,
+                data : {},  // 你的formid
+                success : function(data) {
+                	showall(data, showlist);
+                    $("#jOrgChart").append(showlist);
+                    $("#org").jOrgChart({
+                        chartElement: '#jOrgChart', //指定在某个dom生成jorgchart
+                        dragAndDrop: true //设置是否可拖动
+                    });
+                    $(window).resize();
+                }
+             });
+        	
+        });
+        
+
+        
+    </script>
+</body>
+
+</html>

@@ -26,11 +26,11 @@
     	select t.* from 
         (	select d.*,p.name pname
         	from t_device d
+        	left join t_part p on p.device_id=d.id
         	<if test="device !=null and device.name != null">
         		where d.name like '%${device.name}%'
         	</if>
-        	left join t_part p on p.device_id=d.id
-        	order by name) t
+        	order by d.name) t
         limit #{page.start},#{page.end}
     </select>
     

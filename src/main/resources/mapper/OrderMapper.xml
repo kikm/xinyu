@@ -28,6 +28,8 @@
         <result column="feedback_time" property="feedbackDate" jdbcType="TIMESTAMP" />
         <result column="ts_user_complete" property="completeDate" jdbcType="TIMESTAMP" />
         <result column="create_time" property="createDate" jdbcType="TIMESTAMP" />
+        <result column="dtd_time" property="dtdDate" jdbcType="TIMESTAMP" />
+        <result column="confirm_time" property="confirmDate" jdbcType="TIMESTAMP" />
         <association property="device" javaType="com.xinyu.model.Device">
             <id column="id" property="id" jdbcType="INTEGER"/>
             <result column="dname" property="name" jdbcType="VARCHAR"/>
@@ -131,6 +133,28 @@
         order by o.order_no
     </select>
     
+    <select id="getOrderByOneText" resultMap="BaseResultMap">
+        <include refid="select_order"/>
+        from
+        (SELECT ot.*
+			FROM t_order ot
+			LEFT JOIN t_unit u ON u.id = ot.unit_id
+			WHERE status = 'Finish'
+			and (ot.order_no like '%${text}%' or ot.contact like '%${text}%' or ot.address like '%${text}%')
+			<if test="order.unit != null and order.unit.id!=null">
+				and u.id = #{order.unit.id}
+			</if>
+			<if test="order.technician!=null">
+				and technician=#{order.technician}
+			</if>
+			ORDER BY ot.order_no) as o
+        left join t_device d on d.id = o.device_id
+        left join t_unit u on u.id = o.unit_id
+        left join t_order_part op on op.order_id = o.id
+        left join t_part p on p.id = op.part_id
+        left join t_user us on us.id = o.technician
+        order by o.order_no
+    </select>
     
     
     <select id="getCountOrderCriteriaQuery" resultType="java.lang.Integer">
@@ -170,7 +194,8 @@
 			unit_id =#{order.unit.id},
 			isUrgent =#{order.isUrgent},
 			isRedepath =#{order.isRedepath},
-			confirm_user =#{order.confirmUser}
+			confirm_user =#{order.confirmUser},
+			dtd_time =#{order.dtdDate}
 	        where id = #{order.id}  
 	    </if>  
 	      
@@ -197,7 +222,8 @@
 	            <if test="order.isUrgent != null ">isUrgent,</if>
 	            <if test="order.isRedepath != null ">isRedepath,</if>
 	            <if test="order.confirmUser != null ">confirm_user,</if>
-	            <if test="order.createDate != null ">create_time</if>
+	            <if test="order.createDate != null ">create_time,</if>
+	            <if test="order.dtdDate != null ">dtd_time</if>
 	        </trim>  
 	        <trim prefix="values (" suffix=")" suffixOverrides="," >  
 	            <if test="order.orderNo != null ">#{order.orderNo},</if>  
@@ -219,7 +245,8 @@
 	            <if test="order.isUrgent != null ">#{order.isUrgent},</if>  
 	            <if test="order.isRedepath != null ">#{order.isRedepath},</if>  
 	            <if test="order.confirmUser != null ">#{order.confirm_user},</if>
-	            <if test="order.createDate != null ">#{order.createDate}</if>
+	            <if test="order.createDate != null ">#{order.createDate},</if>
+	            <if test="order.dtdDate != null ">#{order.dtdDate}</if>
 	        </trim>
 	    </if>  
 	</insert> 
@@ -294,6 +321,7 @@
         	<if test="order.depathDate != null ">,depath_time=#{order.depathDate}</if>
         	<if test="order.confirmUser != null ">,confirm_user=#{order.confirmUser}</if>
         	<if test="order.isRedepath != null ">,isRedepath=#{order.isRedepath}</if>
+        	<if test="order.confirmOpinion != null ">,confirm_opinion=#{order.confirmOpinion}</if>
         </set>
         <where>
         	id=#{order.id}
@@ -317,6 +345,7 @@
         	feedback_time=#{order.feedbackDate}
         	<if test="order.imageUrls != null ">,image_urls=#{order.imageUrls}</if>
         	<if test="order.report != null ">,report=#{order.report}</if>
+        	<if test="order.sn != null ">,sn=#{order.sn}</if>
         </set>
         <where>
         	id=#{order.id}
@@ -347,6 +376,10 @@
 	
 	<select id="getTechOrder" resultMap="BaseResultMap">
     	SELECT o.* from t_order o where technician = #{tech} and STATUS IN('Dispatched','OrderConfirmed')
+	</select>
+	
+	<select id="getOrderSingleById" resultMap="BaseResultMap">
+    	SELECT o.* from t_order o where id=#{orderId}
 	</select>
     
 </mapper>

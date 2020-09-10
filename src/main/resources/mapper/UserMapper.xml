@@ -8,6 +8,7 @@
         <result column="user_name" property="name" jdbcType="VARCHAR" />
         <result column="password" property="password" jdbcType="VARCHAR" />
         <result column="phone" property="telephone" jdbcType="VARCHAR" />
+        <result column="org_id" property="orgId" jdbcType="INTEGER" />
         <result column="wx_userID" property="userID" jdbcType="VARCHAR" />
         <result column="wx_openID" property="openID" jdbcType="VARCHAR" />
         <result column="wx_userName" property="userName" jdbcType="VARCHAR" />
@@ -82,7 +83,7 @@
 
 
 	<select id="getUserListByRole" parameterType="String" resultMap="BaseResultMap">
-        select u.id,u.user_name
+        select u.id,u.user_name,u.org_id
         ,r.name as rname,r.id as rid
         from t_user u
         LEFT JOIN t_role_user sru on u.id= sru.user_id
@@ -166,6 +167,32 @@
         from t_unit u
         where u.name = #{unitName}
     </select>
+    
+    <select id="getUserByOrg" parameterType="Long" resultMap="BaseResultMap">
+        select u.*
+        from t_user u
+        where u.org_id = #{orgId} or org_id IS null
+    </select>
+    
+    <select id="getUserByOpenId" parameterType="String" resultMap="BaseResultMap">
+        select u.*
+        from t_user u
+        where u.wx_openID= #{openId}
+    </select>
+    
+    
+    <update id="updateUserOrg" >
+		update t_user set org_id = #{org} where id in 
+    	<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	
+	</update>
+    
+    <update id="clearUserOrg" >
+		update t_user SET org_id = null  WHERE org_id=#{org}
+	</update>
+    
 	
 
 

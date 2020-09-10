@@ -48,7 +48,7 @@
                 <div class="weui-cell__bd">
                     <span style="vertical-align: middle">设备名称</span>
                 </div>
-                <div class="deviceName">1</div>
+                <div class="deviceName"></div>
             </div>
             <div class="weui-cell weui-cell_access">
                 <div class="weui-cell__bd">
@@ -73,6 +73,31 @@
                     <span style="vertical-align: middle">服务热线</span>
                 </div>
                 <div class="phone"></div>
+            </div>
+			<div class="weui-cell weui-cell_access">
+				<div class="weui-cell__bd">
+                    <span style="vertical-align: middle">维修内容:</span>
+                </div>
+            </div>
+			<div class="weui-cell weui-cell_access">
+                <div class="report">
+                    <p>摘要信息更换主板摘要信息更换主板摘要信息更换主板摘要信息更换主板摘要信息更换主板摘要信息更换主板摘要信息更换主板</p>
+                </div>
+            </div>
+			<div class="weui-cell weui-cell_access">
+                <div class="weui-cell__bd">
+                    <span style="vertical-align: middle">意见反馈</span>
+                </div>
+                <div class="option">
+        				<div class="weui-cells weui-cells_form">
+            				<div class="weui-cell">
+                				<div class="weui-cell__bd">
+                    				<textarea class="weui-textarea" placeholder="请输入文本" rows="3"></textarea>
+                    			<div class="weui-textarea-counter"><span>0</span>/200</div>
+                			</div>
+            			</div>
+        			</div>
+				</div>
             </div>
         </div>
 		<div class="weui-form__tips-area">
@@ -105,10 +130,11 @@
 			$(this).addClass('weui-btn_disabled');
 			var button = $(this);
           	if ($tooltips.css('display') != 'none') return;
+			var confirmOpinion = $('.weui-textarea').val();
 			$.ajax({
     			url:url,    //请求的url地址
     			async:false,
-    			data:{"orderId":orderId,"openId":openId},    //参数值
+    			data:{"orderId":orderId,"openId":openId,"confirmOpinion":confirmOpinion},    //参数值
     			type:"POST",   //请求方式
     			success:function(data){
 					$tooltips.text(data.msg);

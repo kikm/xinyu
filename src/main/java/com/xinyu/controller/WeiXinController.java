@@ -96,12 +96,25 @@ public class WeiXinController {
 		ModelAndView mov = new ModelAndView("/mobile/maintenanceFeedback");//未绑定账号
 		mov.addObject("technicianOpenId", technicianOpenId);
 		mov.addObject("depathUserOpenId", depathUserOpenId);
-		String image = orderService.getOrderImage(orderId);
+		Order o = orderService.getSingelOrder(Long.valueOf(orderId));
+		if(o == null) {
+			mov = new ModelAndView("/mobile/error");
+			mov.addObject("msg", "工单不存在，请联系客服");
+			return mov;
+		}
+		String image  = o.getImageUrls();
+		Boolean canRepath = userService.checkCanRepath(depathUserOpenId,orderId);
+		if(canRepath) {
+			List<User> orderDepathList = orderService.getOrgDepathList(depathUserOpenId);
+			mov.addObject("depathList", orderDepathList);
+		}
 		if(StringUtils.isNotBlank(image)){
 			image = image.split(";")[0];
 		}
 		mov.addObject("orderId", orderId);
 		mov.addObject("image", image);
+		mov.addObject("canRepath", canRepath);
+		
 		return mov;
 	}
 	
@@ -109,6 +122,10 @@ public class WeiXinController {
     public ModelAndView preConfrim(String orderId,String cusopenId) {
 		ModelAndView mov = new ModelAndView("/mobile/confirmOrComplete");//未绑定账号
 		OrderBean order = orderService.getOrderBeanById(Long.valueOf(orderId));
+		if(order == null) {
+			mov = new ModelAndView("/mobile/error");
+			mov.addObject("msg", "工单不存在，请联系客服");
+		}
 		mov.addObject("openId", cusopenId);
 		mov.addObject("orderId", orderId);
 		mov.addObject("type", "confirm");
@@ -117,8 +134,8 @@ public class WeiXinController {
     }
 	
 	@RequestMapping(value = "/cusConfirm")
-    public Layui cusConfirm(String openId,String orderId) {
-		Layui result = orderService.orderConfirm(orderId,openId);
+    public Layui cusConfirm(String openId,String orderId,String confirmOpinion) {
+		Layui result = orderService.orderConfirm(orderId,openId,confirmOpinion);
 		
 		return result;
 	}
@@ -174,21 +191,49 @@ public class WeiXinController {
         return total;
     }
 	
+	@RequestMapping("/getHistorybytext")
+    public List<OrderBean> getHistorybytext(String openId, String searchText) {
+		Order order = new Order();
+		List<OrderBean> total = null;
+		User loginUser = userService.getUserByOpenId(openId);
+		boolean iscs = false;
+		for(Role r : loginUser.getRoles()) {
+			if(r.getName().equals("customerService")) iscs = true;//账号有客服角色，展示所有
+		}
+		if(!iscs) {order.setUnit(loginUser.getUnit());}
+		total = orderService.getOrderByOneText(order, searchText);
+		
+        return total;
+    }
+	
 	@RequestMapping(value = "/startOrder", method = RequestMethod.GET)
     public ModelAndView startOrder(String code) {
-		ModelAndView mov = new ModelAndView("/mobile/startOrder"); //未绑定账号\客户页面
+		ModelAndView mov = new ModelAndView("/mobile/error"); //未绑定账号\客户页面
+		mov.addObject("msg", "没有操作权限，请联系管理员");
 		String openID = null; 
 		net.sf.json.JSONObject jsonOpenID = null; 
-		List<Unit> unitList = orderService.getUnit();
-		List<User> orderDepathList = orderService.getDepathList();
-		Layui orderNo = orderService.getNewOrderNo();
-		mov.addObject("units", unitList);
-		mov.addObject("depathList", orderDepathList);
-		mov.addObject("orderNo", orderNo.get("msg"));
 		if(code != null){
-			jsonOpenID = WeiXinUtil.getOpenID(code); 
+			jsonOpenID = WeiXinUtil.getOpenID(code);
 			openID =  (String)jsonOpenID.get("openid");//"oCnlEuFjrHbyecP-JwXMeT0Jcoh8";
-			mov.addObject("openId", openID); 
+			User u = userService.getUserByOpenId(openID);
+			if(u == null) {
+				return mov;
+			}else {
+				Boolean iscs = false;
+				for(Role r : u.getRoles()) {
+					if(r.getName().equals("customerService")) iscs = true;//账号有客服角色，展示所有
+				}
+				if(iscs) {
+					mov = new ModelAndView("/mobile/startOrder");
+					mov.addObject("openId", openID); 
+					List<Unit> unitList = orderService.getUnit();
+					List<User> orderDepathList = orderService.getDepathList();
+					Layui orderNo = orderService.getNewOrderNo();
+					mov.addObject("units", unitList);
+					mov.addObject("depathList", orderDepathList);
+					mov.addObject("orderNo", orderNo.get("msg"));
+				}
+			}
 		}
 		
 		//mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");
@@ -207,6 +252,14 @@ public class WeiXinController {
 	@RequestMapping("/depathOrders")
 	public Layui depathOrder(String ids, String technicianId,String openId) {
 		Layui result = orderService.depathOrder(ids, technicianId, openId);
+
+		return result;
+	}
+	
+	@RequestMapping("/redepathOrders")
+	@ResponseBody
+	public Layui redepathOrder(String ids, String technicianId,String depathUserId) {
+		Layui result = orderService.redepathOrder(ids, technicianId, depathUserId);
 
 		return result;
 	}
@@ -284,6 +337,13 @@ public class WeiXinController {
 	    order.setAddress(address);
 	    order.setFacility(facility);
 	    return order;
+	}
+	
+	@RequestMapping(value = "/getTimeLine")
+    public Layui cusConfirm(String orderId) {
+		Layui result = orderService.getTimeLine(orderId);
+		
+		return result;
 	}
 
 }

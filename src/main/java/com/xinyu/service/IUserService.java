@@ -23,4 +23,10 @@ public interface IUserService {
 
 	public Layui saveUnit(String unitName);
 
+	public Layui getUserListByOrg(String orgId);
+
+	public Layui updateUserOrg(String orgId, String userIds);
+
+	public Boolean checkCanRepath(String depathUserOpenId, String orderId);
+
 }

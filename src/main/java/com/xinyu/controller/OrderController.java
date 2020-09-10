@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.xinyu.Constance;
 import com.xinyu.bean.Layui;
 import com.xinyu.bean.OrderStatus;
@@ -55,15 +56,15 @@ public class OrderController {
 
 	@RequestMapping("/orderTableData")
 	@ResponseBody
-	public Layui getOrderData(PageBean pageBean, String orderNo, String unitName, String status) {
+	public Layui getOrderData(PageBean pageBean, String orderNo, Long unitId, String status) {
 		Order order = new Order();
 		Unit u = new Unit();
 		order.setUnit(u);
 		if (StringUtils.isNotEmpty(orderNo)) {
 			order.setOrderNo(orderNo);
 		}
-		if (StringUtils.isNotEmpty(unitName)) {
-			u.setName(unitName);
+		if (unitId != null) {
+			u.setId(unitId);
 		}
 		if (StringUtils.isNotEmpty(status)) {
 			order.setStatus(OrderStatus.valueOf(status));
@@ -207,6 +208,12 @@ public class OrderController {
 		
 		Layui result = orderService.getTechOrder(tech);
 		return result;
+	}
+	
+	@RequestMapping("/china.json")
+	@ResponseBody
+	public ModelAndView mapJson() {
+		return new ModelAndView("440800.geoJson");
 	}
 	
 	

@@ -22,12 +22,16 @@
   		<div class="layui-inline">
     		<input class="layui-input" placeholder="工单号" name="orderNo" id="parm1" autocomplete="off">
   		</div>
-  		<div class="layui-inline">
-  		<input class="layui-input" placeholder="单位" name="unitName" id="parm2" autocomplete="off">
+  		<div class="layui-inline  layui-form">
+  		<select name="unitName" id="parm2" lay-search="">
+      		<option value="">单位</option>
+      		<option th:each="unit:${unitList}" th:value="${unit.id}"
+                                th:text="${unit.name}"></option>
+      	</select>
   		</div>
   		<div class="layui-inline layui-form">
   		<select name="status" id="parm3" lay-search="">
-      		<option value="">直接选择或搜索选择</option>
+      		<option value="">工单状态</option>
       		<option th:each="status:${statusList}" th:value="${status.name}"
                                 th:text="${status.cnName}"></option>
       	</select>
@@ -86,6 +90,12 @@
       		<input type="checkbox" name="isUrgent" lay-skin="switch" lay-text="YES|NO">
     	</div>
   	</div>
+  	<div class="layui-inline">
+      <label class="layui-form-label required">上门时间(前)</label>
+      <div class="layui-input-inline">
+        <input type="text" readonly="" name="dtdDate" id="date" lay-verify="required|datetime" placeholder="年-月-日 时:分" autocomplete="off" class="layui-input">
+      </div>
+    </div>
   </div>
   
   <div class="layui-form-item">
@@ -537,6 +547,7 @@
 	                data : {"id":data.id},  // 你的formid
 	                success : function(order) {
 	                	var form = layui.form;
+	                	var laydate = layui.laydate;
 	                	for(let i=1;i<order.partList.length;i++){
 	                		if(i != 0){
 	                			addPart();
@@ -560,6 +571,10 @@
 	    				    ,"report": order.report
 	    				    ,"upkeep": order.upkeep
 	    				});
+	                	laydate.render({ 
+	                		elem: '#date'
+	                		,value: order.dtdDate //参数即为：2018-08-20 20:08:08 的时间戳
+	                	});
 	                	$("select[name='unit.id']").val(order.unit.id);
 	                	$("select[name='device.id']").val(order.device.id);
 	                	$("#deviceSelect").siblings("div.layui-form-select").find('dl dd[lay-value=' + order.device.id + ']').click();
@@ -611,7 +626,7 @@
 					}
 					,where: {
 						orderNo: param1,
-				   		unitName: param2,
+				   		unitId: param2,
 				   		status: param3
 					}
 				}, 'data');
@@ -634,9 +649,10 @@
 		  //日期
 		  laydate.render({
 		    elem: '#date'
-		  });
-		  laydate.render({
-		    elem: '#date1'
+		    ,format: 'yyyy-MM-dd HH:mm:ss'
+		    ,type: 'datetime'
+		    ,trigger: 'click'
+		    
 		  });
 		  form.render();
 		  
@@ -957,6 +973,7 @@
 				}
 			}, 'data');
 		}
+		
 		
 		
 		

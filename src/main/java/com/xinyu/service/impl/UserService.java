@@ -19,9 +19,13 @@ import com.xinyu.bean.Layui;
 import com.xinyu.bean.PageBean;
 import com.xinyu.dao.RoleDao;
 import com.xinyu.dao.UserDao;
+import com.xinyu.model.Order;
+import com.xinyu.model.Organization;
 import com.xinyu.model.Role;
 import com.xinyu.model.Unit;
 import com.xinyu.model.User;
+import com.xinyu.service.IOrderService;
+import com.xinyu.service.IOrgService;
 import com.xinyu.service.IUserService;
 
 @Service
@@ -32,6 +36,12 @@ public class UserService implements UserDetailsService,IUserService {
 	
 	@Autowired
 	private RoleDao roleDAO;
+	
+	@Autowired
+	private IOrderService orderService;
+	
+	@Autowired
+	private IOrgService orgService;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -144,6 +154,13 @@ public class UserService implements UserDetailsService,IUserService {
 		List<Role> roleList = roleDAO.getAllRole(name);
 		return Layui.data("成功",0, 0, roleList);
 	}
+	
+	@Override
+	public Layui getUserListByOrg(String orgId) {
+		
+		List<User> userList = userDAO.getUserByOrg(Long.valueOf(orgId));
+		return Layui.data("成功",0, 0, userList);
+	}
 
 	@Override
 	public Layui saveUnit(String unitName) {
@@ -157,6 +174,33 @@ public class UserService implements UserDetailsService,IUserService {
 		List<Unit> list = new ArrayList<Unit>();
 		list.add(u);
 		return Layui.data("保存成功", 0, 0, list);
+	}
+
+	@Override
+	@Transactional
+	public Layui updateUserOrg(String orgId, String userIds) {
+		List<String> list = Arrays.asList(userIds.split(","));
+		Long org = Long.valueOf(orgId);
+		userDAO.clearUserOrg(org);
+		userDAO.updateUserOrg(org,list);
+		
+		return Layui.data("保存成功", 0, 0, null);
+	}
+
+	@Override
+	public Boolean checkCanRepath(String depathUserOpenId, String orderId) {
+		Boolean can = Boolean.TRUE;
+		Order o = orderService.getSingelOrder(Long.valueOf(orderId));
+		User u = userDAO.getUserByOpenId(depathUserOpenId);
+		if(u.getOrgId() == null || o.getIsRedepath()) {
+			can = Boolean.FALSE;
+		}else {
+			List<Organization> childrens = orgService.getChildrens(u.getOrgId());
+			if(childrens == null || childrens.size() < 1) {
+				can = Boolean.FALSE;
+			}
+		}
+		return can;
 	}
 
 }

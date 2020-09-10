@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinyu.dao.OrganizationDao">
+	
+	<resultMap id="BaseResultMap" type="com.xinyu.model.Organization" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+        <result column="pid" property="pid" jdbcType="INTEGER" />
+    </resultMap>
+    
+    <select id="getAllOrg" parameterType="String" resultMap="BaseResultMap">
+        SELECT m.* FROM t_organization m order by order_num
+    </select>   
+    
+    <select id="getOrgChildrens" parameterType="Long" resultMap="BaseResultMap">
+        SELECT m.* FROM t_organization m where pid = #{pid}
+    </select>   
+    
+</mapper>

@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import com.xinyu.bean.AccessToken;
 import com.xinyu.bean.Layui;
 import com.xinyu.bean.OrderBean;
 import com.xinyu.bean.OrderStatus;
@@ -32,10 +31,12 @@ import com.xinyu.dao.UserDao;
 import com.xinyu.model.Device;
 import com.xinyu.model.Order;
 import com.xinyu.model.OrderPart;
+import com.xinyu.model.Organization;
 import com.xinyu.model.Part;
 import com.xinyu.model.Unit;
 import com.xinyu.model.User;
 import com.xinyu.service.IOrderService;
+import com.xinyu.service.IOrgService;
 import com.xinyu.util.FileUpDownLoadUtils;
 import com.xinyu.util.WeiXinUtil;
 
@@ -56,6 +57,9 @@ public class OrderService implements IOrderService {
 	
 	@Autowired
 	private UnitDao unitDao;
+	
+	@Autowired
+	private IOrgService orgService;
 	
 	private Logger logger = LoggerFactory
 			.getLogger(OrderService.class);
@@ -89,6 +93,15 @@ public class OrderService implements IOrderService {
 	}
 	
 	@Override
+	public List<OrderBean> getOrderByOneText(Order order,String text) {
+		
+		List<Order> orderList = orderDao.getOrderByOneText(order,text);
+		List<OrderBean> data = this.OrderToOrderBean(orderList);
+		
+		return data;
+	}
+	
+	@Override
 	public Order getOrderById(Long id) {
 		
 		Order orderResult = orderDao.getOrderById(id);
@@ -100,6 +113,9 @@ public class OrderService implements IOrderService {
 	public OrderBean getOrderBeanById(Long id) {
 		
 		Order orderResult = orderDao.getOrderById(id);
+		if(orderResult == null) {
+			return null;
+		}
 		List<Order> orderList = new ArrayList<Order>();
 		orderList.add(orderResult);
 		OrderBean oBean = this.OrderToOrderBean(orderList).get(0);
@@ -366,6 +382,7 @@ public class OrderService implements IOrderService {
 			data.put("phone", order.getPhone());
 			data.put("unit", order.getUnit().getName());
 			data.put("description", order.getDescription());
+			data.put("dtdDate", sdf.format(order.getDtdDate()));
 			String url = "http://xywxfw.com/xinyu/wx/preFeedback?technicianOpenId="+user.getOpenID()+"&orderId="+order.getId()+"&depathUserOpenId="+depathuser.getOpenID();
 			Order orderTemp = new Order();
 			orderTemp.setId(order.getId());
@@ -376,6 +393,15 @@ public class OrderService implements IOrderService {
 				url = "http://xywxfw.com/xinyu/wx/preComplete?technicianOpenId="+user.getOpenID()+"&orderId="+order.getId()+"&depathUserOpenId="+depathuser.getOpenID();
 			}
 			Boolean isSend = WeiXinUtil.sendTemplate(user.getOpenID(),url,data,OrderStatus.Dispatched,order.getIsUrgent());
+			data.put("orderNo", order.getOrderNo());
+			data.put("address", order.getAddress());
+			data.put("tech", user.getName());
+			data.put("techphone", user.getTelephone());
+			List<User> userList = userDao.getUserListByUnit(order.getUnit().getId());
+			if(userList != null&&userList.size()>0&&userList.get(0).getOpenID() != null) {
+				WeiXinUtil.sendTemplate(userList.get(0).getOpenID(),null,data,OrderStatus.Dispatched,order.getIsUrgent());
+				
+			}
 			orderTemp.setDepathDate(new Date());
 			orderTemp.setDepathUser(depathuser.getId());
 			orderTemp.setTechnician(technicianId);
@@ -519,11 +545,34 @@ public class OrderService implements IOrderService {
 	}
 	
 	@Override
+	public List<User> getOrgDepathList(String depathOpenID) {
+		User user = userDao.getUserByOpenId(depathOpenID);
+		List<Organization> orgList = orgService.getChildrens(user.getOrgId());
+		List<Long> orgIdList = new ArrayList<Long>();
+		for(Organization o : orgList) {
+			orgIdList.add(o.getId());
+		}
+		List<User> result = new ArrayList<User>();
+		List<User> userList = userDao.getUserListByRole("technician");
+		for(User u : userList) {
+			if(orgIdList.contains(u.getOrgId())) {
+				result.add(u);
+			}
+		}
+		
+		return result;
+	}
+	
+	@Override
 	public Layui maintenanceFeedback(MultipartHttpServletRequest params,Order order,String technicianOpenId) {
 		
 		List<MultipartFile> files = params.getFiles("file");   
         MultipartFile file = null; 
         String imageurls = "";
+        String old = orderDao.getOrderImages(String.valueOf(order.getId()));
+        if(StringUtils.isNotBlank(old)) {
+        	imageurls = old;
+        }
         for (int i = 0; i < files.size(); ++i) {    
             file = files.get(i);    
             if (!file.isEmpty()) {    
@@ -560,12 +609,13 @@ public class OrderService implements IOrderService {
 	}
 
 	@Override
-	public Layui orderConfirm(String orderId,String openId) {
+	public Layui orderConfirm(String orderId,String openId,String confirmOpinion) {
 		User confirmUser = userDao.findByOpenId(openId);
 		Order order = new Order();
 		order.setId(Long.valueOf(orderId));
 		order.setStatus(OrderStatus.OrderConfirmed);
 		order.setConfirmUser(confirmUser.getId());
+		order.setConfirmOpinion(confirmOpinion);
 		orderDao.updateOrderStatus(order);
 		Order otemp = orderDao.getDepathAndTechUser(Long.valueOf(orderId));
 		OrderBean obean = this.getOrderBeanById(Long.valueOf(orderId));
@@ -692,6 +742,66 @@ public class OrderService implements IOrderService {
 	public Layui getTechOrder(String tech) {
 		List<Order> list = orderDao.getTechOrder(tech);
 		return Layui.data("", 0, 0, list);
+	}
+
+	@Override
+	public Layui getTimeLine(String orderId) {
+		Order o = orderDao.getOrderById(Long.valueOf(orderId));
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		List<Map<String,String>> timeLine = new ArrayList<Map<String,String>>();
+		Map<String,String> itemcreate = new HashMap<String,String>();
+		Map<String,String> itemdepath = new HashMap<String,String>();
+		Map<String,String> itemfeedback = new HashMap<String,String>();
+		Map<String,String> itemconfirm = new HashMap<String,String>();
+		Map<String,String> itemarrival = new HashMap<String,String>();
+		Map<String,String> itemcomplete = new HashMap<String,String>();
+		User tuser = null;
+		String content = "由"+o.getUnit().getName()+"("+o.getAddress()+")"+"-"+o.getContact()+"("+o.getPhone()+")发起工单申请,故障描述："+o.getDescription();
+		itemcreate.put(sdf.format(o.getCreateDate()), content);
+		timeLine.add(itemcreate);
+		if(o.getDepathDate() != null) {
+			tuser = userDao.findByUserId(o.getTechnician());
+			content = "工单派发成功，技术员："+tuser.getName()+"("+tuser.getTelephone()+")"+"于"+sdf.format(o.getDtdDate())+"前上门检修";
+			itemdepath.put(sdf.format(o.getDepathDate()), content);
+			timeLine.add(itemdepath);
+		}
+		if(o.getFeedbackDate() != null) {
+			content = "检修完成，技术员："+tuser.getName()+"("+tuser.getTelephone()+")"+"检修完成，检修结果："+o.getReport();
+			itemdepath.put(sdf.format(o.getFeedbackDate()), content);
+			timeLine.add(itemfeedback);
+		}
+		if(o.getConfirmDate() != null) {
+			User cuser = userDao.findByUserId(o.getConfirmUser());
+			content = "报价确认完成，确认账号："+cuser.getName()+"("+cuser.getTelephone()+")"+"开始维修";
+			itemdepath.put(sdf.format(o.getConfirmDate()), content);
+			timeLine.add(itemconfirm);
+		}
+		if(o.getArrivalDate() != null) {
+			String partList = "";
+			Integer number = 0;
+			for(OrderPart op : o.getPartList()) {
+				partList = partList+op.getName()+"/";
+				number = number+op.getNum();	
+			}
+			partList = partList.length()>1?partList.substring(0,partList.length()-1):o.getDevice().getName();
+			
+			content = "采购配件已全部到货，配件总数共"+String.valueOf(number)+"+,包括："+partList;
+			itemarrival.put(sdf.format(o.getArrivalDate()), content);
+			timeLine.add(itemarrival);
+		}
+		if(o.getCompleteDate() != null) {
+			content = "工单维修完成，技术员："+tuser.getName()+"("+tuser.getTelephone()+")"+"维修完成";
+			itemcomplete.put(sdf.format(o.getCompleteDate()), content);
+			timeLine.add(itemcomplete);
+		}
+		
+		return Layui.data("", 0, 0, timeLine);
+	}
+
+	@Override
+	public Order getSingelOrder(Long orderId) {
+		Order order = orderDao.getOrderSingleById(orderId);
+		return order;
 	}
 
 }

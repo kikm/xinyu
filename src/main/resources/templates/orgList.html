@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link href="../style/layui/layui.css" rel="stylesheet" type="text/css">
+<script src="../scripts/layui/layui.all.js" type="text/javascript"></script>
+<script src="../scripts/jquery-3.4.1.min.js" type="text/javascript"></script>
+<style>
+	.layui-form-label.required:after{
+        content:"*";
+        color:red;
+        position: absolute;
+    }
+</style>
+</head>
+<body>
+<div id="list">
+	<div class="demoTable" style="padding-left:20px">
+  		<div class="layui-inline">
+  		<input class="layui-input" placeholder="名称" name="roleName" id="parm1" autocomplete="off">
+  		</div>
+  		<button class="layui-btn" id="tableSearch" data-type="reload">搜索</button>
+	</div>
+	<table  id="roleList" lay-filter="role"></table>
+	<script type="text/html" id="toolbar">
+	</script>
+ 
+	<script type="text/html" id="bar">
+  		<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+	</script>
+</div>
+<div id="newOrEdit"  class="layui-hide">
+ <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+  <legend>编辑角色</legend>
+</fieldset>	
+ 
+<form class="layui-form" id="roleForm" lay-filter="roleForm" method="POST">
+  <div class="layui-form-item">
+    <div class="layui-inline">
+      <label class="layui-form-label required">编码</label>
+      <div class="layui-input-inline">
+    	<input type="text" style="display:none;" name="id" autocomplete="off" class="layui-input">
+        <input type="text" style="display:none;" name="name" autocomplete="off" class="layui-input">
+        <label class="layui-form-label" id="roleNameLabel"></label>
+      </div>
+    </div>
+    <div class="layui-inline">
+      <label class="layui-form-label required">中文名称</label>
+      <div class="layui-input-inline">
+        <input type="text" name="cname" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+  </div>
+ 
+ <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+  <legend>角色菜单</legend>
+</fieldset>
+	<div class="layui-form-item">
+		<div id="roleTree" class="demo-tree-more" style="margin:10px 110px"></div>
+	</div>
+  <div class="layui-form-item"></div> 
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <button id="userCommit" class="layui-btn" lay-submit="" lay-filter="role">立即提交</button>
+      <button type="reset" id="formReset" class="layui-btn layui-btn-primary">重置</button>
+      <button type="button" onclick="backcall()" class="layui-btn layui-btn-primary">返回</button>
+    </div>
+  </div>
+  
+</form>
+<script>
+	var dataTemp = null; 
+	layui.use('table', function(){
+	  var table = layui.table;
+	  table.render({
+	    elem: '#roleList',
+	    url:'roleTableData',
+	    toolbar: '#toolbar', //开启头部工具栏，并为其绑定左侧模板
+	    defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+	    	title: '提示'
+	    	,layEvent: 'LAYTABLE_TIPS'
+	    	,icon: 'layui-icon-tips'
+	    }],
+	    page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+	      layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+	      //,curr: 5 //设定初始在第 5 页
+	      groups: 1, //只显示 1 个连续页码
+	      first: false, //不显示首页
+	      last: false //不显示尾页
+	      
+	    },
+	    id: 'tableReload',
+	  	where: {},
+	    cols: [
+	    	[
+	       {type: 'checkbox', fixed: 'left'}
+	      ,{field:'id', width:'8%', title: 'ID', sort: true}
+	      ,{field:'name', width:'15%', title: '英文标符'}
+	      ,{field:'cname', width:'20%', title: '中文简称'}
+	      ,{field:'remark', width:'38%', title: '已分配用户', sort: true}
+	      ,{fixed: 'right', title:'操作', toolbar: '#bar', width:'15%'}
+	    	]
+	    ]
+	    
+	  });
+	  
+	  table.on('toolbar(role)', function(obj){
+		var checkStatus = table.checkStatus(obj.config.id);
+		    switch(obj.event){
+		      case 'newUser':
+		    	  exchange();
+		      break;
+		      //自定义头工具栏右侧图标 - 提示
+		      case 'LAYTABLE_TIPS':
+		        layer.alert('这是工具栏右侧自定义的一个图标按钮');
+		      break;
+		    };
+		  });
+		  
+		  //监听行工具事件
+		  table.on('tool(role)', function(obj){
+		    var data = obj.data;
+		    //console.log(obj)
+		    if(obj.event === 'edit'){
+		    	$.ajax({
+	                type : "get",
+	                url : "getRoleInfo",
+	                async : false,
+	                data : {"id":data.id},  // 你的formid
+	                success : function(role) {
+	                	var form = layui.form;
+	                	var tree = layui.tree;
+	                	form.val('roleForm', {//filter
+	                		"id": role.id
+	                		,"name": role.name
+	                		,"cname": role.cname
+	    				});
+	                	$("#roleNameLabel").text(role.name);
+	                	let val = []; 
+	                	for(let i=0;i<role.menus.length;i++){
+	                		val.push(role.menus[i].id);
+	                	}
+	                	tree.setChecked('roleTree', val);
+	                	exchange();
+	                }
+	             })
+		    	
+		    	
+		    }
+		  });
+		  
+		  var $ = layui.$, active = {
+			reload: function(){
+				var param1 = $('#parm1').val();
+				//执行重载
+				table.reload('tableReload', {
+					page: {
+						curr: 1 //重新从第 1 页开始
+					}
+					,where: {
+						roleName: param1
+					}
+				}, 'data');
+			}
+		  };
+				  
+		$('.demoTable .layui-btn').on('click', function(){
+			var type = $(this).data('type');
+			active[type] ? active[type].call(this) : '';
+		});
+	});
+	
+	layui.use(['form','tree'], function(){
+		  var form = layui.form
+		  ,layer = layui.layer
+		  ,tree = layui.tree
+		  
+		  $.ajax({
+                cache : true,
+                type : "post",
+                url : "menuData",
+                async : false,
+                success : function(req) {
+                	if (req.code == 0) {
+                		dataTemp = req.data;                		
+                	}
+                }
+          });
+		  
+		//基本演示
+		  tree.render({
+		    elem: '#roleTree'
+		    ,data: dataTemp
+		    ,showCheckbox: true  //是否显示复选框
+		    ,id: 'roleTree'
+		    ,click: function(obj){
+		      var data = obj.data;  //获取当前点击的节点数据
+		      layer.msg('状态：'+ obj.state + '<br>节点数据：' + JSON.stringify(data));
+		    }
+		  });
+		  
+		  form.render();
+		  
+		  //自定义验证规则
+		  form.verify({
+		    title: function(value){
+		      if(value.length < 5){
+		        return '标题至少得5个字符啊';
+		      }
+		    }
+		    ,pass: [
+		      /^[\S]{6,12}$/
+		      ,'密码必须6到12位，且不能出现空格'
+		    ]
+		    ,content: function(value){
+		      layedit.sync(editIndex);
+		    }
+		  });
+		  
+		  //监听提交
+		  form.on('submit(role)', function(data){
+			var fd = new FormData();
+		    var formData = new FormData($( "#roleForm" )[0]); 
+		    var getData = tree.getChecked('roleTree');
+		    var roleMenu = "";
+		    for(let i=0;i<getData.length;i++){
+		    	roleMenu += getData[i].id+",";
+		    	for(let j=0;j<getData[i].children.length;j++){
+		    		roleMenu += getData[i].children[j].id+",";
+		    	}
+		    }
+		    formData.append("roleMenu",roleMenu);
+	        $.ajax({
+                cache : true,
+                type : "post",
+                url : "updateRole",
+                async : false,
+                data : formData,  // 你的formid
+                contentType: false,   //jax 中 contentType 设置为 false 是为了避免 JQuery 对其操作，从而失去分界符，而使服务器不能正常解析文件
+                processData: false,   //当设置为true的时候,jquery ajax 提交的时候不会序列化 data，而是直接使用data
+                error : function(request) {
+                    layer.alert('保存失败');
+                },
+                success : function(data) {
+                	if (data.code == 0) {
+                      	$("#formReset").click();
+                      	tableReload();
+                      	layer.msg('提交成功');
+                      	exchange();
+                      } else {
+                          layer.alert(data.msg);
+                      }
+                	}
+             });
+		    return false;
+
+		  });
+		  
+		  //表单赋值
+		  layui.$('#LAY-component-form-setval').on('click', function(){
+		    form.val('userForm', {//filter
+		      "id": "xiaoli" // "name": "value"
+		      ,"name": "效力"
+		      ,"password": "123456"
+		   	  ,"telephone": "12838742934"
+		    });
+		  });
+		  
+		  //表单取值
+		  layui.$('#LAY-component-form-getval').on('click', function(){
+		    var data = form.val('example');
+		    alert(JSON.stringify(data));
+		  });
+		  
+		});
+		
+		function backcall() {
+			layer.confirm('确认放弃页面所有数据？', {icon: 3, title:'提示'}, function(index){
+				$("#formReset").click();
+				layer.close(index);
+				exchange();
+			});
+		}
+		
+		function exchange(){
+			if($('#list').hasClass('layui-hide')){
+				$('#list').removeClass('layui-hide');
+				$('#newOrEdit').addClass('layui-hide');
+			}else{
+				$('#list').addClass('layui-hide');
+				$('#newOrEdit').removeClass('layui-hide');
+			}
+		}
+		
+		function tableReload(){
+			var table = layui.table;
+			var param1 = $('#parm1').val();
+			table.reload('tableReload', {
+				where: {
+					roleName: param1
+				}
+			}, 'data');
+		}
+		
+		
+	
+</script>
+</body>
+</html>

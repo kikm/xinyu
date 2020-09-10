@@ -52,12 +52,17 @@
                 <input name="orderNo" class="weui-input" readonly>
             </div>
           </div>
-		  <div class="weui-cell weui-cell_active">
-            <div class="weui-cell weui-cell_active weui-cell_access weui-cell_select weui-cell_select-after" style="padding-left: 1px;">
-				<input type="hidden" name="unit.id">
-            	<div class="weui-cell__hd">单位</div>
-            	<div class="weui-cell__bd"  data="" style="padding-left: 58px;" id="showPicker">请选择</div>
-          	</div>
+          <div class="weui-cell weui-cell_active weui-cell_access" >
+			<input type="hidden" name="unit.id">
+            <div class="weui-cell__hd">单位</div>
+            <div class="weui-cell__bd" style="padding-left: 58px;" id="showPicker">请选择</div>
+			<div class="weui-cell__ft"></div>
+          </div>
+		  <div class="weui-cell weui-cell_active weui-cell_access" id="showDatePicker">
+			<input type="hidden" name="dtdDate">
+            <div class="weui-cell__hd">上门时间</div>
+            <div class="weui-cell__bd" style="padding-left: 25px;">请选择</div>
+            <div class="weui-cell__ft"></div>
           </div>
 		  <div class="weui-cell weui-cell_active weui-cell_switch">
                 <div class="weui-cell__bd">加急</div>
@@ -92,6 +97,7 @@
                 <input name="address" class="weui-input">
             </div>
           </div>
+		  
         </div>
       </div>
       <div class="weui-cells__group weui-cells__group_form">
@@ -248,6 +254,60 @@
         	});
     	});
 
+		$('#showDatePicker').on('click', function () {
+			var _this = this;
+        	weui.datePicker({
+            	start: new Date(),
+            	end: 2030,
+				defaultValue: [new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate()],
+            	onConfirm: function (result) {
+					console.log($('.showDatePicker_picker .weui-picker'));
+                	$('.showDatePicker_picker .weui-picker').on('animationend webkitAnimationEnd', function() {
+                    	show_expect_time_picker(_this, result);
+                	});
+            	},
+            	title: '日期',
+				id: 'showDatePicker',
+            	className: 'showDatePicker_picker'
+        	});
+   		});
+
+		var hours = [],
+        minites = [],
+        symbol = [{ label: ':', value: 0 }];
+    	function show_expect_time_picker(_this, date) {
+        	var date = date[0].label + date[1].label + date[2].label;
+        	if (!hours.length) {
+            	for (var i = 0; i< 24; i++) {
+                	var hours_item = {};
+                	hours_item.label = ('' + i).length === 1 ? '0' + i : '' + i;
+                	hours_item.value = i;
+                	hours.push(hours_item);
+            	}
+        	}
+        	if (!minites.length) {
+            	for (var j= 0; j < 60; j++) {
+                	var minites_item = {};
+                	minites_item.label = ('' + j).length === 1 ? '0' + j : '' + j;
+                	minites_item.value = j;
+                	minites.push(minites_item);
+            	}
+        	}
+
+        	weui.picker(hours, symbol, minites, {
+            	defaultValue: [new Date().getHours()+1, 0, 0],
+            	onConfirm: function(result) {
+                	var time = result[0].label + ':' + result[2].label;
+                	var expect_date = date + ' ' + time;
+					expect_date = expect_date.replace('年','-').replace('月','-').replace('日','')
+					$('input[name="dtdDate"]').val(expect_date+":00");
+                	$(_this).find('.weui-cell__bd').text(expect_date);
+            	},
+            	id: 'ma_expect_time',
+				title: '时间'
+        	});
+    	}
+
 		$('#showTooltips').on('click', function(){
         	if ($(this).hasClass('weui-btn_disabled')) return;
 			if ($loadingToast.css('display') != 'none') return;
@@ -369,7 +429,6 @@
     				data:{"technicianId":did,"ids":orderId+",","openId":openId},    //参数值
     				success:function(req){
 						$toast.find(".weui-toast__content").text(req.msg);
-						console.log(req.msg);
 						if(req.code == 0){
 							$tooltips.removeClass('weui-toptips_warn');
 							$tooltips.addClass('weui-toptips_success');

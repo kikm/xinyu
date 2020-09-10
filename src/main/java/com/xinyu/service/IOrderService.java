@@ -38,7 +38,7 @@ public interface IOrderService {
 
 	public List<User> getDepathList();
 
-	public Layui orderConfirm(String orderId, String openId);
+	public Layui orderConfirm(String orderId, String openId,String confirmOpinion);
 
 	public Layui finishOrder(String ids, String userId);
 
@@ -61,5 +61,13 @@ public interface IOrderService {
 	public Layui getOrderPartByIds(String ids);
 
 	public Layui getTechOrder(String tech);
+
+	public Layui getTimeLine(String orderId);
+
+	public List<OrderBean> getOrderByOneText(Order order,String text);
+	
+	public Order getSingelOrder(Long orderId);
+
+	public List<User> getOrgDepathList(String depathOpendID);
 	
 }
