@@ -15,9 +15,11 @@
   <input type="hidden" name="statusName" th:value="${orderBean.statusName}">
   <input type="hidden" name="deviceName" th:value="${orderBean.deviceName}">
   <input type="hidden" name="partListSize" th:value="${orderBean.partListSize}">
+  <input type="hidden" name="partListDes" th:value="${orderBean.partListDes}">
   <input type="hidden" name="total" th:value="${orderBean.total}">
   <input type="hidden" name="upkeep" th:value="${orderBean.upkeep}">
   <input type="hidden" name="phone" th:value="${orderBean.phone}">
+  <input type="hidden" name="report" th:value="${orderBean.report}">
   <div class="weui-toptips weui-toptips_warn js_tooltips" style="display: none; opacity: 1;"></div>
 
   <div class="container js_container" id="container">
@@ -29,7 +31,7 @@
 <div class="page">
     <div class="page__hd">
         <h1 class="page__title">确认</h1>
-        <p class="page__desc" style="font-size: 28px">报价确认</p>
+        <p class="page__desc" style="font-size: 28px"></p>
     </div>
     <div class="page__bd">
         <div class="weui-cells__title"></div>
@@ -56,6 +58,12 @@
                 </div>
                 <div class="partListSize" ></div>
             </div>
+			<div class="weui-cell weui-cell_access">
+                <div class="weui-cell__bd">
+                    <span style="vertical-align: middle">配件详情</span>
+                </div>
+                <div class="partListDes" ></div>
+            </div>
             <div class="weui-cell weui-cell_access">
                 <div class="weui-cell__bd">
                     <span style="vertical-align: middle">维修费</span>
@@ -78,10 +86,7 @@
 				<div class="weui-cell__bd">
                     <span style="vertical-align: middle">维修内容:</span>
                 </div>
-            </div>
-			<div class="weui-cell weui-cell_access">
-                <div class="report">
-                    <p>摘要信息更换主板摘要信息更换主板摘要信息更换主板摘要信息更换主板摘要信息更换主板摘要信息更换主板摘要信息更换主板</p>
+				<div class="report">
                 </div>
             </div>
 			<div class="weui-cell weui-cell_access">
@@ -119,9 +124,11 @@
 		$('.orderNo').text($("input[name='orderNo']").val());
 		$('.deviceName').text($("input[name='deviceName']").val());
 		$('.partListSize').text($("input[name='partListSize']").val());
+		$('.partListDes').text($("input[name='partListDes']").val());
 		$('.upkeep').text($("input[name='upkeep']").val());
 		$('.phone').text($("input[name='phone']").val());
 		$('.total').text($("input[name='total']").val());
+		$('.report').text($("input[name='report']").val());
 		var url = type=='confirm'?"cusConfirm":"complete";
 		$('.page__desc').text(type=='confirm'?'报价确认':'完工确认');
 

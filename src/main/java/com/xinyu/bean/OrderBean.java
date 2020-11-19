@@ -9,6 +9,7 @@ public class OrderBean extends Order {
 	public String unitName;
 	public Float total;
 	public Integer partListSize;
+	public String partListDes;
 	public String phone;
 	
 	public String getStatusName() {
@@ -46,6 +47,12 @@ public class OrderBean extends Order {
 	}
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+	public String getPartListDes() {
+		return partListDes;
+	}
+	public void setPartListDes(String partListDes) {
+		this.partListDes = partListDes;
 	}
 	
 	

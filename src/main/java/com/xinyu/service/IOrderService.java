@@ -16,13 +16,11 @@ import com.xinyu.model.User;
 
 public interface IOrderService {
 
-	public Layui getOrderData(PageBean pageBean,Order order);
+	public Layui getOrderData(PageBean pageBean,Order order, String startDate, String endDate);
 	
-	public List<OrderBean> getOrderList(PageBean pageBean,Order order);
-
 	public List<Device> getDeviceList();
 	
-	public Layui getNewOrderNo();
+	public String getNewOrderNo();
 
 	public Layui getPartDataByDevice(Integer deviceId);
 
@@ -58,7 +56,7 @@ public interface IOrderService {
 
 	public Layui arrivalNotice(String ids);
 
-	public Layui getOrderPartByIds(String ids);
+	public String getOrderPartByIds(String ids);
 
 	public Layui getTechOrder(String tech);
 
@@ -69,5 +67,11 @@ public interface IOrderService {
 	public Order getSingelOrder(Long orderId);
 
 	public List<User> getOrgDepathList(String depathOpendID);
+
+	public String getLeastOrderTen(String city);
+
+	public String getOrderPartDesById(Long id);
+
+	public void noticeCustomerService(Order order, User u);
 	
 }

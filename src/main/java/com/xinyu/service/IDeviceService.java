@@ -3,7 +3,6 @@ package com.xinyu.service;
 import com.xinyu.bean.Layui;
 import com.xinyu.bean.PageBean;
 import com.xinyu.model.Device;
-import com.xinyu.model.Order;
 
 public interface IDeviceService {
 

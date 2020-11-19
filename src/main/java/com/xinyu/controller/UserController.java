@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.xinyu.Constance;
+import com.xinyu.bean.City;
 import com.xinyu.bean.Layui;
 import com.xinyu.bean.MenuBean;
 import com.xinyu.bean.PageBean;
@@ -102,14 +103,14 @@ public class UserController {
 			}
 			if(canView) {
 				mov = new ModelAndView("/mobile/orderList");//已绑定账号 
-				mov.addObject("type", "ten");
-				mov.addObject("user",userOri == null?new User():userOri); 
-				mov.addObject("openId", openId); 
 			}else {
 				mov = new ModelAndView("/mobile/error");
 				mov.addObject("msg", "没有操作权限，请联系管理员"); 
 			}
 		} 
+		mov.addObject("type", "ten");
+		mov.addObject("user",userOri == null?new User():userOri); 
+		mov.addObject("openId", openId);
 		
 //		mov = new ModelAndView("/mobile/orderList");//已绑定账号
 //		mov.addObject("type","ten"); 
@@ -125,6 +126,7 @@ public class UserController {
     public ModelAndView getUserList() {
 		ModelAndView mov = new ModelAndView("userList");
 		List<Unit> unitList = orderService.getUnit();
+		mov.addObject("cityList", City.values());
 		mov.addObject("unitList", unitList);
         return mov;
     }

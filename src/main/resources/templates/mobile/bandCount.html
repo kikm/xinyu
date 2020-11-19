@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,viewport-fit=cover">
     <title>新域公司</title>
-    <link rel="stylesheet" href="style/weui/weui.css"/>
-    <link rel="stylesheet" href="style/weui/example.css"/>
+    <link rel="stylesheet" th:href="@{/style/weui/weui.css}" />
+    <link rel="stylesheet" th:href="@{/style/weui/example.css}"/>
 </head>
 <body ontouchstart >
   <input type="hidden" id="hidopenId" name="openId" th:value="${openId}">
@@ -35,7 +35,7 @@
   <div class="weui-form">
     <div class="weui-form__text-area">
       <h1 class="weui-form__title">
-		<img src="images/xinyulogo.jpg" alt="XinYu" height="21px" />&nbsp;新域
+		<img th:src="@{/images/xinyulogo.jpg}" alt="XinYu" height="21px" />&nbsp;新域
 	  </h1>
       <div class="weui-form__desc">绑定账号后可进入查看新域公司业务详情</div>
     </div>
@@ -144,8 +144,8 @@
     
     
     
-    <script src="scripts/weui/zepto.min.js"></script>
-    <script src="scripts/weui/weui.min.js"></script>
-    <script src="scripts/weui/example.js"></script>
+    <script th:src="@{/scripts/weui/zepto.min.js}"></script>
+    <script th:src="@{/scripts/weui/weui.min.js}"></script>
+    <script th:src="@{/scripts/weui/example.js}"></script>
 </body>
 </html>

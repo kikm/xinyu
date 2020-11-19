@@ -23,7 +23,10 @@
   <input type="hidden" name="phone">
   <input type="hidden" name="contact">
   <input type="hidden" name="facility">
+  <input type="hidden" name="address">
   <input type="hidden" name="photoname">
+  <input type="hidden" name="report">
+  <input type="hidden" name="partListDes">
   <input type="hidden" name="confirmOpinion">
   
   <div class="weui-toptips weui-toptips_success js_tooltips" style="display: none; opacity: 1;">错误提示</div>
@@ -232,8 +235,9 @@
 						$(tempValueCus).eq(2).html(bean.unitName);
 						$(tempValueCus).eq(3).html(bean.phone);
 						$(tempValueCus).eq(4).html(bean.facility);
-						$(tempValueCus).eq(5).html(bean.address);
-						$(tempValueCus).eq(6).html('60%');
+						$(tempValueCus).eq(5).html(bean.partListSize);
+						$(tempValueCus).eq(6).html(bean.address);
+						$(tempValueCus).eq(7).html('60%');
 						$('#previewTemplateCus').find(".weui-progress__inner-bar").css("width","60%");
 						$('#previewTemplateCus').find(".weui-form-preview").eq(0).attr("pvdata-id",bean.id);
 						$('#previewTemplateCus').find(".confirm").eq(0).attr('data-id',bean.id);
@@ -359,11 +363,14 @@
 					$("input[name='orderNo']").val(data.orderNo);
 					$("input[name='deviceName']").val(data.deviceName);
 					$("input[name='partListSize']").val(data.partListSize);
+					$("input[name='partListDes']").val(data.partListDes);
 					$("input[name='upkeep']").val(data.upkeep);
 					$("input[name='phone']").val(data.phone);
 					$("input[name='total']").val(data.total);
 					$("input[name='facility']").val(data.facility);
 					$("input[name='contact']").val(data.contact);
+					$("input[name='address']").val(data.address);
+					$("input[name='report']").val(data.report);
     			}
 			});	
 			$('#hidorderId').val(orderId);
@@ -396,6 +403,7 @@
 						$("input[name='facility']").val(data.facility);
 						$("input[name='photoname']").val(data.imageUrls);
 						$("input[name='confirmOpinion']").val(data.confirmOpinion);
+						$("input[name='report']").val(data.report);
     				}
 				});	
 				$("input[name='operType']").val("complete");
@@ -443,7 +451,7 @@
         </div>
 	</div>
       <div class="weui-cells__group weui-cells__group_form">
-        <div class="weui-cells__title">文本域</div>
+        <div class="weui-cells__title">维修意见</div>
         <div class="weui-cells weui-cells_form">
             <div class="weui-cell">
                 <div class="weui-cell__bd">
@@ -652,6 +660,12 @@
                 </div>
                 <div class="partListSize" ></div>
             </div>
+			<div class="weui-cell weui-cell_access">
+                <div class="weui-cell__bd">
+                    <span style="vertical-align: middle">配件详情</span>
+                </div>
+                <div class="partListDes" ></div>
+            </div>
             <div class="weui-cell weui-cell_access">
                 <div class="weui-cell__bd">
                     <span style="vertical-align: middle">维修费</span>
@@ -674,10 +688,7 @@
 				<div class="weui-cell__bd">
                     <span style="vertical-align: middle">维修内容:</span>
                 </div>
-            </div>
-			<div class="weui-cell weui-cell_access">
                 <div class="report">
-                    <p>摘要信息更换主板摘要信息更换主板摘要信息更换主板摘要信息更换主板摘要信息更换主板摘要信息更换主板摘要信息更换主板</p>
                 </div>
             </div>
 			<div class="weui-cell weui-cell_access">
@@ -715,11 +726,13 @@
 		$('.orderNo').text($("input[name='orderNo']").val());
 		$('.deviceName').text($("input[name='deviceName']").val());
 		$('.partListSize').text($("input[name='partListSize']").val());
+		$('.partListDes').text($("input[name='partListDes']").val());
 		$('.upkeep').text($("input[name='upkeep']").val());
 		$('.phone').text($("input[name='phone']").val());
 		$('.total').text($("input[name='total']").val());
 		$('.facility').text($("input[name='facility']").val());
 		$('.contact').text($("input[name='contact']").val());
+		$('.report').text($("input[name='report']").val());
 		var url = type=='confirm'?"wx/cusConfirm":"wx/complete";
 		$('.page__desc').text(type=='confirm'?'报价确认':'完工确认');
 

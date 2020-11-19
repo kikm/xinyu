@@ -50,6 +50,16 @@
       </div>
     </div>
     <div class="layui-inline">
+    <label class="layui-form-label required">地区</label>
+    <div class="layui-input-inline">
+      <select name="city" lay-verify="required" lay-filter="city" lay-search="">
+      	<option value="">直接选择或搜索选择</option>
+        <option th:each="city:${cityList}" th:value="${city.name}"
+                                th:text="${city.cnName}"></option>
+      </select>
+    </div>
+    </div>
+    <div class="layui-inline">
     <label class="layui-form-label required">单位部门</label>
     <div class="layui-input-inline">
       <select name="unit.id" lay-verify="required" lay-filter="unit" lay-search="">
@@ -181,6 +191,7 @@
 	                		,"openID": user.openID
 	    				});
 	                	$("select[name='unit.id']").val(user.unit.id);
+	                	$("select[name='city']").val(user.city);
 	                	form.render("select");
 	                	let val = []; 
 	                	for(let i=0;i<user.roles.length;i++){

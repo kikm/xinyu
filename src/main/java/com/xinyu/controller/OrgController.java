@@ -11,7 +11,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.xinyu.bean.Layui;
 import com.xinyu.bean.OrgTree;
-import com.xinyu.model.User;
 import com.xinyu.service.IOrgService;
 import com.xinyu.service.IUserService;
 

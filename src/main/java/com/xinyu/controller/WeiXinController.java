@@ -18,13 +18,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.baidu.aip.ocr.AipOcr;
 import com.xinyu.Constance;
+import com.xinyu.bean.City;
 import com.xinyu.bean.Layui;
 import com.xinyu.bean.OrderBean;
 import com.xinyu.bean.OrderStatus;
@@ -35,7 +35,6 @@ import com.xinyu.model.User;
 import com.xinyu.service.IOrderService;
 import com.xinyu.service.IUserService;
 import com.xinyu.service.IWxService;
-import com.xinyu.util.FileUpDownLoadUtils;
 import com.xinyu.util.WeiXinUtil;
 
 @RestController
@@ -105,7 +104,7 @@ public class WeiXinController {
 		String image  = o.getImageUrls();
 		Boolean canRepath = userService.checkCanRepath(depathUserOpenId,orderId);
 		if(canRepath) {
-			List<User> orderDepathList = orderService.getOrgDepathList(depathUserOpenId);
+			List<User> orderDepathList = orderService.getOrgDepathList(technicianOpenId);
 			mov.addObject("depathList", orderDepathList);
 		}
 		if(StringUtils.isNotBlank(image)){
@@ -148,7 +147,6 @@ public class WeiXinController {
 		mov.addObject("orderId", orderId);
 		mov.addObject("orderBean", order);
 		mov.addObject("type", "complete");
-
 		
         return mov;
     }
@@ -208,44 +206,84 @@ public class WeiXinController {
 	
 	@RequestMapping(value = "/startOrder", method = RequestMethod.GET)
     public ModelAndView startOrder(String code) {
-		ModelAndView mov = new ModelAndView("/mobile/error"); //未绑定账号\客户页面
+		ModelAndView mov = new ModelAndView("/mobile/bandCount"); //未绑定账号\客户页面
 		mov.addObject("msg", "没有操作权限，请联系管理员");
 		String openID = null; 
 		net.sf.json.JSONObject jsonOpenID = null; 
 		if(code != null){
 			jsonOpenID = WeiXinUtil.getOpenID(code);
-			openID =  (String)jsonOpenID.get("openid");//"oCnlEuFjrHbyecP-JwXMeT0Jcoh8";
+			openID = (String)jsonOpenID.get("openid");//"onIRYuB19EGw1E9ojhwSJZe6Wxuo";
 			User u = userService.getUserByOpenId(openID);
 			if(u == null) {
 				return mov;
 			}else {
-				Boolean iscs = false;
+				mov = new ModelAndView("/mobile/startOrder");
+				mov.addObject("openId", openID); 
+				String orderNo = orderService.getNewOrderNo();
 				for(Role r : u.getRoles()) {
-					if(r.getName().equals("customerService")) iscs = true;//账号有客服角色，展示所有
+					if(r.getName().equals("customer")) {
+						mov.addObject("unitname", u.getUnit().getName());
+						mov.addObject("unitid", u.getUnit().getId());
+						orderNo += 'C'+orderNo;
+						mov.addObject("iscus", Boolean.TRUE);
+						break;
+					}else {
+						List<Unit> unitList = orderService.getUnit();
+						mov.addObject("units", unitList);
+					}
 				}
-				if(iscs) {
-					mov = new ModelAndView("/mobile/startOrder");
-					mov.addObject("openId", openID); 
-					List<Unit> unitList = orderService.getUnit();
-					List<User> orderDepathList = orderService.getDepathList();
-					Layui orderNo = orderService.getNewOrderNo();
-					mov.addObject("units", unitList);
-					mov.addObject("depathList", orderDepathList);
-					mov.addObject("orderNo", orderNo.get("msg"));
-				}
+				List<User> orderDepathList = orderService.getDepathList();
+				mov.addObject("depathList", orderDepathList);
+				mov.addObject("orderNo", orderNo);
 			}
 		}
+		return mov;
 		
+	}
+	
+	@RequestMapping(value = "/depath", method = RequestMethod.GET)
+	public ModelAndView depath(String orderId,String openId) {
+		ModelAndView mov = new ModelAndView("/mobile/depathOrder"); //未绑定账号\客户页面
+		
+		Order o = orderService.getSingelOrder(Long.valueOf(orderId));
+		if(StringUtils.isBlank(o.getTechnician())) {
+			mov = new ModelAndView("/mobile/error"); 
+			mov.addObject("msg", "该工单已派发");
+			return mov;
+		}
+		mov.addObject("openId", openId); 
+		mov.addObject("orderId", orderId); 
+		List<User> orderDepathList = orderService.getDepathList();
+		mov.addObject("depathList", orderDepathList);
 		//mov.addObject("openId", "oCnlEuFjrHbyecP-JwXMeT0Jcoh8");
-
 		return mov;
 	}
 	
 	@RequestMapping("/saveOrUpdateOrder")
-	public Layui saveOrUpdateOrder(HttpServletRequest request, Order order, String deleteFile, String deleteOrderPart) {
+	public Layui saveOrUpdateOrder(HttpServletRequest request, Order order, String deleteFile, String deleteOrderPart,String openId) {
 		MultipartHttpServletRequest params = ((MultipartHttpServletRequest) request);
+		User u = userService.getUserByOpenId(openId);
+		order.setCity(City.valueOf(u.getCity()));
+		Boolean issz = City.SZ.equals(order.getCity())?Boolean.TRUE:Boolean.FALSE;
 		Layui result = orderService.saveOrUpdateOrder(params, order, deleteFile, deleteOrderPart);
-
+		if((int)result.get("code") == 0 ) {
+			Boolean iscs = false;
+			for(Role r : u.getRoles()) {
+				if(r.getName().equals("customer")) {
+					iscs = true;
+					result.put("depathJump", Boolean.FALSE);
+					break;
+				}
+			}
+			if(iscs&&issz) {//是深圳客户账号直接派单
+				String tenUserId = orderService.getLeastOrderTen(order.getCity().getName());//取当前身上最少单的技术员派单
+				result = orderService.depathOrder(String.valueOf(order.getId()), tenUserId, openId);
+			}else if(iscs){
+				orderService.noticeCustomerService(order,u);
+			}else {
+				result.put("depathJump", Boolean.TRUE);
+			}
+		}
 		return result;
 	}
 	

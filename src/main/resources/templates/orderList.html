@@ -20,7 +20,10 @@
 <div id="list">
 	<div class="demoTable" style="padding-left:20px">
   		<div class="layui-inline">
-    		<input class="layui-input" placeholder="工单号" name="orderNo" id="parm1" autocomplete="off">
+  			<input type="text" readonly="" name="startDate" id="parm1" lay-verify="required|date" placeholder="开始时间 " autocomplete="off" class="layui-input">
+  		</div>
+  		<div class="layui-inline">
+  			<input type="text" readonly="" name="endDate" id="parm4" lay-verify="required|date" placeholder="结束时间 " autocomplete="off" class="layui-input">
   		</div>
   		<div class="layui-inline  layui-form">
   		<select name="unitName" id="parm2" lay-search="">
@@ -182,7 +185,7 @@
       </div>
     </div>
     <div class="layui-inline">
-      <label class="layui-form-label">维修费</label>
+      <label class="layui-form-label required">维修费</label>
       <div class="layui-input-inline">
         <input type="text" name="upkeep" lay-verify="numb" placeholder="￥" autocomplete="off" class="layui-input">
       </div>
@@ -191,7 +194,7 @@
  <div id="partList">
   <div class="layui-form-item" >
     <div class="layui-inline">
-      <label class="layui-form-label required">维修配件</label>
+      <label class="layui-form-label">维修配件</label>
       <div class="layui-input-inline">
       <select class="partListId" id="partListId" lay-filter="orderPart" name="partList[0].id" lay-search="">
         <option value="3">直接选择或搜索选择</option>
@@ -206,7 +209,7 @@
       </div>
     </div>
     <div class="layui-inline">
-      <label class="layui-form-label required">报价</label>
+      <label class="layui-form-label">报价</label>
       <div class="layui-input-inline" >
         <input type="text" name="partList[0].offer" lay-verify="numb" placeholder="￥" autocomplete="off" class="layui-input">
       </div>
@@ -301,9 +304,15 @@
 </div>
 <script>
 	 var files;
-	layui.use('table', function(){
+	layui.use(['table','laydate'], function(){
 	  var table = layui.table;
-	  
+	  var laydate = layui.laydate;
+	  laydate.render({ 
+  		elem: '#parm1'
+  	  });
+	  laydate.render({ 
+	  	elem: '#parm4'
+	  });
 	  table.render({
 	    elem: '#orderList',
 	    url:'orderTableData',
@@ -326,14 +335,17 @@
 	    cols: [
 	    	[
 	       {type: 'checkbox', fixed: 'left'}
-	      ,{field:'id', width:20, title: 'ID', sort: true}
+	      ,{field:'id', width:20, title: 'ID', sort: true,hide:true}
 	      ,{field:'orderNo', width:130, title: '工单号'}
-	      ,{field:'unitName', width:80, title: '单位', sort: true}
+	      ,{field:'unitName', width:40, title: '单位', sort: true}
 	      ,{field:'contact', width:80, title: '联系人'}
-	      ,{field:'phone', title: '联系电话', minWidth: 150}
-	      ,{field:'statusName', width:135, title: '工单状态', sort: true}
-	      ,{field:'deviceName', width:135, title: '设备类型', sort: true}
-	      ,{field:'techName', width:135, title: '技术员', sort: true}
+	      ,{field:'phone', title: '联系电话', width: 40}
+	      ,{field:'statusName', width:80, title: '工单状态', sort: true}
+	      ,{field:'deviceName', width:100, title: '设备类型', sort: true}
+	      ,{field:'techName', width:80, title: '技术员', sort: true}
+	      ,{field:'upkeep', width:100, title: '维修费'}
+	      ,{field:'description', width:170, title: '故障描述'}
+	      ,{field:'report', width:170, title: '维修建议'}
 	      ,{fixed: 'right', title:'操作', toolbar: '#bar', width:150}
 	    	]
 	    ]
@@ -345,8 +357,8 @@
 		    switch(obj.event){
 		      case 'newOrder':
 		    	  $.post('getNewOrderNo',{},function(result){
-		     		  	$("#orderNoLabel").html(result.msg);
-		     		  	$("#orderNoInput").val(result.msg);
+		     		  	$("#orderNoLabel").html(result);
+		     		  	$("#orderNoInput").val(result);
 		     	  });
 		    	  exchange();
 		      break;
@@ -617,6 +629,7 @@
 		  var $ = layui.$, active = {
 			reload: function(){
 				var param1 = $('#parm1').val();
+				var param4 = $('#parm4').val();
 				var param2 = $('#parm2').val();
 				var param3 = $('#parm3').val();
 				//执行重载
@@ -625,11 +638,26 @@
 						curr: 1 //重新从第 1 页开始
 					}
 					,where: {
-						orderNo: param1,
+						startDate: param1,
+						endDate: param4,
 				   		unitId: param2,
 				   		status: param3
 					}
 				}, 'data');
+				$.ajax({
+	                type : "get",
+	                url : "getDepathCount",
+	                async : false,
+	                success : function(data) {
+		        		var map = data.data[0];
+						$("#techOrderCount").empty();
+		        		for(var key in map){
+		        			var html = '<button class="layui-btn layui-btn-sm layui-btn-warm layui-btn-radius" onclick="showTechOrder(this);" value="'+key.substring(0,key.indexOf('-'))+'">'+key.substring(key.indexOf('-')+1,key.length)+' '+map[key]+'</button>'
+							$("#techOrderCount").append(html)
+		        　　　　　　　　	}
+	                }
+	            });
+				
 			}
 		  };
 				  
@@ -762,10 +790,6 @@
 			  	var report = $("textarea[name='report']").val();
 			  	if(devId == null||devId ==""){
 				  	layer.msg('设备类型不能为空');
-			  		return false;
-			  	}
-			  	if(partLid == null||partLid ==""){
-				  	layer.msg('配件不能为空');
 			  		return false;
 			  	}
 			  	if(report == null||report ==""){
@@ -967,7 +991,8 @@
 			var table = layui.table;
 			table.reload('tableReload', {
 				where: {
-					orderNo: $('#parm1').val(),
+					startDate: $('#parm1').val(),
+					endDate: $('#parm4').val(),
 			   		unitName: $('#parm2').val(),
 			   		status: $('#parm3').val()
 				}

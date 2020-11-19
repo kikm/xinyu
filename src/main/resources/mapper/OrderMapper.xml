@@ -15,6 +15,7 @@
         <result column="sn" property="sn" jdbcType="VARCHAR" />
         <result column="description" property="description" jdbcType="VARCHAR" />
         <result column="status" property="status" jdbcType="VARCHAR" />
+        <result column="city" property="city" jdbcType="VARCHAR" />
         <result column="isUrgent" property="isUrgent" jdbcType="BOOLEAN" />
         <result column="isRedepath" property="isRedepath" jdbcType="BOOLEAN" />
         <result column="report" property="report" jdbcType="VARCHAR" />
@@ -97,6 +98,12 @@
 			FROM t_order ot
 			LEFT JOIN t_unit u ON u.id = ot.unit_id
 			WHERE 1=1
+			<if test="startDate != null and startDate != ''">
+				and ot.create_time &gt;= '${startDate}'
+			</if>
+			<if test="endDate != null  and endDate != ''">
+				and ot.create_time &lt;= '${endDate}'
+			</if>
 			<!-- 如果满足其中的条件就调用其中的SQL语句 -->
         	<include refid="query_order_where"/>
 			ORDER BY ot.order_no
@@ -123,6 +130,12 @@
 			</if>
 			<if test="order.technician!=null">
 				and technician=#{order.technician}
+			</if>
+			<if test="startDate != null and startDate != ''">
+				and ot.create_time &gt;= '${startDate}'
+			</if>
+			<if test="endDate != null  and endDate != ''">
+				and ot.create_time &lt;= '${endDate}'
 			</if>
 			ORDER BY ot.order_no) as o
         left join t_device d on d.id = o.device_id
@@ -161,14 +174,20 @@
         select count(distinct o.id) from t_order o
         left join t_unit u on u.id = o.unit_id
         where 1=1
-         <!-- 如果满足其中的条件就调用其中的SQL语句 -->
+        <if test="startDate != null and startDate != ''">
+			and o.create_time &gt;= '${startDate}'
+		</if>
+		<if test="endDate != null  and endDate != ''">
+			and o.create_time &lt;= '${endDate}'
+		</if>
+        <!-- 如果满足其中的条件就调用其中的SQL语句 -->
         <include refid="query_order_where"/>
     </select>
     
     <select id="getNewOrderNo" parameterType="String" resultType="java.lang.String">
         select max(o.order_no) from t_order o
          <!-- 如果满足其中的条件就调用其中的SQL语句 -->
-        where order_no like '${preOrderNo}%'
+        where order_no like '%${preOrderNo}%'
         order by o.order_no
     </select>
     
@@ -187,6 +206,7 @@
 			sn =#{order.sn},
 			description =#{order.description },
 			status =#{order.status.name},
+			city =#{order.city.name},
 			report =#{order.report},
 			image_urls =#{order.imageUrls},
 			upkeep =#{order.upkeep},
@@ -212,7 +232,8 @@
 	            <if test="order.model != null ">model,</if>  
 	            <if test="order.sn != null ">sn,</if>  
 	            <if test="order.description  != null ">description,</if>  
-	            <if test="order.status.name != null ">status,</if>  
+	            <if test="order.status.name != null ">status,</if> 
+	            <if test="order.city.name != null ">city,</if> 
 	            <if test="order.report != null ">report,</if>  
 	            <if test="order.imageUrls != null ">image_urls,</if>  
 	            <if test="order.upkeep != null ">upkeep,</if>  
@@ -235,7 +256,8 @@
 	            <if test="order.model != null ">#{order.model},</if>  
 	            <if test="order.sn != null ">#{order.sn},</if>  
 	            <if test="order.description  != null ">#{order.description},</if>  
-	            <if test="order.status.name != null ">#{order.status.name},</if>  
+	            <if test="order.status.name != null ">#{order.status.name},</if>
+	            <if test="order.city.name != null ">#{order.city.name},</if>  
 	            <if test="order.report != null ">#{order.report},</if>  
 	            <if test="order.imageUrls != null ">#{order.imageUrls},</if>  
 	            <if test="order.upkeep != null ">#{order.upkeep},</if>  
@@ -372,6 +394,21 @@
 				WHERE STATUS IN('Dispatched','OrderConfirmed')
 				GROUP BY technician) m
 		LEFT JOIN t_user u ON m.technician = u.id
+	</select>
+	
+	<select id="getLeastOrderTen" resultType="java.lang.String">
+    	SELECT tt.id FROM (
+			SELECT u.id,m.count
+			FROM (
+				SELECT COUNT(t.id) COUNT,technician
+				FROM t_order t
+				WHERE STATUS IN('Dispatched','OrderConfirmed')
+			GROUP BY technician) m
+			inner JOIN t_user u ON m.technician = u.id
+			WHERE u.wx_city = #{city}
+		) tt
+		order by count
+		limit 0, 1 
 	</select>
 	
 	<select id="getTechOrder" resultMap="BaseResultMap">

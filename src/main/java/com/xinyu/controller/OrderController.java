@@ -1,5 +1,6 @@
 package com.xinyu.controller;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +17,8 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.xinyu.Constance;
+import com.xinyu.bean.City;
 import com.xinyu.bean.Layui;
 import com.xinyu.bean.OrderStatus;
 import com.xinyu.bean.PageBean;
@@ -27,6 +28,7 @@ import com.xinyu.model.OrderPart;
 import com.xinyu.model.Unit;
 import com.xinyu.model.User;
 import com.xinyu.service.IOrderService;
+import com.xinyu.service.IUserService;
 import com.xinyu.util.FileUpDownLoadUtils;
 import com.xinyu.util.WeiXinUtil;
 
@@ -36,6 +38,8 @@ public class OrderController {
 
 	@Autowired
 	private IOrderService orderService;
+	@Autowired
+	private IUserService userService;
 
 	@RequestMapping("/orderList")
 	public ModelAndView getOrderList() {
@@ -56,29 +60,36 @@ public class OrderController {
 
 	@RequestMapping("/orderTableData")
 	@ResponseBody
-	public Layui getOrderData(PageBean pageBean, String orderNo, Long unitId, String status) {
+	public Layui getOrderData(PageBean pageBean, String startDate,String endDate, Long unitId, String status) {
 		Order order = new Order();
 		Unit u = new Unit();
 		order.setUnit(u);
-		if (StringUtils.isNotEmpty(orderNo)) {
-			order.setOrderNo(orderNo);
-		}
 		if (unitId != null) {
 			u.setId(unitId);
 		}
 		if (StringUtils.isNotEmpty(status)) {
 			order.setStatus(OrderStatus.valueOf(status));
 		}
-		Layui result = orderService.getOrderData(pageBean, order);
+		Layui result = orderService.getOrderData(pageBean, order,startDate,endDate);
 
 		return result;
 	}
+	
+	@RequestMapping("/getDepathCount")
+	@ResponseBody
+	public Layui getDepathCount() {
+		Map<String ,Integer> count = orderService.getDepathCount();
+		List<Map<String ,Integer>> list = new ArrayList<Map<String ,Integer>>();
+		list.add(count);
+		return Layui.data(null, 0, 0, list);
+	}
+	
 
 	@RequestMapping("/getNewOrderNo")
 	@ResponseBody
-	public Layui getInitData() {
+	public String getInitData() {
 
-		Layui result = orderService.getNewOrderNo();
+		String result = orderService.getNewOrderNo();
 
 		return result;
 	}
@@ -99,6 +110,8 @@ public class OrderController {
 		if(order.getDepathUser() == null&&order.getUpkeep()!= null) {
 			order.setDepathUser(depathUserId);
 		}
+		User u = userService.getUserById(depathUserId);
+		order.setCity(City.valueOf(u.getCity()));
 		Layui result = orderService.saveOrUpdateOrder(params, order, deleteFile, deleteOrderPart);
 
 		return result;
@@ -115,9 +128,9 @@ public class OrderController {
 	@RequestMapping("/getOrderPartInfo")
 	@ResponseBody
 	public Layui getOrderPartInfo(String ids) {
-		Layui result = orderService.getOrderPartByIds(ids);
+		String msg = orderService.getOrderPartByIds(ids);
 
-		return result;
+		return Layui.data(msg, 0, 0, null);
 	}
 
 	@RequestMapping("/deleteOrder")
@@ -189,13 +202,21 @@ public class OrderController {
 		mov.addObject("cusName", order.getAddress());
 		mov.addObject("description", order.getDescription());
 		Float total = 0f;
-		for(OrderPart p : order.getPartList()) {
-			int i = 1;
-			mov.addObject("part"+i, p.getName());
-			mov.addObject("part"+i+"_number", p.getNum());
-			mov.addObject("part"+i+"_single", p.getPartCost());
-			mov.addObject("part"+i+"_total", p.getPartCost()*p.getNum());
-			total += p.getPartCost()*p.getNum();
+		if(order.getPartList().size()>0) {
+			for(OrderPart p : order.getPartList()) {
+				int i = 1;
+				mov.addObject("part"+i, p.getName());
+				mov.addObject("part"+i+"_number", p.getNum());
+				mov.addObject("part"+i+"_single", p.getPartCost());
+				mov.addObject("part"+i+"_total", p.getPartCost()*p.getNum());
+				total += p.getPartCost()*p.getNum();
+			}
+		}else {
+			mov.addObject("part1", order.getDevice().getName());
+			mov.addObject("part1_number", 1);
+			mov.addObject("part1_single", order.getUpkeep());
+			mov.addObject("part1_total", order.getUpkeep());
+			total += order.getUpkeep();
 		}
 		mov.addObject("total", total);
 		mov.addObject("chitotal", WeiXinUtil.numberTOChiString(total));

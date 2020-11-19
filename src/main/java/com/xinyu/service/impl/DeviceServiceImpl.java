@@ -14,11 +14,8 @@ import com.xinyu.bean.PageBean;
 import com.xinyu.dao.DeviceDao;
 import com.xinyu.dao.PartDao;
 import com.xinyu.model.Device;
-import com.xinyu.model.Order;
-import com.xinyu.model.OrderPart;
 import com.xinyu.model.Part;
 import com.xinyu.service.IDeviceService;
-import com.xinyu.util.FileUpDownLoadUtils;
 
 @Service
 public class DeviceServiceImpl implements IDeviceService {

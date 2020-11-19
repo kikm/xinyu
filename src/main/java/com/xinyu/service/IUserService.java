@@ -2,7 +2,6 @@ package com.xinyu.service;
 
 import com.xinyu.bean.Layui;
 import com.xinyu.bean.PageBean;
-import com.xinyu.model.Unit;
 import com.xinyu.model.User;
 
 public interface IUserService {

@@ -9,6 +9,7 @@
         <result column="password" property="password" jdbcType="VARCHAR" />
         <result column="phone" property="telephone" jdbcType="VARCHAR" />
         <result column="org_id" property="orgId" jdbcType="INTEGER" />
+        <result column="wx_city" property="city" jdbcType="VARCHAR" />
         <result column="wx_userID" property="userID" jdbcType="VARCHAR" />
         <result column="wx_openID" property="openID" jdbcType="VARCHAR" />
         <result column="wx_userName" property="userName" jdbcType="VARCHAR" />
@@ -16,7 +17,6 @@
         <result column="wx_country" property="country" jdbcType="VARCHAR" />
         <result column="wx_nickName" property="nickName" jdbcType="VARCHAR" />
         <result column="wx_province" property="province" jdbcType="VARCHAR" />
-        <result column="wx_city" property="city" jdbcType="VARCHAR" />
         <result column="wx_headImgUrl" property="headImgUrl" jdbcType="VARCHAR" />
         <result column="wx_language" property="language" jdbcType="VARCHAR" />
         <result column="wx_sex" property="sex" jdbcType="VARCHAR" />
@@ -67,7 +67,7 @@
         LEFT JOIN t_role_user sru on u.id= sru.user_id
         LEFT JOIN t_role r on sru.role_id=r.id
         LEFT JOIN t_unit un on u.unit_id = un.id
-        where u.wx_openID= #{openId}
+        where u.wx_openID= #{openID}
     </select>
 
 	<update id="bankUserOpenId" parameterType="String">
@@ -140,13 +140,14 @@
     </insert>
     
     <insert id="saveOrUpdateUser" useGeneratedKeys="true" keyProperty="id" parameterType="com.xinyu.model.User">  
-	        insert into t_user ( id, user_name, unit_id, password, phone,wx_openID ) values 
-	        (#{user.id},#{user.name},#{user.unit.id},#{user.password},#{user.telephone},#{user.openID})
+	        insert into t_user ( id, user_name, unit_id, password, phone,wx_openID,wx_city ) values 
+	        (#{user.id},#{user.name},#{user.unit.id},#{user.password},#{user.telephone},#{user.openID},#{user.city})
 	        ON DUPLICATE KEY UPDATE
 	        user_name =VALUES(user_name)
 	        ,unit_id =VALUES(unit_id)
 	        ,password =VALUES(password)
 	        ,phone =VALUES(phone)
+	        ,wx_city =VALUES(wx_city)
 	        ,wx_openID =VALUES(wx_openID)
 	</insert> 
 	

@@ -14,7 +14,6 @@ import com.xinyu.bean.MenuBean;
 import com.xinyu.bean.MenuTree;
 import com.xinyu.bean.PageBean;
 import com.xinyu.dao.RoleDao;
-import com.xinyu.model.Part;
 import com.xinyu.model.Role;
 import com.xinyu.model.User;
 import com.xinyu.service.IMenuService;

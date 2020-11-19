@@ -14,9 +14,9 @@ import com.xinyu.model.OrderPart;
 @Mapper
 public interface OrderDao {
 
-	public List<Order> getOrderCriteriaQuery(@Param("order")Order order,@Param("page")PageBean page);
+	public List<Order> getOrderCriteriaQuery(@Param("order")Order order,@Param("page")PageBean page, String startDate, String endDate);
 
-	public int getCountOrderCriteriaQuery(@Param("order")Order order);
+	public int getCountOrderCriteriaQuery(@Param("order")Order order, String startDate, String endDate);
 	
 	public String getNewOrderNo(String preOrderNo);
 
@@ -55,5 +55,7 @@ public interface OrderDao {
 	public List<Order> getOrderByOneText(Order order, String text);
 	
 	public Order getOrderSingleById(Long orderId);
+	
+	public String getLeastOrderTen(String city);
 
 }

@@ -29,6 +29,7 @@ public class User implements UserDetails {
 	private Long orgId;// 是否管理员 0：不是    1：是
 	private Unit unit;
 	private String unitName;
+	public String city;
 	private Set<Role> roles = new HashSet<Role>();// 所属角色
 	private int isDel;
 	//微信用户属性
@@ -39,7 +40,6 @@ public class User implements UserDetails {
     public String country;
     public String nickName;
     public String province;
-    public String city;
     public String headImgUrl;
     public String language;
     public Integer sex;

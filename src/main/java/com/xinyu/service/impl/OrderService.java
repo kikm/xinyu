@@ -64,24 +64,16 @@ public class OrderService implements IOrderService {
 	private Logger logger = LoggerFactory
 			.getLogger(OrderService.class);
 	
-	public Layui getOrderData(PageBean pageBean,Order order) {
+	public Layui getOrderData(PageBean pageBean,Order order,String startDate,String endDate) {
 		
-		int count = orderDao.getCountOrderCriteriaQuery(order);
+		int count = orderDao.getCountOrderCriteriaQuery(order,startDate,endDate);
 		pageBean.setCount(count);
-		List<Order> orderList = orderDao.getOrderCriteriaQuery(order, pageBean);
+		List<Order> orderList = orderDao.getOrderCriteriaQuery(order, pageBean,startDate,endDate);
 		List<OrderBean> data = this.OrderToOrderBean(orderList);
 		
 		return Layui.data("",0,count, data);
 	}
 	
-	@Override
-	public List<OrderBean> getOrderList(PageBean pageBean,Order order) {
-		
-		List<Order> orderList = orderDao.getOrderCriteriaQuery(order, pageBean);
-		List<OrderBean> data = this.OrderToOrderBean(orderList);
-		
-		return data;
-	}
 	
 	@Override
 	public List<OrderBean> getOrderListByStatusList(Order order,List<OrderStatus> statusList) {
@@ -140,8 +132,12 @@ public class OrderService implements IOrderService {
 			bean.setContact(o.getContact());
 			bean.setPhone(o.getPhone());
 			bean.setFacility(o.getFacility());
+			bean.setFacility(o.getAddress());
+			bean.setReport(o.getReport());
 			bean.setPartList(o.getPartList());
 			bean.setPartListSize(o.getPartList()==null?0:o.getPartList().size());
+			String des = this.getOrderPartDesById(o.getId());
+			bean.setPartListDes(des);
 			bean.setId(o.getId());
 			bean.setModel(o.getModel());
 			bean.setOrderNo(o.getOrderNo());
@@ -173,7 +169,7 @@ public class OrderService implements IOrderService {
 	}
 	
 	@Override
-	public Layui getNewOrderNo() {
+	public String getNewOrderNo() {
 		String number = "0001";
 		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 		String dateNo = dateFormat.format(new Date());
@@ -187,7 +183,7 @@ public class OrderService implements IOrderService {
 			result = dateNo+number;
 		}
 		
-		return Layui.data(result, 0, 0, null);
+		return result;
 	}
 
 	@Override
@@ -208,17 +204,21 @@ public class OrderService implements IOrderService {
 		if(StringUtils.isNotBlank(deleteOrder)) {
 			Long id = Long.valueOf(deleteOrder);
 			Order oriOrder = orderDao.getOrderById(id);
-			List<Long> idList = new ArrayList<Long>();
-			for(OrderPart op : oriOrder.getPartList()) {
-				idList.add(op.getOpid());
+			if(OrderStatus.preOrder.equals(oriOrder.getStatus())) {
+				List<Long> idList = new ArrayList<Long>();
+				for(OrderPart op : oriOrder.getPartList()) {
+					idList.add(op.getOpid());
+				}
+				orderDao.deleteOrder(id);
+				if(idList.size() > 0) {
+					orderDao.deleteOrderPart(idList);
+				}
+				if(StringUtils.isNotBlank(oriOrder.getImageUrls())) {
+					FileUpDownLoadUtils.deleteFile(oriOrder.getImageUrls());
+				}
+			}else {
+				return Layui.data("该工单已派发，无法删除，或结单后删除", 0, 0, null);
 			}
-			orderDao.deleteOrder(id);
- 			if(idList.size() > 0) {
- 				orderDao.deleteOrderPart(idList);
- 			}
- 			if(StringUtils.isNotBlank(oriOrder.getImageUrls())) {
- 				FileUpDownLoadUtils.deleteFile(oriOrder.getImageUrls());
- 			}
  			
  		}
 		return Layui.data("删除成功", 0, 0, null);
@@ -304,7 +304,7 @@ public class OrderService implements IOrderService {
         				}
         			}
         		}
-        		if(OrderStatus.QuotedPrice.equals(order.getStatus())) {
+        		if(OrderStatus.QuotedPrice.equals(order.getStatus())&&order.getPartList().size()>0) {
         			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         			List<User> userList = userDao.getUserListByUnit(order.getUnit().getId());
         			if(userList != null&&userList.size()>0) {
@@ -328,7 +328,7 @@ public class OrderService implements IOrderService {
         				data.put("phone", duser.getTelephone());
         				//http://localhost:8080/xinyu/wx/preConfirm?confirmUser=oCnlEuFjrHbyecP-JwXMeT0Jcoh8&orderId=61
         				String url = "http://xywxfw.com/xinyu/wx/preConfirm?cusopenId="+userList.get(0).getOpenID()+"&orderId="+order.getId();
-        				Boolean isSend = WeiXinUtil.sendTemplate(userList.get(0).getOpenID(),url,data,OrderStatus.QuotedPrice,order.getIsUrgent());
+        				WeiXinUtil.sendTemplate(userList.get(0).getOpenID(),url,data,OrderStatus.QuotedPrice,order.getIsUrgent());
         			}
         		}
              } catch (Exception e) {
@@ -370,12 +370,12 @@ public class OrderService implements IOrderService {
 		Map<String,String> data = new HashMap<String,String>();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		data.put("depathUser", depathuser.getName());
-		data.put("date", sdf.format(new Date()));
 		String msg = "派送结果";
 		for(Order order : orderList) {
 			if(order.getStatus() != OrderStatus.preOrder&&order.getStatus() != OrderStatus.QuotedPrice) {
 				continue;
 			}
+			data.put("date", sdf.format(order.getCreateDate()));
 			data.put("orderNo", order.getOrderNo());
 			data.put("address", order.getAddress());
 			data.put("contact", order.getContact());
@@ -421,6 +421,7 @@ public class OrderService implements IOrderService {
 	@Override
 	public Layui redepathOrder(String ids,String technicianId,String depathUserId) {
 		String[] idarr = ids.split(",");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		List<Long> idList = new ArrayList<Long>();
 		for(String id : idarr) {
 			if(StringUtils.isNotBlank(id)) {
@@ -458,17 +459,17 @@ public class OrderService implements IOrderService {
 			data.put("description", order.getDescription());
 			data.put("redepathUser", user.getName());
 			data.put("redepathUserPhone", user.getTelephone());
+			data.put("dtdDate", sdf.format(order.getDtdDate()));
+			data.put("date", sdf.format(order.getCreateDate()));
 			data.put("beforeUser", beforeUser.getName());
+			data.put("tenUser","tenUser");
 			String url = "http://xywxfw.com/xinyu/wx/preFeedback?technicianOpenId="+user.getOpenID()+"&orderId="+order.getId()+"&depathUserOpenId="+depathuser.getOpenID();
 			Order orderTemp = new Order();
-			if(order.getStatus() == OrderStatus.preOrder)
-				orderTemp.setStatus(OrderStatus.Dispatched);
-			else {
-				orderTemp.setStatus(order.getStatus());
-				url = "http://xywxfw.com/xinyu/wx/preComplete?technicianOpenId="+user.getOpenID()+"&orderId="+order.getId()+"&depathUserOpenId="+depathuser.getOpenID();
-			}
 			Boolean isSend = WeiXinUtil.sendTemplate(user.getOpenID(),url,data,OrderStatus.Dispatched,order.getIsUrgent());
-			WeiXinUtil.sendTemplate(beforeUser.getOpenID(),url,data,OrderStatus.Dispatched,order.getIsUrgent());
+			if(isSend) {//转派成功通知
+				data.remove("tenUser");
+				WeiXinUtil.sendTemplate(beforeUser.getOpenID(),url,data,OrderStatus.Dispatched,order.getIsUrgent());
+			}
 			orderTemp.setId(order.getId());
 			orderTemp.setStatus(OrderStatus.Dispatched);
 			orderTemp.setIsRedepath(true);
@@ -518,9 +519,11 @@ public class OrderService implements IOrderService {
 			data.put("report", order.getReport());
 			String partList = "";
 			Integer number = 0;
-			for(OrderPart op : order.getPartList()) {
-				partList = partList+op.getName()+"/";
-				number = number+op.getNum();	
+			if(order.getPartList() != null) {
+				for(OrderPart op : order.getPartList()) {
+					partList = partList+op.getName()+"/";
+					number = number+op.getNum();	
+				}
 			}
 			data.put("partList", partList.length()>1?partList.substring(0,partList.length()-1):order.getDevice().getName());
 			data.put("number", String.valueOf(number));
@@ -712,7 +715,7 @@ public class OrderService implements IOrderService {
 	}
 
 	@Override
-	public Layui getOrderPartByIds(String ids) {
+	public String getOrderPartByIds(String ids) {
 		String[] idarr = ids.split(",");
 		List<Long> idList = new ArrayList<Long>();
 		for(String id : idarr) {
@@ -735,7 +738,19 @@ public class OrderService implements IOrderService {
 		for(String key : map.keySet()) {
 			msg = msg+key+":"+map.get(key)+"<br/>";
 		}
-		return Layui.data(msg, 0, 0, null);
+		return msg;
+	}
+	
+	@Override
+	public String getOrderPartDesById(Long id) {
+		List<Long> idList = new ArrayList<Long>();
+		idList.add(id);
+		List<OrderPart> opList = orderDao.getOrderPartByIds(idList);
+		String msg = "";
+		for(OrderPart op : opList) {
+			msg = msg + op.getName()+"("+op.getNum()+")\r\n";
+		}
+		return msg;
 	}
 
 	@Override
@@ -776,7 +791,7 @@ public class OrderService implements IOrderService {
 			itemdepath.put(sdf.format(o.getConfirmDate()), content);
 			timeLine.add(itemconfirm);
 		}
-		if(o.getArrivalDate() != null) {
+		if(o.getArrivalDate() != null&&o.getPartList()!=null) {
 			String partList = "";
 			Integer number = 0;
 			for(OrderPart op : o.getPartList()) {
@@ -802,6 +817,34 @@ public class OrderService implements IOrderService {
 	public Order getSingelOrder(Long orderId) {
 		Order order = orderDao.getOrderSingleById(orderId);
 		return order;
+	}
+
+	@Override
+	public String getLeastOrderTen(String city) {
+		String tenUserId = orderDao.getLeastOrderTen(city);
+		return tenUserId;
+	}
+
+	@Override
+	public void noticeCustomerService(Order order, User u) {
+        String strDateFormat = "yyyy-MM-dd HH:mm:ss";
+        SimpleDateFormat sdf = new SimpleDateFormat(strDateFormat);
+        List<User> userList = userDao.getUserListByRole("customerService");
+		Map<String,String> data = new HashMap<String,String>();
+		data.put("orderNo", order.getOrderNo());
+		data.put("user", u.getName());
+		data.put("unit", u.getUnit().getName());
+		data.put("facility", order.getFacility());
+		data.put("phone", u.getTelephone());
+		data.put("description", order.getDescription());
+		data.put("createTime", sdf.format(order.getCreateDate()));
+		for(User user : userList) {
+			if(StringUtils.isNotBlank(user.getOpenID())) {
+				String url = "http://xywxfw.com/xinyu/wx/depath?technicianOpenId="+u.getOpenID()+"&orderId="+order.getId();
+				WeiXinUtil.sendTemplate(user.getOpenID(),url,data,OrderStatus.preOrder,order.getIsUrgent());
+			}
+		}
+		
 	}
 
 }
