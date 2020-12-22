@@ -42,6 +42,7 @@ public class Order implements Serializable {
 	private String techName;
 	private String confirmOpinion;
 	private City city;
+	private String assistTechs;
 	public Long getId() {
 		return id;
 	}
@@ -234,6 +235,13 @@ public class Order implements Serializable {
 	public void setCity(City city) {
 		this.city = city;
 	}
+	public String getAssistTechs() {
+		return assistTechs;
+	}
+	public void setAssistTechs(String assistTechs) {
+		this.assistTechs = assistTechs;
+	}
+	
 	
 	
 	

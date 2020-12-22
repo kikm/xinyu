@@ -53,4 +53,6 @@ public interface UserDao {
 	public void clearUserOrg(Long org);
 	
 	public User getUserByOpenId(String openId);
+
+	public List<String> getUserListOpenid(List<String> list);
 }

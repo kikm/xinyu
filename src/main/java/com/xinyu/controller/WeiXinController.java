@@ -100,18 +100,20 @@ public class WeiXinController {
 			mov = new ModelAndView("/mobile/error");
 			mov.addObject("msg", "工单不存在，请联系客服");
 			return mov;
+		}else if(!OrderStatus.Dispatched.equals(o.getStatus())&&!OrderStatus.MaintenanceFeedback.equals(o.getStatus())){
+			mov = new ModelAndView("/mobile/error");
+			mov.addObject("msg", "工单状态不符合反馈条件，请联系客服");
+			return mov;
 		}
-		String image  = o.getImageUrls();
 		Boolean canRepath = userService.checkCanRepath(depathUserOpenId,orderId);
 		if(canRepath) {
 			List<User> orderDepathList = orderService.getOrgDepathList(technicianOpenId);
 			mov.addObject("depathList", orderDepathList);
 		}
-		if(StringUtils.isNotBlank(image)){
-			image = image.split(";")[0];
-		}
+		String orderInfo = o.getContact()+"("+o.getAddress()+")发起的故障工单："+o.getDescription();
+		
 		mov.addObject("orderId", orderId);
-		mov.addObject("image", image);
+		mov.addObject("orderInfo", orderInfo);
 		mov.addObject("canRepath", canRepath);
 		
 		return mov;
@@ -124,6 +126,10 @@ public class WeiXinController {
 		if(order == null) {
 			mov = new ModelAndView("/mobile/error");
 			mov.addObject("msg", "工单不存在，请联系客服");
+		}else if(!OrderStatus.Dispatched.equals(order.getStatus())||!OrderStatus.MaintenanceFeedback.equals(order.getStatus())){
+			mov = new ModelAndView("/mobile/error");
+			mov.addObject("msg", "工单状态不符合反馈条件，请联系客服");
+			return mov;
 		}
 		mov.addObject("openId", cusopenId);
 		mov.addObject("orderId", orderId);
@@ -190,18 +196,25 @@ public class WeiXinController {
     }
 	
 	@RequestMapping("/getHistorybytext")
-    public List<OrderBean> getHistorybytext(String openId, String searchText) {
+    public List<OrderBean> getHistorybytext(String openId, String type,String startDate,String endDate) {
 		Order order = new Order();
 		List<OrderBean> total = null;
 		User loginUser = userService.getUserByOpenId(openId);
-		boolean iscs = false;
-		for(Role r : loginUser.getRoles()) {
-			if(r.getName().equals("customerService")) iscs = true;//账号有客服角色，展示所有
+		if(loginUser.contains("customerService")) {
+			order.setDepathUser(loginUser.getId());
 		}
-		if(!iscs) {order.setUnit(loginUser.getUnit());}
-		total = orderService.getOrderByOneText(order, searchText);
+		if(loginUser.contains("technician")) {
+			order.setTechnician(loginUser.getId());
+			total = orderService.getOrderByOneText(order, type,startDate,endDate);
+			return total;
+		}
+		if(loginUser.contains("customer")) {
+			order.setUnit(loginUser.getUnit());
+			total = orderService.getOrderByOneText(order, type,startDate,endDate);
+			return total;
+		}
+		return total;
 		
-        return total;
     }
 	
 	@RequestMapping(value = "/startOrder", method = RequestMethod.GET)
@@ -277,7 +290,7 @@ public class WeiXinController {
 			}
 			if(iscs&&issz) {//是深圳客户账号直接派单
 				String tenUserId = orderService.getLeastOrderTen(order.getCity().getName());//取当前身上最少单的技术员派单
-				result = orderService.depathOrder(String.valueOf(order.getId()), tenUserId, openId);
+				result = orderService.depathOrder(String.valueOf(order.getId()), tenUserId, openId,null);
 			}else if(iscs){
 				orderService.noticeCustomerService(order,u);
 			}else {
@@ -289,7 +302,7 @@ public class WeiXinController {
 	
 	@RequestMapping("/depathOrders")
 	public Layui depathOrder(String ids, String technicianId,String openId) {
-		Layui result = orderService.depathOrder(ids, technicianId, openId);
+		Layui result = orderService.depathOrder(ids, technicianId, openId,null);
 
 		return result;
 	}

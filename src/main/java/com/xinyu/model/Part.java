@@ -10,6 +10,7 @@ public class Part {
 	private String url;
 	private Float partCost;
 	private Long deviceId;
+	private Integer frequent;
 
 	public Long getId() {
 		return id;
@@ -53,6 +54,13 @@ public class Part {
 	public void setDeviceId(Long deviceId) {
 		this.deviceId = deviceId;
 	}
+	public Integer getFrequent() {
+		return frequent;
+	}
+	public void setFrequent(Integer frequent) {
+		this.frequent = frequent;
+	}
+	
 
 	
 	

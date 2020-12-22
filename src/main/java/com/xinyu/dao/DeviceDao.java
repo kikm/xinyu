@@ -22,4 +22,6 @@ public interface DeviceDao {
 	public void deleteDeviceById(Long valueOf);
 
 	public Device getDeviceById(Long id);
+	
+	public void addDeviceFrequentCount(Long id);
 }

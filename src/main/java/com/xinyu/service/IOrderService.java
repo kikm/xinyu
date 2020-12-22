@@ -32,7 +32,7 @@ public interface IOrderService {
 
 	public Layui deleteOrder(String deleteOrder);
 
-	public Layui depathOrder(String ids,String userId,String depathUserId);
+	public Layui depathOrder(String ids,String userId,String depathUserId,String assistTechs);
 
 	public List<User> getDepathList();
 
@@ -62,7 +62,7 @@ public interface IOrderService {
 
 	public Layui getTimeLine(String orderId);
 
-	public List<OrderBean> getOrderByOneText(Order order,String text);
+	public List<OrderBean> getOrderByOneText(Order order,String type,String startDate,String endDate);
 	
 	public Order getSingelOrder(Long orderId);
 
@@ -73,5 +73,7 @@ public interface IOrderService {
 	public String getOrderPartDesById(Long id);
 
 	public void noticeCustomerService(Order order, User u);
+
+	void quitePriceNoteic(Order order);
 	
 }

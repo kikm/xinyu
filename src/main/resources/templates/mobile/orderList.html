@@ -12,6 +12,9 @@
 <body ontouchstart>
   <input type="hidden" id="hidopenId" name="openId" th:value="${openId}">
   <input type="hidden" id="hidorderId" name="orderId" value="">
+  <input type="hidden" id="accountName" name="accountName" th:value="${accountName}">
+  <input type="hidden" id="accountRole" name="accountRole" th:value="${accountRole}">
+  <input type="hidden" id="accountUnit" name="accountUnit" th:value="${accountUnit}">
   <input type="hidden" id="viewType" th:value="${type}">
   <input type="hidden" name="operType">
   <input type="hidden" name="orderNo">
@@ -38,7 +41,7 @@
     <div class="page__bd" style="height: 100%;">
         <div class="weui-tab">
             <div class="weui-tab__panel">
-        		<div id="tabDispatched">
+        		<div id="tabDispatched" >
 					<div class="content-padded Dispatched">
         				
       				</div>
@@ -53,22 +56,36 @@
       					
     				</div>
         		</div>
-				<div id="tabOrderHistory" style="display: none;overflow:auto;height: 100%">
-            		<div class="content-padded OrderHistory">
-      					<div class="weui-search-bar" id="searchBar">
-            				<form class="weui-search-bar__form">
-                				<div class="weui-search-bar__box">
-                    				<i class="weui-icon-search"></i>
-                    					<input type="search" class="weui-search-bar__input" id="searchInput" placeholder="搜索" required="">
-                    					<a href="javascript:" class="weui-icon-clear" id="searchClear"></a>
-                				</div>
-                				<label class="weui-search-bar__label" id="searchText" style="transform-origin: 0px 0px; opacity: 1; transform: scale(1, 1);">
-                    				<i class="weui-icon-search"></i>
-                    				<span>搜索</span>
-                				</label>
-            				</form>
-            				<a href="javascript:" class="weui-search-bar__cancel-btn" id="searchConfirm">确定</a>
-        				</div>
+				<div id="tabMine" style="display: none;overflow:auto;height: 100%">
+            		<div class="content-padded Mine">
+						<div class="page__hd">
+					        <h1 style="font-size:20" name="accountName"></h1>
+					        <p class="page__desc"></p>
+					    </div>
+					    <div class="page__bd">
+					        <div class="weui-cells__title"></div>
+					        <div class="weui-cells">
+					            <div class="weui-cell">
+					                <div class="weui-cell__bd">账号单位</div>
+					                <div class="weui-cell__ft" style="font-size: 0">
+					                    <span style="vertical-align:middle; font-size: 17px;" name="accountUnit"></span>
+					                </div>
+					            </div>
+								<div class="weui-cell">
+					                <div class="weui-cell__bd">角色</div>
+					                <div class="weui-cell__ft" style="font-size: 0">
+					                    <span style="vertical-align:middle; font-size: 17px;" name="accountRole"></span>
+					                </div>
+					            </div>
+								<div class="weui-cell weui-cell_access" onclick="window.pageManager.go('hislist');">
+					                <div class="weui-cell__bd">历史工单</div>
+					                <div class="weui-cell__ft" style="font-size: 0">
+					                    <span style="vertical-align:middle; font-size: 17px;"  name="historyList"></span>
+					                </div>
+					            </div>
+					        </div>
+					
+					    </div>
     				</div>
         		</div>
     		</div>
@@ -92,11 +109,11 @@
                     </div>
                     <p class="weui-tabbar__label">待完修</p>
                 </div>
-				<div class="weui-tabbar__item" status="OrderHistory">
+				<div class="weui-tabbar__item" status="Mine">
                     <div style="display: inline-block; position: relative;">
                         <img src="images/history.png" alt="" class="weui-tabbar__icon">
                     </div>
-                    <p class="weui-tabbar__label">历史</p>
+                    <p class="weui-tabbar__label">我的</p>
                 </div>
             </div>
         </div>
@@ -188,6 +205,7 @@
 			</div>
         </div>
 </div>
+
 <script type="text/javascript">
     $(function(){
 		var status = $('.weui-bar__item_on').attr('status');
@@ -195,6 +213,13 @@
 		var tempValueCus = $('#previewTemplateCus').find(".weui-form-preview__value");
 		var $tooltips = $('.js_tooltips');
         var openId = $('#hidopenId').val();
+		var accountName = $('#accountName').val();
+		var accountRole = $('#accountRole').val();
+		var accountUnit = $('#accountUnit').val();
+		$("h1[name='accountName']").html(accountName);
+		$("span[name='accountRole']").html(accountRole);
+		$("span[name='accountUnit']").html(accountUnit);
+		$("input[name='startDate']").val();
 		var viewType = $('#viewType').val();
 		
 		$.ajax({
@@ -260,84 +285,9 @@
 						$('#previewTemplateTen').find(".detail").eq(0).attr('data-id',bean.id);				
 						$(".Dispatched").append($('#previewTemplateTen').html());
 					}
-					if(bean.status == 'Finish'){
-						$(tempValueTen).eq(0).html(bean.orderNo);
-						$(tempValueTen).eq(1).html(bean.contact);
-						$(tempValueTen).eq(2).html(bean.unitName);
-						$(tempValueTen).eq(3).html(bean.phone);
-						$(tempValueTen).eq(4).html(bean.facility);
-						$(tempValueTen).eq(5).html(bean.address);
-						if(viewType == "cus"){
-							$('#previewTemplateTen').find(".feedbackOrComplete").eq(0).remove();
-						}else{
-							$('#previewTemplateTen').find(".feedbackOrComplete").eq(0).attr('data-id',bean.id);
-						}
-						$('#previewTemplateTen').find(".weui-form-preview").eq(0).attr("pvdata-id",bean.id);
-						$('#previewTemplateTen').find(".detail").eq(0).attr('data-id',bean.id);				
-						$(".OrderHistory").append($('#previewTemplateTen').html());
-					}
 				}
 		}
 
-		var $searchBar = $('#searchBar'),
-            $searchResult = $('#searchResult'),
-            $searchText = $('#searchText'),
-            $searchInput = $('#searchInput'),
-            $searchClear = $('#searchClear'),
-            $searchCancel = $('#searchCancel');
-			$searchConfirm = $('#searchConfirm');
-
-        function hideSearchResult(){
-            $searchResult.hide();
-            $searchInput.val('');
-        }
-        function cancelSearch(){
-            hideSearchResult();
-            $searchBar.removeClass('weui-search-bar_focusing');
-            $searchText.show();
-        }
-
-        $searchText.on('click', function(){
-            $searchBar.addClass('weui-search-bar_focusing');
-            $searchInput.focus();
-        });
-        $searchInput
-            .on('blur', function () {
-                if(!this.value.length) cancelSearch();
-            })
-            .on('input', function(){
-                if(this.value.length) {
-                    $searchResult.show();
-                } else {
-                    $searchResult.hide();
-                }
-            })
-        ;
-        $searchClear.on('click', function(){
-            hideSearchResult();
-            $searchInput.focus();
-        });
-        $searchCancel.on('click', function(){
-            cancelSearch();
-            $searchInput.blur();
-        });
-		$searchConfirm.on('click', function(){
-            searchText = $('#searchInput').val();
-			$.ajax({
-    				url:"wx/getHistorybytext",    //请求的url地址
-    				async:false,
-    				data:{"searchText":searchText,"openId":openId},    //参数值
-    				type:"POST",   //请求方式
-    				success:function(data){
-						addTempleHtml(data);
-						$('.weui-form-preview__btn.weui-form-preview__btn_primary.detail').on('click', function(){
-            				var orderId = $(this).data('id');
-							$('#hidorderId').val(orderId);
-							window.pageManager.go('timeline');
-        				});
-    				}
-				});	
-        });
 
 		$('.weui-tabbar__item').on('click', function () {
             $(this).addClass('weui-bar__item_on').siblings('.weui-bar__item_on').removeClass('weui-bar__item_on');
@@ -783,6 +733,55 @@
 		});
 
 
+	});
+</script>
+</script>
+<script type="text/html" id="tpl_hislist">
+<div class="page">
+    <div class="page__bd historyList" >
+	  
+    </div>
+</div>
+<div id="previewTemplateHis" style="display:none">
+<br>
+	  <div class="weui-form-preview" pvdata-id="">
+        <div class="weui-form-preview__bd">
+	        <div class="weui-form-preview__item">
+	             <label class="weui-form-preview__label">申请人</label>
+	             <span class="weui-form-preview__value">海油-张华（中心库11号）</span>
+	        </div>
+	        <div class="weui-form-preview__item">
+	             <label class="weui-form-preview__label">技术员</label>
+	             <span class="weui-form-preview__value">张辉</span>
+	        </div>
+			<div class="weui-form-preview__item">
+	             <label class="weui-form-preview__label">详情</label>
+	             <span class="weui-form-preview__value">主板损坏。维修意见：更换主板</span>
+	        </div>
+		</div>
+      </div>
+</div>
+<script type="text/javascript">
+    $(function(){
+		var openId = $('#hidopenId').val();
+		var $tooltips = $('.js_tooltips');
+		var type = $("input[name='operType']").val();
+		$.ajax({
+    			url:"wx/getHistorybytext",    //请求的url地址
+    			async:false,
+    			data:{"type":type,"openId":openId},    //参数值
+    			type:"POST",   //请求方式
+    			success:function(data){
+					var tempValueTen = $('#previewTemplateHis').find(".weui-form-preview__value");
+					for(let i=0;i<data.length;i++){
+						var bean = data[i];
+						$(tempValueTen).eq(0).html(bean.unitName+"-"+bean.contact+"("+bean.address+")");
+						$(tempValueTen).eq(1).html(bean.techName);
+						$(tempValueTen).eq(2).html(bean.description+";"+bean.report);
+						$(".historyList").append($('#previewTemplateHis').html());
+					}
+    			},
+			});
 	});
 </script>
 </script>   

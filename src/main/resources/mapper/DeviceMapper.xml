@@ -7,6 +7,7 @@
         <id column="id" property="id" jdbcType="INTEGER" />
         <result column="name" property="name" jdbcType="VARCHAR" />
         <result column="agency" property="agency" jdbcType="VARCHAR" />
+        <result column="frequent" property="frequent" jdbcType="INTEGER" />
         <collection property="partList" ofType="com.xinyu.model.Part">
             <id column="pid" property="id" jdbcType="INTEGER"/>
             <result column="pname" property="name" jdbcType="VARCHAR"/>
@@ -20,6 +21,7 @@
 	<select id="getAllDevice" parameterType="String" resultMap="BaseResultMap">
         select d.*
         from t_device d
+        order by frequent desc
     </select>
     
     <select id="getDeviceList" resultMap="BaseResultMap">
@@ -30,7 +32,7 @@
         	<if test="device !=null and device.name != null">
         		where d.name like '%${device.name}%'
         	</if>
-        	order by d.name) t
+        	order by d.frequent desc) t
         limit #{page.start},#{page.end}
     </select>
     
@@ -75,7 +77,9 @@
 		delete from t_device where id = #{id}
 	</delete>
 
-
+	<update id="addDeviceFrequentCount">
+		update t_device set frequent=frequent+1 where id=#{id}
+	</update>
 
 
 

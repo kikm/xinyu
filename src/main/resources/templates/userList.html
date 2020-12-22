@@ -103,8 +103,8 @@
   <div class="layui-form-item"></div> 
   <div class="layui-form-item">
     <div class="layui-input-block">
-	  <button type="button" class="layui-btn layui-btn-normal" id="LAY-component-form-setval">赋值</button>
-      <button id="userCommit" class="layui-btn" lay-submit="" lay-filter="user">立即提交</button>
+<!-- 	  <button type="button" class="layui-btn layui-btn-normal" id="LAY-component-form-setval">赋值</button>
+ -->      <button id="userCommit" class="layui-btn" lay-submit="" lay-filter="user">立即提交</button>
       <button type="reset" id="formReset" class="layui-btn layui-btn-primary">重置</button>
       <button type="button" onclick="backcall()" class="layui-btn layui-btn-primary">返回</button>
     </div>
@@ -360,6 +360,8 @@
 		function backcall() {
 			layer.confirm('确认放弃页面所有数据？', {icon: 3, title:'提示'}, function(index){
 				$("#formReset").click();
+				$('input[name="oldid"]').val("");
+              	$('input[name="openID"]').val("");
 				layer.close(index);
 				exchange();
 			});

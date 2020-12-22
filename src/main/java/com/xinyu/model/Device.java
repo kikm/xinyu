@@ -8,6 +8,7 @@ public class Device {
 	private Long id;
 	private String name;
 	private String agency;
+	private Integer frequent;
 	private List<Part> partList;
 	private String partListName;
 	
@@ -41,6 +42,13 @@ public class Device {
 	public void setPartListName(String partListName) {
 		this.partListName = partListName;
 	}
+	public Integer getFrequent() {
+		return frequent;
+	}
+	public void setFrequent(Integer frequent) {
+		this.frequent = frequent;
+	}
+	
 	
 	
 	

@@ -113,7 +113,9 @@ public class OrderController {
 		User u = userService.getUserById(depathUserId);
 		order.setCity(City.valueOf(u.getCity()));
 		Layui result = orderService.saveOrUpdateOrder(params, order, deleteFile, deleteOrderPart);
-
+		if((int)result.get("code") == 0) {
+			orderService.quitePriceNoteic(order);
+		}
 		return result;
 	}
 
@@ -143,10 +145,9 @@ public class OrderController {
 
 	@RequestMapping("/depathOrders")
 	@ResponseBody
-	public Layui depathOrder(String ids, String technicianId,
+	public Layui depathOrder(String ids, String technicianId,String assistTechs,
 			@SessionAttribute(Constance.USER_ID) String depathUserId) {
-		Layui result = orderService.depathOrder(ids, technicianId, depathUserId);
-
+		Layui result = orderService.depathOrder(ids, technicianId, depathUserId,assistTechs);
 		return result;
 	}
 	

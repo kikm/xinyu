@@ -226,6 +226,14 @@ public class User implements UserDetails {
 	public void setOrgId(Long orgId) {
 		this.orgId = orgId;
 	}
+	public boolean contains(String roleName) {
+		for(Role r : this.roles) {
+			if(r.getName().equals(roleName)) {
+				return Boolean.TRUE;
+			}
+		}
+		return Boolean.FALSE;
+	}
 	
 	
 	

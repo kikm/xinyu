@@ -72,9 +72,19 @@ public class UserController {
 			openId =  (String)jsonOpenID.get("openid");//"oCnlEuFjrHbyecP-JwXMeT0Jcoh8";
 		}
 		User userOri = userService.getUserByOpenId(openId); //
-		//WeiXinUtil.getUserInfo(openID); 
 		if(userOri != null) { 
 			mov = new ModelAndView("/mobile/orderList");//已绑定账号 
+			mov.addObject("accountName",userOri.getName()); 
+			String[] array = new String [userOri.getRoles().size()]; 
+			int i=0;
+			for(Role r : userOri.getRoles()) {
+				array[i++] = r.getCname();
+			}
+		    String splitSetWithComma = StringUtils.join(array, ",");
+			mov.addObject("accountRole",splitSetWithComma); 
+			mov.addObject("accountUnit",userOri.getUnit().getName());
+			mov.addObject("accountRole",splitSetWithComma); 
+			mov.addObject("accountUnit",userOri.getUnit().getName()); 
 		} 
 		mov.addObject("user",userOri == null?new User():userOri); 
 		mov.addObject("openId", openId); 
@@ -94,6 +104,7 @@ public class UserController {
 			jsonOpenID = WeiXinUtil.getOpenID(code); 
 			openId =  (String)jsonOpenID.get("openid");//"oCnlEuFjrHbyecP-JwXMeT0Jcoh8";
 		}
+		//openId = "onIRYuB19EGw1E9ojhwSJZe6Wxuo";
 		User userOri = userService.getUserByOpenId(openId); //
 		if(userOri != null) { 
 			Boolean canView = false;
@@ -103,6 +114,15 @@ public class UserController {
 			}
 			if(canView) {
 				mov = new ModelAndView("/mobile/orderList");//已绑定账号 
+				mov.addObject("accountName",userOri.getName()); 
+				String[] array = new String [userOri.getRoles().size()]; 
+				int i=0;
+				for(Role r : userOri.getRoles()) {
+					array[i++] = r.getCname();
+				}
+			    String splitSetWithComma = StringUtils.join(array, ",");
+				mov.addObject("accountRole",splitSetWithComma); 
+				mov.addObject("accountUnit",userOri.getUnit().getName());
 			}else {
 				mov = new ModelAndView("/mobile/error");
 				mov.addObject("msg", "没有操作权限，请联系管理员"); 

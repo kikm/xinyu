@@ -23,6 +23,7 @@
         <result column="upkeep" property="upkeep" jdbcType="FLOAT" />
         <result column="depath_user" property="depathUser" jdbcType="VARCHAR" />
         <result column="technician" property="technician" jdbcType="VARCHAR" />
+        <result column="assist_techs" property="assistTechs" jdbcType="VARCHAR" />
         <result column="usname" property="techName" jdbcType="VARCHAR" />
         <result column="confirm_user" property="confirmUser" jdbcType="VARCHAR" />
         <result column="depath_date" property="depathDate" jdbcType="TIMESTAMP" />
@@ -32,9 +33,8 @@
         <result column="dtd_time" property="dtdDate" jdbcType="TIMESTAMP" />
         <result column="confirm_time" property="confirmDate" jdbcType="TIMESTAMP" />
         <association property="device" javaType="com.xinyu.model.Device">
-            <id column="id" property="id" jdbcType="INTEGER"/>
+            <id column="did" property="id" jdbcType="INTEGER"/>
             <result column="dname" property="name" jdbcType="VARCHAR"/>
-            <result column="did" property="id" jdbcType="INTEGER"/>
             <result column="dagency" property="agency" jdbcType="VARCHAR"/>
 		</association>
 		<association property="unit" javaType="com.xinyu.model.Unit">
@@ -113,7 +113,7 @@
         left join t_order_part op on op.order_id = o.id
         left join t_part p on p.id = op.part_id
         left join t_user us on us.id = o.technician
-        order by o.order_no
+        order by o.create_time desc
     </select>
     
     <select id="getOrderCriteriaQueryByStatusList" resultMap="BaseResultMap">
@@ -131,12 +131,6 @@
 			<if test="order.technician!=null">
 				and technician=#{order.technician}
 			</if>
-			<if test="startDate != null and startDate != ''">
-				and ot.create_time &gt;= '${startDate}'
-			</if>
-			<if test="endDate != null  and endDate != ''">
-				and ot.create_time &lt;= '${endDate}'
-			</if>
 			ORDER BY ot.order_no) as o
         left join t_device d on d.id = o.device_id
         left join t_unit u on u.id = o.unit_id
@@ -153,20 +147,28 @@
 			FROM t_order ot
 			LEFT JOIN t_unit u ON u.id = ot.unit_id
 			WHERE status = 'Finish'
-			and (ot.order_no like '%${text}%' or ot.contact like '%${text}%' or ot.address like '%${text}%')
 			<if test="order.unit != null and order.unit.id!=null">
 				and u.id = #{order.unit.id}
 			</if>
 			<if test="order.technician!=null">
-				and technician=#{order.technician}
+				and ot.technician=#{order.technician}
 			</if>
-			ORDER BY ot.order_no) as o
+			<if test="order.depathUser!=null">
+				or ot.depath_user=#{order.depathUser}
+			</if>
+			<if test="startDate!=null">
+				and ot.create_time &gt;= '${startDate}'
+			</if>
+			<if test="endDate!=null">
+				and ot.create_time &lt;= '${endDate}'
+			</if>
+			ORDER BY ot.create_time) as o
         left join t_device d on d.id = o.device_id
         left join t_unit u on u.id = o.unit_id
         left join t_order_part op on op.order_id = o.id
         left join t_part p on p.id = op.part_id
         left join t_user us on us.id = o.technician
-        order by o.order_no
+        order by o.create_time
     </select>
     
     
@@ -278,7 +280,7 @@
             UPDATE t_order_part op
             <set>
                 part_id =#{item.id},
-				part_offer=#{item.offer}
+				part_offer=#{item.offer},
 				num=#{item.num}
             </set>
             <where>
@@ -344,6 +346,7 @@
         	<if test="order.confirmUser != null ">,confirm_user=#{order.confirmUser}</if>
         	<if test="order.isRedepath != null ">,isRedepath=#{order.isRedepath}</if>
         	<if test="order.confirmOpinion != null ">,confirm_opinion=#{order.confirmOpinion}</if>
+        	<if test="order.assistTechs != null ">,assist_techs=#{order.assistTechs}</if>
         </set>
         <where>
         	id=#{order.id}

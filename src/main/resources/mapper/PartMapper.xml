@@ -10,6 +10,7 @@
         <result column="url" property="url" jdbcType="VARCHAR" />
         <result column="category" property="category" jdbcType="VARCHAR" />
         <result column="cost" property="partCost" jdbcType="FLOAT" />
+        <result column="frequent" property="frequent" jdbcType="INTEGER" />
     </resultMap>
 
 	<select id="getPartByDevice" parameterType="Integer" resultMap="BaseResultMap">

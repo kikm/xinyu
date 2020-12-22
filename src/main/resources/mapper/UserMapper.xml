@@ -27,6 +27,7 @@
 		</association>
         <collection property="roles" ofType="com.xinyu.model.Role">
             <result column="rname" property="name"/>
+            <result column="cname" property="cname"/>
             <result column="rid" property="id"/>
         </collection>
     </resultMap>
@@ -61,7 +62,7 @@
     
     <select id="findByOpenId" parameterType="String" resultMap="BaseResultMap">
         select u.*
-        ,r.name as rname,r.id as rid
+        ,r.name as rname,r.cname,r.id as rid
         ,un.name as uname,un.id as unid
         from t_user u
         LEFT JOIN t_role_user sru on u.id= sru.user_id
@@ -167,6 +168,11 @@
         select count(u.id)
         from t_unit u
         where u.name = #{unitName}
+    </select>
+    
+    <select id="getUserListOpenid" parameterType="java.util.List" resultType="java.lang.String">
+		select u.wx_openID from t_user u where u.id in 
+        <foreach collection="list" item="id" index="index" open="(" separator="," close=")" >#{id}</foreach>
     </select>
     
     <select id="getUserByOrg" parameterType="Long" resultMap="BaseResultMap">
