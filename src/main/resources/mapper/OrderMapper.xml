@@ -162,13 +162,13 @@
 			<if test="endDate!=null">
 				and ot.create_time &lt;= '${endDate}'
 			</if>
-			ORDER BY ot.create_time) as o
+			ORDER BY ot.create_time desc) as o
         left join t_device d on d.id = o.device_id
         left join t_unit u on u.id = o.unit_id
         left join t_order_part op on op.order_id = o.id
         left join t_part p on p.id = op.part_id
         left join t_user us on us.id = o.technician
-        order by o.create_time
+        order by o.create_time desc
     </select>
     
     

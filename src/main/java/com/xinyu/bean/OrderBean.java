@@ -11,6 +11,7 @@ public class OrderBean extends Order {
 	public Integer partListSize;
 	public String partListDes;
 	public String phone;
+	public String createTime;
 	
 	public String getStatusName() {
 		return statusName;
@@ -54,6 +55,13 @@ public class OrderBean extends Order {
 	public void setPartListDes(String partListDes) {
 		this.partListDes = partListDes;
 	}
+	public String getCreateTime() {
+		return createTime;
+	}
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+	
 	
 	
 	

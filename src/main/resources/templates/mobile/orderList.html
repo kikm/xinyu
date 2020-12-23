@@ -149,6 +149,10 @@
              <label class="weui-form-preview__label">地址</label>
              <span class="weui-form-preview__value"></span>
         </div>
+		<div class="weui-form-preview__item">
+             <label class="weui-form-preview__label">技术员</label>
+             <span class="weui-form-preview__value"></span>
+        </div>
         </div>
 			<div class="weui-form-preview__ft">
                 <a class="weui-form-preview__btn weui-form-preview__btn_default feedbackOrComplete" data-id href="javascript:">确认</a>
@@ -190,12 +194,9 @@
              <label class="weui-form-preview__label">地址</label>
              <span class="weui-form-preview__value"></span>
         </div>
-		<div class="weui-progress">
-            <div class="weui-progress__bar">
-                <div class="weui-progress__inner-bar js_progress"></div>
-            </div>
-			&nbsp&nbsp
-			<span class="weui-form-preview__value"></span>
+		<div class="weui-form-preview__item">
+             <label class="weui-form-preview__label">技术员</label>
+             <span class="weui-form-preview__value"></span>
         </div>
         </div>
 			<div class="weui-form-preview__ft" data-id="">
@@ -245,6 +246,7 @@
 						$(tempValueTen).eq(3).html(bean.phone);
 						$(tempValueTen).eq(4).html(bean.facility);
 						$(tempValueTen).eq(5).html(bean.address);
+						$(tempValueTen).eq(6).html(bean.techName);
 						if(viewType == "cus"){
 							$('#previewTemplateTen').find(".feedbackOrComplete").eq(0).remove();
 						}else{
@@ -262,8 +264,7 @@
 						$(tempValueCus).eq(4).html(bean.facility);
 						$(tempValueCus).eq(5).html(bean.partListSize);
 						$(tempValueCus).eq(6).html(bean.address);
-						$(tempValueCus).eq(7).html('60%');
-						$('#previewTemplateCus').find(".weui-progress__inner-bar").css("width","60%");
+						$(tempValueCus).eq(7).html(bean.techName);
 						$('#previewTemplateCus').find(".weui-form-preview").eq(0).attr("pvdata-id",bean.id);
 						$('#previewTemplateCus').find(".confirm").eq(0).attr('data-id',bean.id);
 						$('#previewTemplateCus').find(".detail").eq(0).attr('data-id',bean.id);
@@ -276,6 +277,7 @@
 						$(tempValueTen).eq(3).html(bean.phone);
 						$(tempValueTen).eq(4).html(bean.facility);
 						$(tempValueTen).eq(5).html(bean.address);
+						$(tempValueTen).eq(6).html(bean.techName);
 						if(viewType == "cus"){
 							$('#previewTemplateTen').find(".feedbackOrComplete").eq(0).remove();
 						}else{
@@ -746,17 +748,21 @@
 <br>
 	  <div class="weui-form-preview" pvdata-id="">
         <div class="weui-form-preview__bd">
+			<div class="weui-form-preview__item">
+	             <label class="weui-form-preview__label">工单日期</label>
+	             <span class="weui-form-preview__value"></span>
+	        </div>
 	        <div class="weui-form-preview__item">
 	             <label class="weui-form-preview__label">申请人</label>
-	             <span class="weui-form-preview__value">海油-张华（中心库11号）</span>
+	             <span class="weui-form-preview__value"></span>
 	        </div>
 	        <div class="weui-form-preview__item">
 	             <label class="weui-form-preview__label">技术员</label>
-	             <span class="weui-form-preview__value">张辉</span>
+	             <span class="weui-form-preview__value"></span>
 	        </div>
 			<div class="weui-form-preview__item">
 	             <label class="weui-form-preview__label">详情</label>
-	             <span class="weui-form-preview__value">主板损坏。维修意见：更换主板</span>
+	             <span class="weui-form-preview__value"></span>
 	        </div>
 		</div>
       </div>
@@ -775,9 +781,10 @@
 					var tempValueTen = $('#previewTemplateHis').find(".weui-form-preview__value");
 					for(let i=0;i<data.length;i++){
 						var bean = data[i];
-						$(tempValueTen).eq(0).html(bean.unitName+"-"+bean.contact+"("+bean.address+")");
-						$(tempValueTen).eq(1).html(bean.techName);
-						$(tempValueTen).eq(2).html(bean.description+";"+bean.report);
+						$(tempValueTen).eq(0).html(bean.createTime);
+						$(tempValueTen).eq(1).html(bean.unitName+"-"+bean.contact+"("+bean.address+")");
+						$(tempValueTen).eq(2).html(bean.techName);
+						$(tempValueTen).eq(3).html(bean.description+";"+bean.report);
 						$(".historyList").append($('#previewTemplateHis').html());
 					}
     			},

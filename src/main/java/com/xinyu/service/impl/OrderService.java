@@ -129,7 +129,7 @@ public class OrderService implements IOrderService {
 	
 	private List<OrderBean> OrderToOrderBean(List<Order> orderList) {
 		List<OrderBean> result = new ArrayList<OrderBean>();
-		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		for(Order o : orderList) {
 			OrderBean bean = new OrderBean();
 			bean.setDeviceName(o.getDevice()==null?"":o.getDevice().getName());
@@ -153,6 +153,7 @@ public class OrderService implements IOrderService {
 			bean.setSn(o.getSn());
 			bean.setImageUrls(o.getImageUrls());
 			bean.setTechName(o.getTechName());
+			bean.setCreateTime(sdf.format(o.getCreateDate()));
 			result.add(bean);
 			
 			if(o.getUpkeep() != null) {
