@@ -104,9 +104,12 @@
 			<if test="endDate != null  and endDate != ''">
 				and ot.create_time &lt;= '${endDate}'
 			</if>
+			<if test="order.status==null">
+				and status !='Finish'
+			</if>
 			<!-- 如果满足其中的条件就调用其中的SQL语句 -->
         	<include refid="query_order_where"/>
-			ORDER BY ot.order_no
+			ORDER BY ot.create_time desc
 			limit #{page.start},#{page.end}) AS o
         left join t_device d on d.id = o.device_id
         left join t_unit u on u.id = o.unit_id
@@ -181,6 +184,9 @@
 		</if>
 		<if test="endDate != null  and endDate != ''">
 			and o.create_time &lt;= '${endDate}'
+		</if>
+		<if test="order.status==null">
+				and status !='Finish'
 		</if>
         <!-- 如果满足其中的条件就调用其中的SQL语句 -->
         <include refid="query_order_where"/>

@@ -307,6 +307,17 @@
   </div>
 </div>
 
+<div id="redepathOrder" style="display:none">
+ <div class="layui-form" >
+  <div class="layui-form-item layui-inline">
+    <label class="layui-form-label">技术员：</label>
+    <div class="layui-input-block" th:each="user:${orderDepathList}">
+    	<input type="radio" name="userId"  th:value="${user.id}"
+                                th:title="${user.name}">
+    </div>
+  </div>
+</div>
+
 
 <div id="printIframe">
 
@@ -457,7 +468,7 @@
 						type:0,
 						area: ['400px', '400px'],
 						title:"选择派单人员",
-						content:$("#depathOrder").html(),
+						content:$("#redepathOrder").html(),
 						success: function(layero){
 							var form = layui.form;
 							form.render("radio");
@@ -561,8 +572,9 @@
 		        $.post('deleteOrder',{"id":data.id},function(result){
 		        	obj.del();
 		     		layer.msg(result.msg);
+		     		if(result.msg.indexOf("成功"))
+			        	layer.close(index);
 		     	});
-		        layer.close(index);
 		        
 		      });
 		    } else if(obj.event === 'edit'){

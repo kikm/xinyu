@@ -127,7 +127,7 @@
             </div>
         </div>
 		</form>
-		<div class="weui-cells weui-cells_form" id="uploader">
+	<!--<div class="weui-cells weui-cells_form" id="uploader">
      <div class="weui-cell">
          <div class="weui-cell__bd">
              <div class="weui-uploader">
@@ -143,7 +143,7 @@
                  </div>
              </div>
          </div>
-     </div>
+     </div>-->
 	<div class="weui-form__opr-area">
       <a class="weui-btn weui-btn_primary weui-btn_disabled" href="javascript:" id="showTooltips">确定</a>
     </div>
@@ -367,13 +367,18 @@
 			var msg = "";
 			if(unit == ''){
 				msg = "请选择单位";
-            }else if(phone == ''){
+            }
+			if(phone == ''){
 				msg = "请填写联系方式";
-			}else if(phone == ''){
+			}
+      		
+			if(contact == ''){
 				msg = "请填写联系人";
-			}else if(phone == ''){
+			}
+			if(address == ''){
 				msg = "请填写地址";
-			}else if(phone == ''){
+			}
+			if(facility == ''){
 				msg = "请填写设备类型";
 			}    
 			if(msg != ""){ 

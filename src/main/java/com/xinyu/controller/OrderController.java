@@ -75,6 +75,30 @@ public class OrderController {
 		return result;
 	}
 	
+	@RequestMapping("/finishOrderList")
+	public ModelAndView getFinishOrderList() {
+		ModelAndView mov = new ModelAndView("finishOrderList");
+		List<Unit> unitList = orderService.getUnit();
+		mov.addObject("unitList", unitList);
+		mov.addObject("pageBean", new PageBean());
+		return mov;
+	}
+
+	@RequestMapping("/finishOrderTableData")
+	@ResponseBody
+	public Layui getFinishOrderData(PageBean pageBean, String startDate,String endDate, Long unitId) {
+		Order order = new Order();
+		Unit u = new Unit();
+		order.setUnit(u);
+		if (unitId != null) {
+			u.setId(unitId);
+		}
+		order.setStatus(OrderStatus.Finish);
+		Layui result = orderService.getOrderData(pageBean, order,startDate,endDate);
+
+		return result;
+	}
+	
 	@RequestMapping("/getDepathCount")
 	@ResponseBody
 	public Layui getDepathCount() {
