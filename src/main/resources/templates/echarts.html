@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
-<script src="scripts/echarts.js" type="text/javascript"></script>
-<link rel="stylesheet" href="style/layui/layui.css">
-<script src="scripts/layui/layui.all.js" type="text/javascript"></script>
-<link href="style/layui/layui.css" rel="stylesheet" type="text/css">
-<script src="scripts/jquery-3.4.1.min.js" type="text/javascript"></script>
+<script th:src="@{/scripts/echarts.js}" type="text/javascript"></script>
+<link rel="stylesheet" th:href="@{/style/layui/layui.css}">
+<script th:src="@{/scripts/layui/layui.all.js}" type="text/javascript"></script>
+<link th:href="@{/style/layui/layui.css}" rel="stylesheet" type="text/css">
+<script th:src="@{/scripts/jquery-3.4.1.min.js}" type="text/javascript"></script>
 <style type="text/css">
     html,body{
         height:100%;
@@ -144,7 +144,7 @@
         	    },
         	    tooltip: {},
         	    legend: {
-        	        data: ['预算分配（Allocated Budget）', '实际开销（Actual Spending）']
+        	        data: ['预算分配', '实际开销']
         	    },
         	    radar: {
         	        // shape: 'circle',

@@ -256,6 +256,12 @@ public class OrderController {
 		return result;
 	}
 	
+	@RequestMapping("/statistics")
+	public ModelAndView statistics() {
+		ModelAndView mov = new ModelAndView("statistics");
+		return mov;
+	}
+	
 	@RequestMapping("/china.json")
 	@ResponseBody
 	public ModelAndView mapJson() {
