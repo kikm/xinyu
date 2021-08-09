@@ -113,4 +113,11 @@ public class DeviceServiceImpl implements IDeviceService {
 		
 		return Layui.data("保存成功",0, 0, null);
 	}
+	
+	@Override
+	public Layui getDeviceByUnit(Long unitid) {
+		List<Device> dList = deviceDao.getDeviceByUnit(unitid);
+		
+		return Layui.data("查询成功", 0, dList.size(), dList);
+	}
 }

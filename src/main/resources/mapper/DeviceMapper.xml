@@ -8,6 +8,8 @@
         <result column="name" property="name" jdbcType="VARCHAR" />
         <result column="agency" property="agency" jdbcType="VARCHAR" />
         <result column="frequent" property="frequent" jdbcType="INTEGER" />
+        <result column="unit_id" property="unitId" jdbcType="INTEGER" />
+        <result column="unitName" property="unitName" jdbcType="INTEGER" />
         <collection property="partList" ofType="com.xinyu.model.Part">
             <id column="pid" property="id" jdbcType="INTEGER"/>
             <result column="pname" property="name" jdbcType="VARCHAR"/>
@@ -26,9 +28,10 @@
     
     <select id="getDeviceList" resultMap="BaseResultMap">
     	select t.* from 
-        (	select d.*,p.name pname
+        (	select d.*,u.name unitName,p.name pname 
         	from t_device d
         	left join t_part p on p.device_id=d.id
+        	left join t_unit u on d.unit_id=u.id
         	<if test="device !=null and device.name != null">
         		where d.name like '%${device.name}%'
         	</if>
@@ -44,6 +47,12 @@
         where d.id=#{id}
     </select>
     
+    <select id="getDeviceByUnit" resultMap="BaseResultMap">
+        select d.*            
+        from t_device d
+        where d.unit_id=#{unitid}
+    </select>
+    
     <select id="getCountDeviceCriteriaQuery" resultType="java.lang.Integer">
         select count(distinct d.id) from t_device d
         <if test="device !=null and device.name != null">
@@ -55,7 +64,8 @@
 	    <!-- 如果大于0则更新 -->    
 	    <if test="device.id!=null">    
 	        update t_device set         
-	        name =#{device.name}
+	        name =#{device.name},
+	        unit_id=#{device.unitId}
 	        where id = #{device.id}  
 	    </if>  
 	      
@@ -63,12 +73,12 @@
 	    <if test="device.id==null">  
 	        insert into t_device  
 	        <trim prefix="(" suffix=")" suffixOverrides="," >  
-	            <if test="device.name != null ">name</if>  
-	            
+	            <if test="device.name != null ">name,</if> 
+	            <if test="device.unitId != null ">unit_id,</if>   
 	        </trim>  
 	        <trim prefix="values (" suffix=")" suffixOverrides="," >  
 	            <if test="device.name != null ">#{device.name},</if>  
-	            
+	            <if test="device.unitId != null ">#{device.unitId},</if>  
 	        </trim>
 	    </if>  
 	</insert> 

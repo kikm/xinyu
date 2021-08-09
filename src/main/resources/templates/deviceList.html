@@ -49,6 +49,16 @@
         <input type="text" name="name" lay-verify="request" autocomplete="off" class="layui-input">
       </div>
     </div>
+    <div class="layui-inline">
+      <label class="layui-form-label required">关联公司</label>
+      <div class="layui-input-inline">
+        <select name="unitId" id="unitId" lay-search="">
+      		<option value="">单位</option>
+      		<option th:each="unit:${unitList}" th:value="${unit.id}"
+                                th:text="${unit.name}"></option>
+      	</select>
+      </div>
+    </div>
   </div>
  
  <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
@@ -148,9 +158,10 @@
 	    cols: [
 	    	[
 	       {type: 'checkbox', fixed: 'left'}
-	      ,{field:'id', width:'8%', title: 'ID', sort: true}
+	      ,{field:'id', width:'8%', title: 'ID'}
 	      ,{field:'name', width:'15%', title: '名称'}
-	      ,{field:'partListName', width:'58%', title: '关联配件', sort: true}
+	      ,{field:'partListName', width:'48%', title: '关联配件'}
+	      ,{field:'unitName', width:'10%', title: '关联公司', sort: true}
 	      ,{fixed: 'right', title:'操作', toolbar: '#bar', width:'15%'}
 	    	]
 	    ]
@@ -200,6 +211,7 @@
 	                		"name": device.name
 	    				});
 	                	$("#deviceId").val(device.id);
+	                	$("select[name='unitId']").val(device.unitId);
 	                	for(let i=0;i<device.partList.length;i++){
 	                		$("#partList input[name='partList["+i+"].id']").val(device.partList[i].id);
 	                		$("#partList input[name='partList["+i+"].name']").val(device.partList[i].name);
@@ -207,6 +219,7 @@
 	                		$("#partList input[name='partList["+i+"].partCost']").val(device.partList[i].partCost);
 
 	                	} 
+	                	form.render("select");
 	                	exchange();
 	                }
 	             })

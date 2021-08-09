@@ -324,6 +324,7 @@
 </div>
 <script>
 	 var files;
+	 
 	layui.use(['table','laydate'], function(){
 	  var table = layui.table;
 	  var laydate = layui.laydate;
@@ -860,6 +861,21 @@
                 	}
              })
 		     return false;
+		  });
+		  
+		  form.on('select(unit)', function(data){
+			  var form=layui.form;
+			  $("#deviceSelect").html("<option value=''>直接选择或搜索选择</option>");
+			  $.ajaxSettings.async = false;//编辑的时候需要关闭异步才能赋值
+			  $.post('../device/getDeviceByUnit',{"unitId":data.value},function(result){
+	     		var partHtml = "";
+	     		for (var i = 0; i < result.data.length; i++) { 
+	  	    		partHtml += "<option value='"+result.data[i].id+"'>"+result.data[i].name+"</option>"
+	  	    	}
+	     		$("#deviceSelect").append(partHtml);
+				form.render("select");
+	     	 });
+			  $.ajaxSettings.async = true;
 		  });
 		  
 		  form.on('select(device)', function(data){

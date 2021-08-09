@@ -14,4 +14,6 @@ public interface IDeviceService {
 
 	public Layui saveOrUpdateDevice(Device d, String deletePart);
 
+	public Layui getDeviceByUnit(Long unitid);
+
 }

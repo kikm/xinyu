@@ -1,5 +1,7 @@
 package com.xinyu.controller;
 
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -10,7 +12,9 @@ import org.springframework.web.servlet.ModelAndView;
 import com.xinyu.bean.Layui;
 import com.xinyu.bean.PageBean;
 import com.xinyu.model.Device;
+import com.xinyu.model.Unit;
 import com.xinyu.service.IDeviceService;
+import com.xinyu.service.IOrderService;
 
 @Controller
 @RequestMapping("/device")
@@ -19,13 +23,17 @@ public class DeviceController {
 	@Autowired
 	private IDeviceService deviceService;
 	
+	@Autowired
+	private IOrderService orderService;
 	
 	@RequestMapping("/deviceList")
     public ModelAndView getOrderList() {
 		ModelAndView mov = new ModelAndView();
-		
+		List<Unit> unitList = orderService.getUnit();
+
 		mov.setViewName("deviceList");
-		
+		mov.addObject("unitList", unitList);
+
         return mov;
     }
 	
@@ -64,6 +72,13 @@ public class DeviceController {
     public Layui deleteDevice(String id) {
 		Layui result = deviceService.deleteDevice(id);
 		
+        return result;
+    }
+	
+	@RequestMapping("/getDeviceByUnit")
+	@ResponseBody
+    public Layui getDeviceByUnit(String unitId) {
+		Layui result = deviceService.getDeviceByUnit(Long.valueOf(unitId));
         return result;
     }
 	

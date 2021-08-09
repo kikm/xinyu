@@ -24,4 +24,6 @@ public interface DeviceDao {
 	public Device getDeviceById(Long id);
 	
 	public void addDeviceFrequentCount(Long id);
+
+	public List<Device> getDeviceByUnit(Long unitid);
 }
